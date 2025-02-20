@@ -624,6 +624,7 @@
     "react-dev-utils": "^12.0.1",
     "react-dom": "^19.0.0",
     "react-error-overlay": "^6.1.0",
+    "react-icons": "^5.5.0",
     "react-is": "^17.0.2",
     "react-redux": "^9.2.0",
     "react-refresh": "^0.11.0",
