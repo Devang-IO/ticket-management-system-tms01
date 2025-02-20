@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Styles */
+body {
+  @apply bg-gray-100 text-gray-900 transition-all;
+}
+
+/* Container */
+.container {
+  @apply max-w-6xl mx-auto px-4;
+}
+
+/* Buttons */
+.btn {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition;
+}
+
+/* Cards */
+.card {
+  @apply bg-white p-6 rounded-lg shadow-md border border-gray-200;
+}
+
+/* Forms */
+.input {
+  @apply w-full p-3 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+/* Custom Utility Classes (Avoiding Circular Dependencies) */
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.flex-between {
+  @apply flex items-center justify-between;
+}
+
+.text-title {
+  @apply text-xl font-semibold;
+}
