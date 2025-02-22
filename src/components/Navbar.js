@@ -4,29 +4,29 @@ import { FiHome, FiFileText, FiBell, FiUser } from "react-icons/fi"; // Importin
 
 const Navbar = () => {
   return (
-    <nav className="bg-blue-600 text-white p-4 shadow-md fixed w-full top-0 z-10">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
+    <nav className="navbar">
+      <div className="navbar-container">
         {/* Logo */}
-        <Link to="/dashboard" className="flex items-center space-x-2">
-          <img src="/logo2.png" alt="Logo" className="h-10" /> {/* Adjust the height as needed */}
-          <span className="text-xl font-bold">QuickAssist</span>
+        <Link to="/dashboard" className="logo">
+          <img src="/logo2.png" alt="Logo" className="logo-img" />
+          <span className="logo-text">QuickAssist</span>
         </Link>
 
         {/* Navigation Links */}
-        <div className="flex items-center space-x-6">
-          <Link to="/dashboard" className="flex items-center space-x-2 hover:underline">
+        <div className="nav-links">
+          <Link to="/dashboard" className="nav-item">
             <FiHome size={20} />
             <span>Dashboard</span>
           </Link>
-          <Link to="/tickets" className="flex items-center space-x-2 hover:underline">
+          <Link to="/tickets" className="nav-item">
             <FiFileText size={20} />
             <span>Tickets</span>
           </Link>
-          <Link to="/notifications" className="flex items-center space-x-2 hover:underline">
+          <Link to="/notifications" className="nav-item">
             <FiBell size={20} />
             <span>Notifications</span>
           </Link>
-          <Link to="/profile" className="flex items-center space-x-2 hover:underline">
+          <Link to="/profile" className="nav-item">
             <FiUser size={20} />
             <span>Profile</span>
           </Link>
@@ -36,4 +36,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar;
