@@ -1,17 +1,29 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiUsers, FiLogOut, FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi"; // Importing icons
+import { Link, useNavigate } from "react-router-dom";
+import { 
+  FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
+  FiSettings, FiUsers, FiLogOut, FiArrowLeftCircle, 
+  FiArrowRightCircle 
+} from "react-icons/fi"; 
 
 const Sidebar = ({ isAdmin }) => {
   const [isOpen, setIsOpen] = useState(true); 
+  const navigate = useNavigate(); // 👈 For navigation
+
+  const handleLogout = () => {
+    // Clear user session (if using localStorage, sessionStorage, or cookies)
+    localStorage.removeItem("user"); // Example: Remove user data from localStorage
+    alert("Logged out successfully!");
+    navigate("/login"); // Redirect to login page
+  };
 
   return (
-    <aside className={`h-screen bg-gray-800 text-white ${isOpen ? "w-64" : "w-20"} transition-all duration-300 fixed top-0 left-0 pt-16`}>
-      <ul className="mt-4 space-y-6">
+    <aside className={`sidebar ${isOpen ? "sidebar-open" : "sidebar-closed"}`}>
+      <ul className="sidebar-list">
         {/* Collapse Button */}
         <li>
           <button
-            className="p-2 text-gray-300 hover:text-white flex items-center justify-center"
+            className="collapse-btn"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <FiArrowLeftCircle size={24} /> : <FiArrowRightCircle size={24} />}
@@ -20,69 +32,69 @@ const Sidebar = ({ isAdmin }) => {
 
         {/* Dashboard */}
         <li>
-          <Link to="/dashboard" className="flex items-center p-4 hover:bg-gray-700">
+          <Link to="/dashboard" className="sidebar-item">
             <FiHome size={20} />
-            {isOpen && <span className="ml-4">Dashboard</span>}
+            {isOpen && <span className="sidebar-item-text">Dashboard</span>}
           </Link>
         </li>
 
         {/* My Tickets */}
         <li>
-          <Link to="/tickets" className="flex items-center p-4 hover:bg-gray-700">
+          <Link to="/tickets" className="sidebar-item">
             <FiFileText size={20} />
-            {isOpen && <span className="ml-4">My Tickets</span>}
+            {isOpen && <span className="sidebar-item-text">My Tickets</span>}
           </Link>
         </li>
 
         {/* Create Ticket */}
         <li>
-          <Link to="/tickets/new" className="flex items-center p-4 hover:bg-gray-700">
+          <Link to="/tickets/new" className="sidebar-item">
             <FiPlusCircle size={20} />
-            {isOpen && <span className="ml-4">Create Ticket</span>}
+            {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
           </Link>
         </li>
 
         {/* Ticket Details */}
         <li>
-          <Link to="/tickets/:id" className="flex items-center p-4 hover:bg-gray-700">
+          <Link to="/tickets/:id" className="sidebar-item">
             <FiCheckCircle size={20} />
-            {isOpen && <span className="ml-4">Ticket Details</span>}
+            {isOpen && <span className="sidebar-item-text">Ticket Details</span>}
           </Link>
         </li>
 
         {/* Closed Tickets */}
         <li>
-          <Link to="/tickets/closed" className="flex items-center p-4 hover:bg-gray-700">
+          <Link to="/tickets/closed" className="sidebar-item">
             <FiCheckCircle size={20} />
-            {isOpen && <span className="ml-4">Closed Tickets</span>}
+            {isOpen && <span className="sidebar-item-text">Closed Tickets</span>}
           </Link>
         </li>
 
         {/* Admin Panel (If Admin) */}
         {isAdmin && (
           <>
-            <li className="text-gray-400 mt-6">{isOpen && "Admin Panel"}</li>
+            <li className="sidebar-admin-title">{isOpen && "Admin Panel"}</li>
             <li>
-              <Link to="/admin/users" className="flex items-center p-4 hover:bg-gray-700">
+              <Link to="/admin/users" className="sidebar-item">
                 <FiUsers size={20} />
-                {isOpen && <span className="ml-4">Manage Users</span>}
+                {isOpen && <span className="sidebar-item-text">Manage Users</span>}
               </Link>
             </li>
             <li>
-              <Link to="/admin/tickets" className="flex items-center p-4 hover:bg-gray-700">
+              <Link to="/admin/tickets" className="sidebar-item">
                 <FiSettings size={20} />
-                {isOpen && <span className="ml-4">Manage Tickets</span>}
+                {isOpen && <span className="sidebar-item-text">Manage Tickets</span>}
               </Link>
             </li>
           </>
         )}
 
-        {/* Logout */}
-        <li className="mt-6">
-          <Link to="/logout" className="flex items-center p-4 hover:bg-gray-700">
+        {/* Logout Button */}
+        <li className="sidebar-item-logout">
+          <button onClick={handleLogout} className="sidebar-item">
             <FiLogOut size={20} />
-            {isOpen && <span className="ml-4">Logout</span>}
-          </Link>
+            {isOpen && <span className="sidebar-item-text">Logout</span>}
+          </button>
         </li>
       </ul>
     </aside>

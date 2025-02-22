@@ -6,11 +6,11 @@ import Dashboard from "./Dashboard"; // Import Dashboard
 
 const Home = () => {
   return (
-    <div>
+    <div className="home-container">
       <Navbar />
-      <div className="flex">
+      <div className="main-content">
         <Sidebar />
-        <div className="p-6 mt-16 w-full">
+        <div className="main-content-body">
           <Routes>
             <Route path="dashboard" element={<Dashboard />} /> {/* Render Dashboard */}
             {/* Add other routes inside Home if needed */}

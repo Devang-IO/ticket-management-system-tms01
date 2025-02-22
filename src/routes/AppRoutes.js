@@ -4,7 +4,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import NotFound from "../pages/NotFound";
-import Home from "../pages/Home"; // Import Home
+import Home from "../pages/Home"; 
 
 const AppRoutes = () => {
   return (
@@ -12,6 +12,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/home/*" element={<Home />} /> {/* Add Home route */}
         <Route path="*" element={<NotFound />} />
