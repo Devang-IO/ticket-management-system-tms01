@@ -18,9 +18,11 @@ const Sidebar = ({ isAdmin }) => {
 
   // Logout Handler
   const handleLogout = () => {
-    // Perform any logout operations like clearing tokens
-    localStorage.removeItem("authToken"); // Example: Clearing auth token
-    navigate("/login"); // Redirect to Login page
+    // Clear user session and auth token
+    localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
+    alert("Logged out successfully!");
+    navigate("/login");
   };
 
   return (
