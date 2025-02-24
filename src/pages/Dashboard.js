@@ -2,46 +2,47 @@ import React from "react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import "../styles/global.css";
 
 const Dashboard = () => {
-  // Sample data for the pie chart
+  // Sample data for the user's ticket statuses
   const ticketData = [
-    { name: "Pending", value: 15, color: "#FFA500" },
-    { name: "Resolved", value: 105, color: "#28A745" },
-    { name: "In Progress", value: 30, color: "#007BFF" },
-    { name: "Urgent", value: 5, color: "#DC3545" },
+    { name: "Pending", value: 8, color: "#FFA500" },
+    { name: "Resolved", value: 18, color: "#28A745" },
+    { name: "In Progress", value: 1, color: "#007BFF" },
+    { name: "Urgent", value: 2, color: "#DC3545" },
   ];
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="dashboard-container">
       {/* Sidebar */}
       <Sidebar />
-      
-      <div className="flex flex-col flex-1">
+
+      <div className="dashboard-main">
         {/* Navbar */}
         <Navbar />
-        
+
         {/* Main Dashboard Content */}
-        <div className="p-6 mt-16">
-          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-          
+        <div className="dashboard-content">
+          <h1 className="dashboard-title">My Dashboard</h1>
+
           {/* Overview Cards */}
-          <div className="grid grid-cols-4 gap-6 mb-6">
-            {["Pending", "Resolved", "In Progress", "Urgent"].map((status, index) => (
-              <div key={index} className="bg-white shadow-lg rounded-lg p-6">
-                <h2 className="text-lg font-semibold">{status} Tickets</h2>
-                <p className="text-xl font-bold" style={{ color: ticketData[index].color }}>
+          <div className="overview-cards">
+            {["Open Tickets", "Closed Tickets", "In Progress", "Pending Tickets"].map((status, index) => (
+              <div key={index} className="card">
+                <h2 className="card-title">{status}</h2>
+                <p className="card-value" style={{ color: ticketData[index].color }}>
                   {ticketData[index].value}
                 </p>
               </div>
             ))}
           </div>
-          
-          {/* Charts & Activity Section */}
-          <div className="grid grid-cols-2 gap-6">
-            {/* Pie Chart */}
-            <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center">
-              <h2 className="text-lg font-semibold mb-4">Ticket Status Distribution</h2>
+
+          {/* Charts & Activity Section (side-by-side) */}
+          <div className="charts-activity">
+            {/* Pie Chart Card */}
+            <div className="chart-card">
+              <h2 className="chart-title">Your Ticket Status Distribution</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
@@ -63,21 +64,21 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white shadow-lg rounded-lg p-6">
-              <h2 className="text-lg font-semibold">Recent Activity</h2>
-              <ul className="list-disc pl-5 mt-2">
-                <li>User X opened a ticket: "Login Issue"</li>
-                <li>Admin resolved a ticket: "Payment Failure"</li>
-                <li>User Y reported a "UI Bug"</li>
+            {/* Recent Ticket Updates Card */}
+            <div className="activity-card">
+              <h2 className="activity-title">Recent Ticket Updates</h2>
+              <ul className="activity-list">
+                <li><span className="list-bullet" />Your ticket <strong>"Login Issue"</strong> is now <em>In Progress</em>.</li>
+                <li><span className="list-bullet" />Your ticket <strong>"Password Reset"</strong> was closed.</li>
+                <li><span className="list-bullet" />Your ticket <strong>"UI Bug in Dashboard"</strong> is pending review.</li>
               </ul>
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white shadow-lg rounded-lg p-6 mt-6 flex space-x-4">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded">Create Ticket</button>
-            <button className="bg-green-600 text-white px-4 py-2 rounded">View Reports</button>
+          <div className="quick-actions">
+            <button className="action-button btn-create-ticket">Create Ticket</button>
+            <button className="action-button btn-view-reports">View Reports</button>
           </div>
         </div>
       </div>
@@ -86,5 +87,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-

@@ -27,7 +27,7 @@ body {
   @apply w-full p-3 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500;
 }
 
-/* Custom Utility Classes (Avoiding Circular Dependencies) */
+/* Custom Utility Classes */
 .flex-center {
   @apply flex items-center justify-center;
 }
@@ -40,339 +40,204 @@ body {
   @apply text-xl font-semibold;
 }
 
-/* Sidebar*/
-/* Sidebar Container */
-.sidebar {
-  height: 100vh;
-  background-color: #2d3748; /* Dark gray */
-  color: white;
-  position: fixed;
-  top: 0;
-  left: 0;
-  padding-top: 4rem;
-  transition: all 0.3s ease;
-}
-
-/* When Sidebar is Open */
-.sidebar-open {
-  width: 16rem; /* 64px */
-}
-
-/* When Sidebar is Closed */
-.sidebar-closed {
-  width: 5rem; /* 20px */
-}
-
-/* List of Sidebar Items */
-.sidebar-list {
-  margin-top: 1rem;
-  list-style-type: none;
-  padding-left: 0;
-}
-
-/* Sidebar Item */
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  text-decoration: none;
-  color: white;
-}
-
-.sidebar-item:hover {
-  background-color: #4a5568; /* Darker gray on hover */
-}
-
-.sidebar-item-text {
-  margin-left: 1rem;
-}
-
-/* Collapse Button */
-.collapse-btn {
-  padding: 0.5rem;
-  color: #e2e8f0; /* Light gray */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: transparent;
-  border: none;
-}
-
-.collapse-btn:hover {
-  color: white;
-}
-
-/* Admin Panel Title */
-.sidebar-admin-title {
-  color: #e2e8f0; /* Light gray */
-  margin-top: 1.5rem;
-}
-
-/* Logout Item */
-.sidebar-item-logout {
-  margin-top: 1.5rem;
-}
-
-/*Navbar*/
-
-/* Global styles for the Navbar */
+/* Navbar */
 .navbar {
-  background-color: #1E40AF; /* Blue background */
-  color: white;
-  padding: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  position: fixed;
-  width: 100%;
-  top: 0;
-  z-index: 10;
+  @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-50 h-16;
 }
 
 .navbar-container {
-  max-width: 1140px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  @apply max-w-6xl mx-auto flex justify-between items-center;
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  @apply flex items-center gap-2;
 }
 
 .logo-img {
-  height: 40px;
+  @apply h-10;
 }
 
 .logo-text {
-  font-size: 1.25rem;
-  font-weight: bold;
+  @apply text-lg font-bold;
 }
 
 .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+  @apply flex items-center gap-6;
 }
 
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: white;
+  @apply flex items-center gap-2 text-white no-underline hover:underline;
 }
 
-.nav-item:hover {
-  text-decoration: underline;
+/* Login & Register */
+.login-container, .register-container {
+  @apply flex flex-col justify-center items-center h-screen bg-gray-50 p-4;
 }
 
-/*home*/
-/* Container for the whole page */
-.home-container {
-  display: flex;
-  flex-direction: column;
+.login-title, .register-title {
+  @apply text-2xl font-bold mb-4;
 }
 
-/* Main Content Section */
-.main-content {
-  display: flex;
-  flex: 1;
-  margin-top: 4rem; /* Adjust for Navbar height */
+.login-form, .register-form {
+  @apply flex flex-col gap-4 w-full max-w-md bg-white p-6 rounded-lg shadow-md;
 }
 
-/* Main Content Body */
-.main-content-body {
-  padding: 1.5rem;
-  margin-top: 4rem; /* Adjust for Navbar height */
-  width: 100%;
-}
-/*Login*/
-
-/* Login Page Container */
-.login-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f7fafc; /* Light background */
-  padding: 1rem;
-}
-
-/* Login Title */
-.login-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-/* Form Styling */
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 400px;
-  padding: 1.5rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Form Group (label and input) */
 .form-group {
-  display: flex;
-  flex-direction: column;
+  @apply flex flex-col;
 }
 
 .form-label {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  color: #2d3748; /* Dark text */
+  @apply text-sm font-medium mb-2;
 }
 
 .form-input {
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-  transition: border-color 0.3s;
+  @apply p-3 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500;
 }
 
-.form-input:focus {
-  border-color: #3182ce; /* Blue focus */
-}
-
-/* Submit Button */
 .submit-btn {
-  background-color: #3182ce;
-  color: white;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  @apply bg-blue-600 text-white p-3 rounded-md font-semibold hover:bg-blue-700;
 }
 
-.submit-btn:hover {
-  background-color: #2b6cb0;
+.forgot-password-btn, .login-link-text {
+  @apply text-blue-600 cursor-pointer hover:underline;
 }
 
-/* Forgot Password Button */
-.forgot-password-btn {
-  background: transparent;
-  color: #3182ce;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 1rem;
+.signup-link, .login-link {
+  @apply mt-4 text-sm;
 }
 
-/* Sign Up Link */
-.signup-link {
-  margin-top: 1rem;
-  font-size: 1rem;
+/*Dashboard*/
+
+/* Dashboard Container */
+.dashboard-container {
+  @apply flex h-screen bg-gray-100;
 }
 
-.signup-link a {
-  color: #3182ce;
-  text-decoration: none;
+/* Main Content Area
+   Adding a left margin equal to the sidebar width (w-64 is 16rem) ensures that
+   the content doesn't overlap the sidebar.
+*/
+.dashboard-main {
+  @apply flex-1 mt-16 p-4 ml-16;
 }
 
-.signup-link a:hover {
-  text-decoration: underline;
+/* Dashboard Content Wrapper */
+.dashboard-content {
+  @apply max-w-6xl mx-auto p-6;
 }
 
-/*Register*/
-
-/* Register Page Container */
-.register-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f7fafc;
-  padding: 1rem;
+/* Dashboard Title */
+.dashboard-title {
+  @apply text-2xl font-bold mb-4;
 }
 
-/* Register Title */
-.register-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
+/* Overview Cards Grid */
+.overview-cards {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6;
 }
 
-/* Form Styling */
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 400px;
-  padding: 1.5rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Card Style */
+.card {
+  @apply bg-white shadow-lg rounded-lg p-6;
 }
 
-/* Form Group (label and input) */
-.form-group {
-  display: flex;
-  flex-direction: column;
+/* Card Title */
+.card-title {
+  @apply text-lg font-semibold mb-2;
 }
 
-.form-label {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  color: #2d3748;
+/* Card Value */
+.card-value {
+  @apply text-2xl font-bold;
 }
 
-.form-input {
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-  transition: border-color 0.3s;
+/* Chart Card Style */
+.chart-card {
+  @apply bg-white shadow-lg rounded-lg p-6 flex flex-col items-center mb-6;
 }
 
-.form-input:focus {
-  border-color: #3182ce;
+/* Chart Title */
+.chart-title {
+  @apply text-lg font-semibold mb-4;
 }
 
-/* Submit Button */
-.submit-btn {
-  background-color: #3182ce;
-  color: white;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+/* Charts & Activity Section */
+.charts-activity {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
 }
 
-.submit-btn:hover {
-  background-color: #2b6cb0;
+/* Activity Card Style */
+.activity-card {
+  @apply bg-white shadow-lg rounded-lg p-6 mb-6;
 }
 
-/* Login Link */
-.login-link {
-  margin-top: 1rem;
-  font-size: 1rem;
+/* Activity Title */
+.activity-title {
+  @apply text-lg font-semibold mb-4;
 }
 
-.login-link-text {
-  color: #3182ce;
-  cursor: pointer;
-  text-decoration: none;
+/* Activity List */
+.activity-list {
+  @apply space-y-2 mt-2 text-gray-700 list-none;
 }
 
-.login-link-text:hover {
-  text-decoration: underline;
+/* Custom Bullet for Activity List */
+.list-bullet {
+  @apply inline-block w-2 h-2 rounded-full bg-blue-500 mr-2;
+}
+
+/* Quick Actions Container */
+.quick-actions {
+  @apply bg-white rounded-lg p-6 mt-6 flex space-x-4;
+}
+
+/* Action Button Style */
+.action-button {
+  @apply px-4 py-2 rounded font-bold text-white cursor-pointer transition-colors;
+}
+
+/* Specific Button Variants */
+.btn-create-ticket {
+  @apply bg-blue-600 hover:bg-blue-700;
+}
+
+.btn-view-reports {
+  @apply bg-green-600 hover:bg-green-700;
+}
+
+/* Sidebar */
+.sidebar {
+  @apply h-screen bg-gray-800 text-white fixed top-0 left-0 pt-16 transition-all;
+}
+
+.sidebar-open {
+  @apply w-64;
+}
+
+.sidebar-closed {
+  @apply w-20;
+}
+
+.sidebar-list {
+  @apply mt-4 list-none pl-0;
+}
+
+.sidebar-item {
+  @apply flex items-center p-4 text-white no-underline hover:bg-gray-700;
+}
+
+.sidebar-item-text {
+  @apply ml-4;
+}
+
+.collapse-btn {
+  @apply p-2 text-gray-300 flex justify-center items-center bg-transparent border-none hover:text-white;
+}
+
+.sidebar-admin-title {
+  @apply text-gray-300 mt-6;
+}
+
+.sidebar-item-logout {
+  @apply mt-6;
 }

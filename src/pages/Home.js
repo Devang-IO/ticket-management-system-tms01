@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Dashboard from "./Dashboard"; // Import Dashboard
+import "../styles/global.css";
 
 const Home = () => {
   return (

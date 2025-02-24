@@ -4,8 +4,8 @@ import { FiBell, FiUser, FiSettings, FiLogOut, FiEdit } from "react-icons/fi";
 
 const Navbar = () => {
   const user = {
-    name: "John Doe",
-    role: "Admin",
+    name: "Rohit Mehra",
+    role: "User",
   };
 
   // State for dropdowns
@@ -13,8 +13,8 @@ const Navbar = () => {
   const [showSettings, setShowSettings] = useState(false);
 
   const notifications = [
-    { id: 1, message: "New ticket assigned to you", time: "2m ago" },
-    { id: 2, message: "System maintenance scheduled", time: "1h ago" },
+    { id: 1, message: "Your tikcet has been closed", time: "2m ago" },
+    { id: 2, message: "System maintenance notice", time: "1h ago" },
     { id: 3, message: "Your ticket has been updated", time: "3h ago" },
   ];
 
