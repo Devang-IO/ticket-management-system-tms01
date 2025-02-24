@@ -1,20 +1,28 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
-  FiSettings, FiUsers, FiLogOut, FiArrowLeftCircle, 
-  FiArrowRightCircle 
-} from "react-icons/fi"; 
+import {
+  FiHome,
+  FiFileText,
+  FiPlusCircle,
+  FiCheckCircle,
+  FiSettings,
+  FiUsers,
+  FiLogOut,
+  FiArrowLeftCircle,
+  FiArrowRightCircle,
+} from "react-icons/fi";
 
 const Sidebar = ({ isAdmin }) => {
-  const [isOpen, setIsOpen] = useState(true); 
-  const navigate = useNavigate(); // 👈 For navigation
+  const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
 
+  // Logout Handler
   const handleLogout = () => {
-    // Clear user session (if using localStorage, sessionStorage, or cookies)
-    localStorage.removeItem("user"); // Example: Remove user data from localStorage
+    // Clear user session and auth token
+    localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
     alert("Logged out successfully!");
-    navigate("/login"); // Redirect to login page
+    navigate("/login");
   };
 
   return (
@@ -22,11 +30,12 @@ const Sidebar = ({ isAdmin }) => {
       <ul className="sidebar-list">
         {/* Collapse Button */}
         <li>
-          <button
-            className="collapse-btn"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <FiArrowLeftCircle size={24} /> : <FiArrowRightCircle size={24} />}
+          <button className="collapse-btn" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? (
+              <FiArrowLeftCircle size={24} />
+            ) : (
+              <FiArrowRightCircle size={24} />
+            )}
           </button>
         </li>
 
@@ -58,7 +67,9 @@ const Sidebar = ({ isAdmin }) => {
         <li>
           <Link to="/tickets/:id" className="sidebar-item">
             <FiCheckCircle size={20} />
-            {isOpen && <span className="sidebar-item-text">Ticket Details</span>}
+            {isOpen && (
+              <span className="sidebar-item-text">Ticket Details</span>
+            )}
           </Link>
         </li>
 
@@ -66,7 +77,9 @@ const Sidebar = ({ isAdmin }) => {
         <li>
           <Link to="/tickets/closed" className="sidebar-item">
             <FiCheckCircle size={20} />
-            {isOpen && <span className="sidebar-item-text">Closed Tickets</span>}
+            {isOpen && (
+              <span className="sidebar-item-text">Closed Tickets</span>
+            )}
           </Link>
         </li>
 
@@ -77,21 +90,25 @@ const Sidebar = ({ isAdmin }) => {
             <li>
               <Link to="/admin/users" className="sidebar-item">
                 <FiUsers size={20} />
-                {isOpen && <span className="sidebar-item-text">Manage Users</span>}
+                {isOpen && (
+                  <span className="sidebar-item-text">Manage Users</span>
+                )}
               </Link>
             </li>
             <li>
               <Link to="/admin/tickets" className="sidebar-item">
                 <FiSettings size={20} />
-                {isOpen && <span className="sidebar-item-text">Manage Tickets</span>}
+                {isOpen && (
+                  <span className="sidebar-item-text">Manage Tickets</span>
+                )}
               </Link>
             </li>
           </>
         )}
 
-        {/* Logout Button */}
+        {/* Logout */}
         <li className="sidebar-item-logout">
-          <button onClick={handleLogout} className="sidebar-item">
+          <button className="sidebar-item" onClick={handleLogout}>
             <FiLogOut size={20} />
             {isOpen && <span className="sidebar-item-text">Logout</span>}
           </button>

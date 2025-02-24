@@ -39,3 +39,340 @@ body {
 .text-title {
   @apply text-xl font-semibold;
 }
+
+/* Sidebar*/
+/* Sidebar Container */
+.sidebar {
+  height: 100vh;
+  background-color: #2d3748; /* Dark gray */
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 4rem;
+  transition: all 0.3s ease;
+}
+
+/* When Sidebar is Open */
+.sidebar-open {
+  width: 16rem; /* 64px */
+}
+
+/* When Sidebar is Closed */
+.sidebar-closed {
+  width: 5rem; /* 20px */
+}
+
+/* List of Sidebar Items */
+.sidebar-list {
+  margin-top: 1rem;
+  list-style-type: none;
+  padding-left: 0;
+}
+
+/* Sidebar Item */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  text-decoration: none;
+  color: white;
+}
+
+.sidebar-item:hover {
+  background-color: #4a5568; /* Darker gray on hover */
+}
+
+.sidebar-item-text {
+  margin-left: 1rem;
+}
+
+/* Collapse Button */
+.collapse-btn {
+  padding: 0.5rem;
+  color: #e2e8f0; /* Light gray */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+}
+
+.collapse-btn:hover {
+  color: white;
+}
+
+/* Admin Panel Title */
+.sidebar-admin-title {
+  color: #e2e8f0; /* Light gray */
+  margin-top: 1.5rem;
+}
+
+/* Logout Item */
+.sidebar-item-logout {
+  margin-top: 1.5rem;
+}
+
+/*Navbar*/
+
+/* Global styles for the Navbar */
+.navbar {
+  background-color: #1E40AF; /* Blue background */
+  color: white;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-img {
+  height: 40px;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: white;
+}
+
+.nav-item:hover {
+  text-decoration: underline;
+}
+
+/*home*/
+/* Container for the whole page */
+.home-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main Content Section */
+.main-content {
+  display: flex;
+  flex: 1;
+  margin-top: 4rem; /* Adjust for Navbar height */
+}
+
+/* Main Content Body */
+.main-content-body {
+  padding: 1.5rem;
+  margin-top: 4rem; /* Adjust for Navbar height */
+  width: 100%;
+}
+/*Login*/
+
+/* Login Page Container */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f7fafc; /* Light background */
+  padding: 1rem;
+}
+
+/* Login Title */
+.login-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* Form Styling */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Group (label and input) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #2d3748; /* Dark text */
+}
+
+.form-input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  border-color: #3182ce; /* Blue focus */
+}
+
+/* Submit Button */
+.submit-btn {
+  background-color: #3182ce;
+  color: white;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #2b6cb0;
+}
+
+/* Forgot Password Button */
+.forgot-password-btn {
+  background: transparent;
+  color: #3182ce;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+/* Sign Up Link */
+.signup-link {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.signup-link a {
+  color: #3182ce;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/*Register*/
+
+/* Register Page Container */
+.register-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f7fafc;
+  padding: 1rem;
+}
+
+/* Register Title */
+.register-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* Form Styling */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Group (label and input) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+}
+
+.form-input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  border-color: #3182ce;
+}
+
+/* Submit Button */
+.submit-btn {
+  background-color: #3182ce;
+  color: white;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #2b6cb0;
+}
+
+/* Login Link */
+.login-link {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.login-link-text {
+  color: #3182ce;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.login-link-text:hover {
+  text-decoration: underline;
+}

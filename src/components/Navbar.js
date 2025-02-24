@@ -36,11 +36,12 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="bg-blue-600 text-white p-4 shadow-md fixed w-full top-0 z-10">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
+    <nav className="navbar">
+      <div className="navbar-container">
         {/* Logo */}
-        <Link to="/dashboard" className="text-xl font-bold">
-          Ticket System
+        <Link to="/dashboard" className="logo">
+          <img src="/logo2.png" alt="Logo" className="logo-img" />
+          <span className="logo-text">QuickAssist</span>
         </Link>
 
         {/* Right Section */}
@@ -95,10 +96,11 @@ const Navbar = () => {
               </div>
             )}
           </div>
+
         </div>
       </div>
     </nav>
   );
 };
 
-export default Navbar;
+export default Navbar;
