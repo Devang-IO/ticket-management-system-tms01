@@ -7,14 +7,13 @@ import {
 } from "react-icons/fi"; 
 
 const Sidebar = ({ isAdmin }) => {
-  const [isOpen, setIsOpen] = useState(true); 
-  const navigate = useNavigate(); // 👈 For navigation
+  const [isOpen, setIsOpen] = useState(false); 
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear user session (if using localStorage, sessionStorage, or cookies)
-    localStorage.removeItem("user"); // Example: Remove user data from localStorage
+    localStorage.removeItem("user");
     alert("Logged out successfully!");
-    navigate("/login"); // Redirect to login page
+    navigate("/login");
   };
 
   return (
@@ -22,14 +21,10 @@ const Sidebar = ({ isAdmin }) => {
       <ul className="sidebar-list">
         {/* Collapse Button */}
         <li>
-          <button
-            className="collapse-btn"
-            onClick={() => setIsOpen(!isOpen)}
-          >
+          <button className="collapse-btn" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <FiArrowLeftCircle size={24} /> : <FiArrowRightCircle size={24} />}
           </button>
         </li>
-
         {/* Dashboard */}
         <li>
           <Link to="/dashboard" className="sidebar-item">
@@ -37,7 +32,6 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">Dashboard</span>}
           </Link>
         </li>
-
         {/* My Tickets */}
         <li>
           <Link to="/tickets" className="sidebar-item">
@@ -45,7 +39,6 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">My Tickets</span>}
           </Link>
         </li>
-
         {/* Create Ticket */}
         <li>
           <Link to="/tickets/new" className="sidebar-item">
@@ -53,7 +46,6 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
           </Link>
         </li>
-
         {/* Ticket Details */}
         <li>
           <Link to="/tickets/:id" className="sidebar-item">
@@ -61,7 +53,6 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">Ticket Details</span>}
           </Link>
         </li>
-
         {/* Closed Tickets */}
         <li>
           <Link to="/tickets/closed" className="sidebar-item">
@@ -69,7 +60,6 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">Closed Tickets</span>}
           </Link>
         </li>
-
         {/* Admin Panel (If Admin) */}
         {isAdmin && (
           <>
@@ -88,7 +78,6 @@ const Sidebar = ({ isAdmin }) => {
             </li>
           </>
         )}
-
         {/* Logout Button */}
         <li className="sidebar-item-logout">
           <button onClick={handleLogout} className="sidebar-item">

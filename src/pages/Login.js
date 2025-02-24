@@ -12,7 +12,8 @@ export default function LoginPage() {
 
     if (email && password) {
       alert("Login Successful!");
-      navigate("/home");
+      localStorage.setItem("isAuthenticated", "true"); // Store login state
+      navigate("/dashboard");
     } else {
       alert("Invalid credentials");
     }

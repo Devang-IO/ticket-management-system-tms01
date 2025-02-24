@@ -88,6 +88,6 @@ export default function RegisterPage() {
           </span>
         </p>
       </div>
-    </div>
-  );
+    </div>
+  );
 }

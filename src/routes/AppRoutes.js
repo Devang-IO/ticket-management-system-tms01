@@ -6,6 +6,7 @@ import Dashboard from "../pages/Dashboard";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home"; 
 
+
 const AppRoutes = () => {
   return (
     <Router>
