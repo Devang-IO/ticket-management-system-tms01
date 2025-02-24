@@ -25,6 +25,7 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen ? <FiArrowLeftCircle size={24} /> : <FiArrowRightCircle size={24} />}
           </button>
         </li>
+
         {/* Dashboard */}
         <li>
           <Link to="/dashboard" className="sidebar-item">
@@ -32,6 +33,7 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">Dashboard</span>}
           </Link>
         </li>
+
         {/* My Tickets */}
         <li>
           <Link to="/tickets" className="sidebar-item">
@@ -39,6 +41,7 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">My Tickets</span>}
           </Link>
         </li>
+
         {/* Create Ticket */}
         <li>
           <Link to="/tickets/new" className="sidebar-item">
@@ -46,13 +49,7 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
           </Link>
         </li>
-        {/* Ticket Details */}
-        <li>
-          <Link to="/tickets/:id" className="sidebar-item">
-            <FiCheckCircle size={20} />
-            {isOpen && <span className="sidebar-item-text">Ticket Details</span>}
-          </Link>
-        </li>
+
         {/* Closed Tickets */}
         <li>
           <Link to="/tickets/closed" className="sidebar-item">
@@ -60,10 +57,11 @@ const Sidebar = ({ isAdmin }) => {
             {isOpen && <span className="sidebar-item-text">Closed Tickets</span>}
           </Link>
         </li>
+
         {/* Admin Panel (If Admin) */}
         {isAdmin && (
           <>
-            <li className="sidebar-admin-title">{isOpen && "Admin Panel"}</li>
+            {isOpen && <li className="sidebar-admin-title">Admin Panel</li>}
             <li>
               <Link to="/admin/users" className="sidebar-item">
                 <FiUsers size={20} />
@@ -78,6 +76,7 @@ const Sidebar = ({ isAdmin }) => {
             </li>
           </>
         )}
+
         {/* Logout Button */}
         <li className="sidebar-item-logout">
           <button onClick={handleLogout} className="sidebar-item">
