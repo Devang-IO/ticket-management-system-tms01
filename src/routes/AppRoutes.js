@@ -4,7 +4,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import NotFound from "../pages/NotFound";
-import Home from "../pages/Home"; // Import Home
+import Home from "../pages/Home"; 
 
 
 const AppRoutes = () => {

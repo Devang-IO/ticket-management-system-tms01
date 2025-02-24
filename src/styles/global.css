@@ -39,16 +39,17 @@ body {
 .text-title {
   @apply text-xl font-semibold;
 }
-
 /* Navbar */
 .navbar {
   @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-50 h-16;
 }
 
+/* Navbar Container */
 .navbar-container {
   @apply max-w-6xl mx-auto flex justify-between items-center;
 }
 
+/* Logo */
 .logo {
   @apply flex items-center gap-2;
 }
@@ -61,13 +62,26 @@ body {
   @apply text-lg font-bold;
 }
 
+/* Navigation Links (Desktop) */
 .nav-links {
-  @apply flex items-center gap-6;
+  @apply hidden md:flex items-center gap-6; /* Hidden on mobile, flex on desktop */
 }
 
-.nav-item {
-  @apply flex items-center gap-2 text-white no-underline hover:underline;
+/* Mobile Menu Toggle */
+.menu-toggle {
+  @apply text-white text-2xl md:hidden; /* Show only on mobile */
 }
+
+/* Mobile Menu (Fixed Alignment) */
+.nav-links.mobile {
+  @apply flex flex-col items-start gap-4 absolute top-16 left-0 w-full bg-blue-800 p-4 shadow-lg md:hidden; 
+}
+
+/* Navigation Items */
+.nav-item {
+  @apply flex items-center gap-2 text-white no-underline hover:underline transition-all duration-200;
+}
+
 
 /* Login & Register */
 .login-container, .register-container {
