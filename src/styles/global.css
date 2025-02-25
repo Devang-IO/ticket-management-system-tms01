@@ -369,3 +369,105 @@ body {
 .form-button {
   @apply w-full py-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors;
 }
+
+/* Tickets List Container */
+.tickets-container {
+  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-lg shadow-md;
+}
+
+/* Header */
+.tickets-header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.tickets-header h2 {
+  @apply text-2xl font-bold text-gray-800;
+}
+
+.btn-primary {
+  @apply flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-bold transition duration-300 hover:bg-blue-700;
+}
+
+/* Controls */
+.tickets-controls {
+  @apply flex flex-wrap gap-4 bg-gray-200 p-4 rounded-md mb-4;
+}
+
+.filter-group {
+  @apply flex items-center gap-2;
+}
+
+.filter-group label {
+  @apply text-sm font-bold;
+}
+
+.search-input {
+  @apply px-3 py-2 border border-gray-300 rounded-md w-48;
+}
+
+/* Table */
+.table-container {
+  @apply overflow-x-auto bg-white rounded-md shadow-md;
+}
+
+.table-container table {
+  @apply w-full border-collapse;
+}
+
+.table-container th,
+.table-container td {
+  @apply p-4 border-b border-gray-300;
+}
+
+.table-container th {
+  @apply bg-gray-900 text-white text-left;
+}
+
+/* Actions column styling */
+.action-cell {
+  @apply relative text-center;
+}
+
+.action-btn {
+  @apply flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-white 
+         bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg 
+         hover:from-indigo-600 hover:to-blue-500 hover:shadow-xl 
+         transition-all duration-300 transform hover:scale-105 active:scale-95;
+}
+
+
+/* Dropdown styling */
+.dropdown {
+  @apply absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-xl z-10 transition-all duration-300;
+}
+
+/* Dropdown items */
+.dropdown-item {
+  @apply flex items-center gap-3 px-4 py-2 text-gray-700 transition-all duration-300 hover:bg-gray-100 hover:text-blue-600 cursor-pointer;
+}
+
+/* Delete button */
+.delete-btn {
+  @apply flex items-center gap-3 px-4 py-2 text-red-600 transition-all duration-300 hover:bg-red-100 hover:text-red-700 cursor-pointer w-full text-left rounded-b-lg;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .tickets-container {
+    @apply max-w-[95%] p-4;
+  }
+
+  .tickets-controls {
+    @apply flex-col gap-2;
+  }
+
+  .search-input {
+    @apply w-full;
+  }
+
+  .table-container th,
+  .table-container td {
+    @apply p-3;
+  }
+}
