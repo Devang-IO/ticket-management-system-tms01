@@ -8,7 +8,7 @@ import {
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Sidebar = ({ isAdmin }) => {
+const Sidebar = ({ isAdmin, onOpenTicket }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ const Sidebar = ({ isAdmin }) => {
     });
     setTimeout(() => {
       navigate('/login');
-    }, 1000); // Delay navigation to allow the toast to be visible
+    }, 1000);
   };
 
   return (
@@ -56,10 +56,10 @@ const Sidebar = ({ isAdmin }) => {
 
           {/* Create Ticket */}
           <li>
-            <Link to="/tickets/new" className="sidebar-item">
+          <button onClick={onOpenTicket} className="sidebar-item">
               <FiPlusCircle size={20} />
               {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
-            </Link>
+            </button>
           </li>
 
           {/* Closed Tickets */}
@@ -98,7 +98,6 @@ const Sidebar = ({ isAdmin }) => {
           </li>
         </ul>
       </aside>
-      {/* ToastContainer renders toast notifications */}
       <ToastContainer />
     </>
   );

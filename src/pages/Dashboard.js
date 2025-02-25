@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+import TicketSubmissionModal from "../components/TicketSubmissionModal";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import "../styles/global.css";
 
 const Dashboard = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // Sample data for the user's ticket statuses
   const ticketData = [
     { name: "Pending", value: 8, color: "#FFA500" },
@@ -16,7 +18,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar onOpenTicket={() => setIsModalOpen(true)}/>
 
       <div className="dashboard-main">
         {/* Navbar */}
@@ -77,11 +79,24 @@ const Dashboard = () => {
 
           {/* Quick Actions */}
           <div className="quick-actions">
-            <button className="action-button btn-create-ticket">Create Ticket</button>
+            <button
+              className="action-button btn-create-ticket"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Create Ticket
+            </button>
             <button className="action-button btn-view-reports">View Reports</button>
           </div>
         </div>
       </div>
+
+      {/* Ticket Submission Modal */}
+      {isModalOpen && (
+        <TicketSubmissionModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
