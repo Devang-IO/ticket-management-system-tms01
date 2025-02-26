@@ -242,6 +242,14 @@ body {
 }
 
 /* Sidebar */
+.sidebar-item {
+  @apply flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 rounded-md transition;
+}
+
+.sidebar-item-text {
+  @apply text-base;
+}
+
 .sidebar {
   @apply h-screen bg-gray-800 text-white fixed top-0 left-0 pt-16 transition-all;
 }
@@ -373,6 +381,7 @@ body {
 /* Tickets List Container */
 .tickets-container {
   @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-lg shadow-md;
+  margin-top: 80px; /* Adjust this based on your navbar height */
 }
 
 /* Header */
