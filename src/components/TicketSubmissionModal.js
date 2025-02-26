@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -17,27 +17,49 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
 
   const onSubmit = (data) => {
     console.log(data);
-    toast.success("Ticket submitted successfully!", {
-      position: "top-center",
-      autoClose: 3000,
-    });
+    const toastId = "ticket-submit-toast";
+  
+    if (!toast.isActive(toastId)) {
+      toast.success("Ticket submitted successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+        toastId,
+        hideProgressBar:true,
+      });
+    }
+  
     setTimeout(() => {
+      onClose();  // Close the modal after submission
       navigate("/dashboard");
     }, 1000);
   };
+  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) setImagePreview(URL.createObjectURL(file));
-    else setImagePreview(null);
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl);
+    } else {
+      setImagePreview(null);
+    }
   };
+
+  // Cleanup object URL to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
       <div className="modal">
-        <button className="close-btn" onClick={onClose}>
+        <button className="close-btn" onClick={onClose ? onClose : () => {}}>
           ×
         </button>
         <h2 className="modal-title">Submit a Ticket</h2>

@@ -20,7 +20,6 @@ const TicketList = () => {
       title: `Issue ${i + 1}`,
       status: ["Open", "Closed", "Pending", "Resolved"][i % 4],
       priority: ["High", "Medium", "Low"][i % 3],
-      createdBy: ["John", "Emma", "Liam", "Sophia"][i % 4],
       date: `2025-02-${24 - i}`,
     }));
     setTickets(mockTickets);
@@ -45,7 +44,6 @@ const TicketList = () => {
       (statusFilter === "All" || ticket.status === statusFilter) &&
       (priorityFilter === "All" || ticket.priority === priorityFilter)
   );
-  
 
   const indexOfLastTicket = currentPage * entriesPerPage;
   const indexOfFirstTicket = indexOfLastTicket - entriesPerPage;
@@ -105,7 +103,6 @@ const TicketList = () => {
               <th>Title</th>
               <th>Status</th>
               <th>Priority</th>
-              <th>Created By</th>
               <th>Created At</th>
               <th>Actions</th>
             </tr>
@@ -121,7 +118,6 @@ const TicketList = () => {
                 </td>
                 <td>{ticket.status}</td>
                 <td>{ticket.priority}</td>
-                <td>{ticket.createdBy}</td>
                 <td>{ticket.date}</td>
                 <td className="action-cell">
                   <div className="dropdown-wrapper" ref={dropdownRef}>
