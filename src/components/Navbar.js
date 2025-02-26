@@ -19,7 +19,7 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <Link to="/dashboard" className="logo">
-          <img src="/logo2.png" alt="Logo" className="logo-img" />
+          <img src="/logo1.png" alt="Logo" className="logo-img" />
           <span className="logo-text">QuickAssist</span>
         </Link>
 
