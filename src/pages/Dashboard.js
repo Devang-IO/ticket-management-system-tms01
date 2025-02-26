@@ -1,13 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { toast } from "react-toastify"; // Ensure you have react-toastify installed
+import "react-toastify/dist/ReactToastify.css";
 import "../styles/global.css";
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate(); // Hook to navigate to another page
+
   // Sample data for the user's ticket statuses
   const ticketData = [
     { name: "Pending", value: 8, color: "#FFA500" },
@@ -15,6 +19,19 @@ const Dashboard = () => {
     { name: "In Progress", value: 1, color: "#007BFF" },
     { name: "Urgent", value: 2, color: "#DC3545" },
   ];
+
+  // Function to handle ticket submission
+  const handleTicketSubmit = () => {
+    toast.success("Ticket submitted successfully!", {
+      position: "top-center",
+      autoClose: 2000, // Closes toast after 2 seconds
+    });
+
+    setTimeout(() => {
+      setIsModalOpen(false); // Close modal
+      navigate("/dashboard"); // Redirect back to dashboard
+    }, 2000);
+  };
 
   return (
     <div className="dashboard-container">
@@ -43,7 +60,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Charts & Activity Section (side-by-side) */}
+          {/* Charts & Activity Section */}
           <div className="charts-activity">
             {/* Pie Chart Card */}
             <div className="chart-card">
@@ -57,7 +74,6 @@ const Dashboard = () => {
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
-                    fill="#8884d8"
                     label
                   >
                     {ticketData.map((entry, index) => (
@@ -91,10 +107,7 @@ const Dashboard = () => {
 
           {/* Quick Actions */}
           <div className="quick-actions">
-            <button
-              className="action-button btn-create-ticket"
-              onClick={() => setIsModalOpen(true)}
-            >
+            <button className="action-button btn-create-ticket" onClick={() => setIsModalOpen(true)}>
               Create Ticket
             </button>
             <Link to="/tickets" className="action-button btn-view-reports">
@@ -106,7 +119,7 @@ const Dashboard = () => {
 
       {/* Ticket Submission Modal */}
       {isModalOpen && (
-        <TicketSubmissionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <TicketSubmissionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleTicketSubmit} />
       )}
     </div>
   );
