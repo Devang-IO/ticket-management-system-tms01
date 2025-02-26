@@ -6,6 +6,7 @@ import Dashboard from "../pages/Dashboard";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Tickets from "../pages/Tickets";
+import TicketDetails from "../pages/TicketDetails";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 
@@ -22,6 +23,7 @@ const AppRoutes = () => {
         <Route path="/tickets" element={<Tickets />} />
         <Route path="/home/*" element={<Home />} /> {/* Add Home route */}
         <Route path="*" element={<NotFound />} />
+        <Route path="/ticket/:id" element={<TicketDetails />} />
       </Routes>
     </Router>
   );
