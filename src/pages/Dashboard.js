@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+import TicketSubmissionModal from "../components/TicketSubmissionModal";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import "../styles/global.css";
 
 const Dashboard = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // Sample data for the user's ticket statuses
   const ticketData = [
     { name: "Pending", value: 8, color: "#FFA500" },
@@ -16,7 +19,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar onOpenTicket={() => setIsModalOpen(true)} />
 
       <div className="dashboard-main">
         {/* Navbar */}
@@ -28,14 +31,16 @@ const Dashboard = () => {
 
           {/* Overview Cards */}
           <div className="overview-cards">
-            {["Open Tickets", "Closed Tickets", "In Progress", "Pending Tickets"].map((status, index) => (
-              <div key={index} className="card">
-                <h2 className="card-title">{status}</h2>
-                <p className="card-value" style={{ color: ticketData[index].color }}>
-                  {ticketData[index].value}
-                </p>
-              </div>
-            ))}
+            {["Open Tickets", "Closed Tickets", "In Progress", "Pending Tickets"].map(
+              (status, index) => (
+                <div key={index} className="card">
+                  <h2 className="card-title">{status}</h2>
+                  <p className="card-value" style={{ color: ticketData[index].color }}>
+                    {ticketData[index].value}
+                  </p>
+                </div>
+              )
+            )}
           </div>
 
           {/* Charts & Activity Section (side-by-side) */}
@@ -68,20 +73,41 @@ const Dashboard = () => {
             <div className="activity-card">
               <h2 className="activity-title">Recent Ticket Updates</h2>
               <ul className="activity-list">
-                <li><span className="list-bullet" />Your ticket <strong>"Login Issue"</strong> is now <em>In Progress</em>.</li>
-                <li><span className="list-bullet" />Your ticket <strong>"Password Reset"</strong> was closed.</li>
-                <li><span className="list-bullet" />Your ticket <strong>"UI Bug in Dashboard"</strong> is pending review.</li>
+                <li>
+                  <span className="list-bullet" />Your ticket <strong>"Login Issue"</strong> is now{" "}
+                  <em>In Progress</em>.
+                </li>
+                <li>
+                  <span className="list-bullet" />Your ticket <strong>"Password Reset"</strong> was
+                  closed.
+                </li>
+                <li>
+                  <span className="list-bullet" />Your ticket <strong>"UI Bug in Dashboard"</strong>{" "}
+                  is pending review.
+                </li>
               </ul>
             </div>
           </div>
 
           {/* Quick Actions */}
           <div className="quick-actions">
-            <button className="action-button btn-create-ticket">Create Ticket</button>
-            <button className="action-button btn-view-reports">View Reports</button>
+            <button
+              className="action-button btn-create-ticket"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Create Ticket
+            </button>
+            <Link to="/tickets" className="action-button btn-view-reports">
+              View Tickets
+            </Link>
           </div>
         </div>
       </div>
+
+      {/* Ticket Submission Modal */}
+      {isModalOpen && (
+        <TicketSubmissionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      )}
     </div>
   );
 };

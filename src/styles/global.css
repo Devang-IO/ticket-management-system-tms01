@@ -44,6 +44,28 @@ body {
   @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-50 h-16;
 }
 
+/*navbar options*/
+
+/* Dropdown Styles */
+.dropdown {
+  @apply absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-50;
+}
+
+.dropdown div {
+  @apply p-4 border-b border-gray-200;
+}
+
+.dropdown a {
+  @apply block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100;
+}
+
+/* Mobile Menu Adjustments */
+.nav-links.mobile .nav-item.relative {
+  @apply block;
+}
+
+/*------------------------------------*/
+
 /* Navbar Container */
 .navbar-container {
   @apply max-w-6xl mx-auto flex justify-between items-center;
@@ -258,27 +280,194 @@ body {
 
 
 /* Login & Register */
+
+/* Container for the password input and toggle */
 .password-container {
-  position: relative;
-  display: flex;
-  align-items: center;
+  @apply relative flex items-center;
 }
 
+/* Password input: full width with right padding (approx 36px, adjust if needed) */
 .password-input {
-  width: 100%;
-  padding-right: 35px;
+  @apply w-full pr-9;
 }
 
+/* Password toggle: absolutely positioned with a small right offset, pointer cursor, and gray color */
 .password-toggle {
-  position: absolute;
-  right: 10px;
-  cursor: pointer;
-  color: #666;
+  @apply absolute right-2.5 cursor-pointer text-gray-600;
 }
 
+/* Error text: red, small font size (approx 14px), a little top margin, bold */
 .error-text {
-  color: red;
-  font-size: 14px;
-  margin-top: 5px;
-  font-weight: bold;
+  @apply text-red-500 text-sm mt-1 font-bold;
+}
+
+
+/* ---------------- Modal Styles ---------------- */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 backdrop-blur-md;
+}
+
+.modal {
+  @apply bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full sm:max-w-2xl relative; /* Increased max-width */
+}
+
+.close-btn {
+  @apply absolute top-4 right-4 text-gray-400 text-3xl cursor-pointer transition-colors hover:text-gray-600;
+}
+
+.modal-title {
+  @apply text-3xl font-extrabold mb-6 text-gray-800;
+}
+
+/* ---------------- Horizontal Form Styles ---------------- */
+.form-grid {
+  @apply grid grid-cols-2 gap-4; /* Create 2-column grid */
+}
+
+.form-group {
+  @apply col-span-1; /* Each form group takes 1 column */
+}
+
+.form-group.full-width {
+  @apply col-span-2; /* For elements that need full width */
+}
+
+.form-label {
+  @apply block text-gray-700 text-sm font-semibold mb-2;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors;
+}
+
+.form-input-file {
+  @apply hidden;
+}
+
+.dropzone {
+  @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-colors hover:border-blue-400 hover:bg-blue-50;
+}
+
+.dropzone-text {
+  @apply text-gray-600 text-sm;
+}
+
+.image-preview {
+  @apply mt-4;
+}
+
+.image-preview img {
+  @apply w-full max-h-64 object-cover rounded-lg;
+}
+
+.error-message {
+  @apply text-red-500 text-xs mt-1 font-medium;
+}
+
+.form-button {
+  @apply w-full py-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors;
+}
+
+/* Tickets List Container */
+.tickets-container {
+  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-lg shadow-md;
+}
+
+/* Header */
+.tickets-header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.tickets-header h2 {
+  @apply text-2xl font-bold text-gray-800;
+}
+
+.btn-primary {
+  @apply flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-bold transition duration-300 hover:bg-blue-700;
+}
+
+/* Controls */
+.tickets-controls {
+  @apply flex flex-wrap gap-4 bg-gray-200 p-4 rounded-md mb-4;
+}
+
+.filter-group {
+  @apply flex items-center gap-2;
+}
+
+.filter-group label {
+  @apply text-sm font-bold;
+}
+
+.search-input {
+  @apply px-3 py-2 border border-gray-300 rounded-md w-48;
+}
+
+/* Table */
+.table-container {
+  @apply overflow-x-auto bg-white rounded-md shadow-md;
+}
+
+.table-container table {
+  @apply w-full border-collapse;
+}
+
+.table-container th,
+.table-container td {
+  @apply p-4 border-b border-gray-300;
+}
+
+.table-container th {
+  @apply bg-gray-900 text-white text-left;
+}
+
+/* Actions column styling */
+.action-cell {
+  @apply relative text-center;
+}
+
+.action-btn {
+  @apply flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-white 
+         bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg 
+         hover:from-indigo-600 hover:to-blue-500 hover:shadow-xl 
+         transition-all duration-300 transform hover:scale-105 active:scale-95;
+}
+
+
+/* Dropdown styling */
+.dropdown {
+  @apply absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-xl z-10 transition-all duration-300;
+}
+
+/* Dropdown items */
+.dropdown-item {
+  @apply flex items-center gap-3 px-4 py-2 text-gray-700 transition-all duration-300 hover:bg-gray-100 hover:text-blue-600 cursor-pointer;
+}
+
+/* Delete button */
+.delete-btn {
+  @apply flex items-center gap-3 px-4 py-2 text-red-600 transition-all duration-300 hover:bg-red-100 hover:text-red-700 cursor-pointer w-full text-left rounded-b-lg;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .tickets-container {
+    @apply max-w-[95%] p-4;
+  }
+
+  .tickets-controls {
+    @apply flex-col gap-2;
+  }
+
+  .search-input {
+    @apply w-full;
+  }
+
+  .table-container th,
+  .table-container td {
+    @apply p-3;
+  }
 }
