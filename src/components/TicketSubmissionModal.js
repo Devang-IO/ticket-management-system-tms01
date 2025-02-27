@@ -71,6 +71,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </label>
             <input
               id="name"
+              placeholder="Enter your name"
               type="text"
               className="form-input"
               {...register("name", { required: "Name is required" })}
@@ -85,6 +86,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </label>
             <input
               id="email"
+              placeholder="Enter your email"
               type="email"
               className="form-input"
               {...register("email", {
@@ -139,6 +141,20 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </select>
             {errors.priority && <p className="error-message">{errors.priority.message}</p>}
           </div>
+          
+          {/* title Textarea */}
+          <div className="form-group full-width">
+            <label className="form-label" htmlFor="description">
+             Title
+            </label>
+            <textarea
+              id="title"
+              placeholder="Enter a brief title for the issue"
+              className="form-textarea"
+              {...register("title", { required: "Title is required" })}
+            ></textarea>
+            {errors.description && <p className="error-message">{errors.title.message}</p>}
+          </div>
 
           {/* Description Textarea */}
           <div className="form-group full-width">
@@ -147,6 +163,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </label>
             <textarea
               id="description"
+              placeholder="Describe your issue in detail..."
               className="form-textarea"
               {...register("description", { required: "Description is required" })}
             ></textarea>
