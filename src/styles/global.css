@@ -41,7 +41,7 @@ body {
 }
 /* Navbar */
 .navbar {
-  @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-50 h-16;
+  @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 h-16;
 }
 
 /*navbar options*/
@@ -103,7 +103,6 @@ body {
 .nav-item {
   @apply flex items-center gap-2 text-white no-underline hover:underline transition-all duration-200;
 }
-
 
 /* Login & Register */
 .login-container, .register-container {
@@ -241,10 +240,10 @@ body {
   @apply bg-green-600 hover:bg-green-700;
 }
 
-/* Sidebar */
+/*sidebar*/
 .sidebar {
   @apply h-screen bg-white text-gray-800 fixed top-0 left-0 pt-16 transition-all 
-         shadow-lg border-r border-gray-300 flex flex-col justify-between;
+         shadow-lg border-r border-gray-300 flex flex-col justify-between z-50;
 }
 
 .sidebar-open {
@@ -256,20 +255,19 @@ body {
 }
 
 .sidebar-list {
-  @apply mt-4 list-none pl-0 flex-grow; /* Sidebar items take full space */
+  @apply mt-[-40px] list-none pl-0;
 }
 
 /* Sidebar Items with More Space */
 .sidebar-item {
   @apply flex items-center p-3 text-gray-700 no-underline rounded-lg 
-         transition duration-300 relative my-2;
+         transition duration-300 relative my-2; /* Added more vertical margin */
 }
 
-/* Hover Effect: Slightly Rounded Blue Background */
+/* Hover Effect: Rounded Blue Background */
 .sidebar-item:hover {
-  @apply bg-blue-600 text-white shadow-md rounded-lg !important;
+  @apply bg-blue-500 text-white shadow-md rounded-[15px];
 }
-
 
 /* Sidebar Icons */
 .sidebar-item svg {
@@ -297,19 +295,14 @@ body {
   @apply text-gray-500 mt-6 font-semibold px-4;
 }
 
-/* Logout Button Fixed at Bottom */
-.sidebar-logout {
-  @apply mt-auto; /* Pushes logout button to the bottom */
-}
-
 /* Logout Button - Default State */
 .logout-btn {
-  @apply flex items-center w-full p-3 text-red-500 transition duration-300 absolute bottom-4 left-0;
+  @apply flex items-center w-full p-3 text-red-500 transition duration-300 my-3 absolute bottom-4 left-0; /* Added space */
 }
 
-/* Logout Button on Hover - Slightly Rounded Red Background */
+/* Logout Button on Hover - Rounded Red Background */
 .logout-btn:hover {
-  @apply bg-red-500 text-white rounded-md shadow-md; /* Slightly rounded on hover */
+  @apply bg-red-500 text-white rounded-[15px] shadow-md;
 }
 
 /* Fix Logout Icon Alignment */
@@ -321,8 +314,6 @@ body {
 .logout-btn:hover svg {
   @apply text-white;
 }
-
-
 
 /* Login & Register */
 
