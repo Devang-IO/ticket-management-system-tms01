@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FiHome, FiFileText, FiPlusCircle, FiCheckCircle,
   FiSettings, FiUsers, FiLogOut, FiArrowLeftCircle,
@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 const Sidebar = ({ isAdmin, onOpenTicket }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Get current route
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -38,7 +39,10 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Dashboard */}
         <li>
-          <Link to="/dashboard" className="sidebar-item">
+          <Link
+            to="/dashboard"
+            className={`sidebar-item ${location.pathname === "/dashboard" ? "sidebar-item-active" : ""}`}
+          >
             <FiHome size={20} />
             {isOpen && <span className="sidebar-item-text">Dashboard</span>}
           </Link>
@@ -46,7 +50,10 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* My Tickets */}
         <li>
-          <Link to="/tickets" className="sidebar-item">
+          <Link
+            to="/tickets"
+            className={`sidebar-item ${location.pathname === "/tickets" ? "sidebar-item-active" : ""}`}
+          >
             <FiFileText size={20} />
             {isOpen && <span className="sidebar-item-text">My Tickets</span>}
           </Link>
@@ -54,7 +61,10 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Create Ticket */}
         <li>
-          <button onClick={onOpenTicket} className="sidebar-item">
+          <button
+            onClick={onOpenTicket}
+            className="sidebar-item w-full"
+          >
             <FiPlusCircle size={20} />
             {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
           </button>
@@ -62,7 +72,10 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Closed Tickets */}
         <li>
-          <Link to="/tickets/closed" className="sidebar-item">
+          <Link
+            to="/tickets/closed"
+            className={`sidebar-item ${location.pathname === "/tickets/closed" ? "sidebar-item-active" : ""}`}
+          >
             <FiCheckCircle size={20} />
             {isOpen && <span className="sidebar-item-text">Closed Tickets</span>}
           </Link>
@@ -73,13 +86,19 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
           <>
             {isOpen && <li className="sidebar-admin-title">Admin Panel</li>}
             <li>
-              <Link to="/admin/users" className="sidebar-item">
+              <Link
+                to="/admin/users"
+                className={`sidebar-item ${location.pathname === "/admin/users" ? "sidebar-item-active" : ""}`}
+              >
                 <FiUsers size={20} />
                 {isOpen && <span className="sidebar-item-text">Manage Users</span>}
               </Link>
             </li>
             <li>
-              <Link to="/admin/tickets" className="sidebar-item">
+              <Link
+                to="/admin/tickets"
+                className={`sidebar-item ${location.pathname === "/admin/tickets" ? "sidebar-item-active" : ""}`}
+              >
                 <FiSettings size={20} />
                 {isOpen && <span className="sidebar-item-text">Manage Tickets</span>}
               </Link>
@@ -89,7 +108,7 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Logout Button */}
         <li className="sidebar-item-logout">
-          <button onClick={handleLogout} className="sidebar-item">
+          <button onClick={handleLogout} className="logout-btn w-full">
             <FiLogOut size={20} />
             {isOpen && <span className="sidebar-item-text">Logout</span>}
           </button>
