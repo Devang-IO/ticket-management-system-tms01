@@ -373,7 +373,9 @@ body {
 /* Tickets List Container */
 .tickets-container {
   @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-lg shadow-md;
+  margin-top: 80px; /* Adjust this based on your navbar height */
 }
+
 
 /* Header */
 .tickets-header {
