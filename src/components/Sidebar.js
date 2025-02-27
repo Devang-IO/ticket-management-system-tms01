@@ -5,7 +5,8 @@ import {
   FiSettings, FiUsers, FiLogOut, FiArrowLeftCircle,
   FiArrowRightCircle
 } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Sidebar = ({ isAdmin, onOpenTicket }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,27 +23,27 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
       pauseOnHover: true,
       draggable: true,
     });
+
+    // Delay navigation slightly to allow the toast to display
     setTimeout(() => {
       navigate('/login');
-    }, 1000);
+    }, 1200); // Increased delay to 1200ms
   };
 
   return (
-    <aside className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-      <ul className="sidebar-list">
-        {/* Collapse Button */}
-        <li>
-          <button className="collapse-btn" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <FiArrowLeftCircle size={24} /> : <FiArrowRightCircle size={24} />}
-          </button>
-        </li>
+    <>
+      <aside className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        <ul className="sidebar-list">
+          {/* Collapse Button */}
+          <li>
+            <button className="collapse-btn" onClick={() => setIsOpen(!isOpen)}>
+              {isOpen ? <FiArrowLeftCircle size={24} /> : <FiArrowRightCircle size={24} />}
+            </button>
+          </li>
 
         {/* Dashboard */}
         <li>
-          <Link 
-            to="/dashboard" 
-            className={`sidebar-item ${location.pathname === "/dashboard" ? "sidebar-item-active" : ""}`}
-          >
+          <Link to="/dashboard" className="sidebar-item">
             <FiHome size={20} />
             {isOpen && <span className="sidebar-item-text">Dashboard</span>}
           </Link>
@@ -50,10 +51,7 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* My Tickets */}
         <li>
-          <Link 
-            to="/tickets" 
-            className={`sidebar-item ${location.pathname === "/tickets" ? "sidebar-item-active" : ""}`}
-          >
+          <Link to="/tickets" className="sidebar-item">
             <FiFileText size={20} />
             {isOpen && <span className="sidebar-item-text">My Tickets</span>}
           </Link>
@@ -61,10 +59,7 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Create Ticket */}
         <li>
-          <button 
-            onClick={onOpenTicket} 
-            className="sidebar-item w-full"
-          >
+          <button onClick={onOpenTicket} className="sidebar-item">
             <FiPlusCircle size={20} />
             {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
           </button>
@@ -72,10 +67,7 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Closed Tickets */}
         <li>
-          <Link 
-            to="/tickets/closed" 
-            className={`sidebar-item ${location.pathname === "/tickets/closed" ? "sidebar-item-active" : ""}`}
-          >
+          <Link to="/tickets/closed" className="sidebar-item">
             <FiCheckCircle size={20} />
             {isOpen && <span className="sidebar-item-text">Closed Tickets</span>}
           </Link>
@@ -86,19 +78,13 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
           <>
             {isOpen && <li className="sidebar-admin-title">Admin Panel</li>}
             <li>
-              <Link 
-                to="/admin/users" 
-                className={`sidebar-item ${location.pathname === "/admin/users" ? "sidebar-item-active" : ""}`}
-              >
+              <Link to="/admin/users" className="sidebar-item">
                 <FiUsers size={20} />
                 {isOpen && <span className="sidebar-item-text">Manage Users</span>}
               </Link>
             </li>
             <li>
-              <Link 
-                to="/admin/tickets" 
-                className={`sidebar-item ${location.pathname === "/admin/tickets" ? "sidebar-item-active" : ""}`}
-              >
+              <Link to="/admin/tickets" className="sidebar-item">
                 <FiSettings size={20} />
                 {isOpen && <span className="sidebar-item-text">Manage Tickets</span>}
               </Link>
@@ -108,7 +94,7 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Logout Button */}
         <li className="sidebar-item-logout">
-          <button onClick={handleLogout} className="logout-btn w-full">
+          <button onClick={handleLogout} className="sidebar-item">
             <FiLogOut size={20} />
             {isOpen && <span className="sidebar-item-text">Logout</span>}
           </button>

@@ -6,9 +6,10 @@ import Dashboard from "../pages/Dashboard";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Tickets from "../pages/Tickets";
+import TicketDetails from "../pages/TicketDetails";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 import Navbar from "../components/Navbar"; // Import Navbar
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const AppRoutes = () => {
   return (
@@ -22,6 +23,7 @@ const AppRoutes = () => {
         <Route path="/tickets" element={<Tickets />} />
         <Route path="/home/*" element={<Home />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/ticket/:id" element={<TicketDetails />} />
       </Routes>
 
       {/* Toast Notifications */}
