@@ -39,8 +39,8 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Dashboard */}
         <li>
-          <Link
-            to="/dashboard"
+          <Link 
+            to="/dashboard" 
             className={`sidebar-item ${location.pathname === "/dashboard" ? "sidebar-item-active" : ""}`}
           >
             <FiHome size={20} />
@@ -50,8 +50,8 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* My Tickets */}
         <li>
-          <Link
-            to="/tickets"
+          <Link 
+            to="/tickets" 
             className={`sidebar-item ${location.pathname === "/tickets" ? "sidebar-item-active" : ""}`}
           >
             <FiFileText size={20} />
@@ -61,8 +61,8 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Create Ticket */}
         <li>
-          <button
-            onClick={onOpenTicket}
+          <button 
+            onClick={onOpenTicket} 
             className="sidebar-item w-full"
           >
             <FiPlusCircle size={20} />
@@ -72,8 +72,8 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Closed Tickets */}
         <li>
-          <Link
-            to="/tickets/closed"
+          <Link 
+            to="/tickets/closed" 
             className={`sidebar-item ${location.pathname === "/tickets/closed" ? "sidebar-item-active" : ""}`}
           >
             <FiCheckCircle size={20} />
@@ -86,8 +86,8 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
           <>
             {isOpen && <li className="sidebar-admin-title">Admin Panel</li>}
             <li>
-              <Link
-                to="/admin/users"
+              <Link 
+                to="/admin/users" 
                 className={`sidebar-item ${location.pathname === "/admin/users" ? "sidebar-item-active" : ""}`}
               >
                 <FiUsers size={20} />
@@ -95,8 +95,8 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
               </Link>
             </li>
             <li>
-              <Link
-                to="/admin/tickets"
+              <Link 
+                to="/admin/tickets" 
                 className={`sidebar-item ${location.pathname === "/admin/tickets" ? "sidebar-item-active" : ""}`}
               >
                 <FiSettings size={20} />
