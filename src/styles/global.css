@@ -247,11 +247,11 @@ body {
 }
 
 .sidebar-open {
-  @apply w-56;
+  @apply w-52;
 }
 
 .sidebar-closed {
-  @apply w-20;
+  @apply w-14;
 }
 
 .sidebar-list {
