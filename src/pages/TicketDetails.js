@@ -71,8 +71,22 @@ const TicketDetails = () => {
           </div>
         </div>
 
-        {/* Live Comments Section */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        {/* Attachments Section (Moved Above Comments) */}
+        <div className="bg-white p-4 rounded-lg shadow-md mt-4">
+          <h3 className="text-xl font-bold flex items-center gap-3">
+            <FaPaperclip className="text-green-500 text-2xl" /> Attachments
+          </h3>
+          {ticket.attachments.map((file, index) => (
+            <p key={index} className="mt-2">
+              <a href={file.link} className="text-blue-500 hover:underline text-lg">
+                {file.name}
+              </a>
+            </p>
+          ))}
+        </div>
+
+        {/* Live Comments Section (Now Placed at the End, Above the Back Button) */}
+        <div className="bg-white p-4 rounded-lg shadow-md mt-4">
           <h3 className="text-xl font-bold flex items-center gap-3">
             <FaComments className="text-blue-500 text-2xl" /> Live Conversation
           </h3>
@@ -161,21 +175,7 @@ const TicketDetails = () => {
           </div>
         </div>
 
-        {/* Attachments Section */}
-        <div className="bg-white p-4 rounded-lg shadow-md mt-4">
-          <h3 className="text-xl font-bold flex items-center gap-3">
-            <FaPaperclip className="text-green-500 text-2xl" /> Attachments
-          </h3>
-          {ticket.attachments.map((file, index) => (
-            <p key={index} className="mt-2">
-              <a href={file.link} className="text-blue-500 hover:underline text-lg">
-                {file.name}
-              </a>
-            </p>
-          ))}
-        </div>
-
-        {/* Back Button  */}
+        {/* Back Button at the Bottom */}
         <div className="mt-6 flex justify-center">
           <button
             onClick={() => navigate(-1)}
