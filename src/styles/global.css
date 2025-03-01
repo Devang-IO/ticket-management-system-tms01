@@ -105,6 +105,59 @@ body {
 }
 
 
+
+
+/* global.css */
+
+.navbar {
+  @apply flex justify-between items-center p-4 bg-white shadow-md z-10;
+}
+
+.navbar-right {
+  @apply flex items-center gap-4;
+}
+
+.new-ticket-btn {
+  @apply bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700;
+}
+
+.notifications-dropdown,
+.profile-dropdown {
+  @apply absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-50;
+}
+
+.dropdown-header {
+  @apply p-4 border-b border-gray-200 font-semibold text-gray-800;
+}
+
+.dropdown-content {
+  @apply max-h-48 overflow-y-auto;
+}
+
+.dropdown-item {
+  @apply p-4 border-b border-gray-200 hover:bg-gray-50;
+}
+
+.time-text {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+.dropdown-footer {
+  @apply p-4 text-center;
+}
+
+.view-all-link {
+  @apply text-sm text-blue-500 hover:underline;
+}
+
+/* Profile Placeholder */
+.profile-placeholder {
+  @apply w-10 h-10 rounded-full bg-gray-300;
+}
+
+
+
+
 /* Login & Register */
 .login-container, .register-container {
   @apply flex flex-col justify-center items-center h-screen bg-gray-50 p-4;
@@ -243,7 +296,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-  @apply h-screen bg-gray-800 text-white fixed top-0 left-0 pt-16 transition-all;
+  @apply h-screen bg-gray-800 text-white fixed top-0 left-0 pt-16 transition-all z-20;
 }
 
 .sidebar-open {
