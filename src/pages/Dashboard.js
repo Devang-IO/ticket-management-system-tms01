@@ -40,7 +40,7 @@ const Dashboard = () => {
 
       <div className="dashboard-main">
         {/* Navbar */}
-        <Navbar />
+        <Navbar onOpenTicket={() => setIsModalOpen(true)} />
 
         {/* Main Dashboard Content */}
         <div className="dashboard-content">

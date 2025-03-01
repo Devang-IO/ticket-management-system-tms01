@@ -31,7 +31,7 @@ const TicketList = () => {
       if (!event.target.closest('.dropdown-wrapper')) {
         setActionDropdown(null);
       }
-      
+
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -133,12 +133,12 @@ const TicketList = () => {
                     {actionDropdown === ticket.id && (
                       <div className="dropdown">
                         <Link
-  to={`/ticket/${ticket.id}`}
-  className="dropdown-item"
-  onClick={() => setActionDropdown(null)}
->
-  <FiEye /> View
-</Link>
+                          to={`/ticket/${ticket.id}`}
+                          className="dropdown-item"
+                          onClick={() => setActionDropdown(null)}
+                        >
+                          <FiEye /> View
+                        </Link>
 
                         <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
                           <FiEdit /> Edit
