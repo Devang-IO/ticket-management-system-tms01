@@ -28,9 +28,10 @@ const TicketList = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (!event.target.closest('.dropdown-wrapper')) {
         setActionDropdown(null);
       }
+
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -131,9 +132,14 @@ const TicketList = () => {
                     </button>
                     {actionDropdown === ticket.id && (
                       <div className="dropdown">
-                        <Link to={`/ticket/${ticket.id}`} className="dropdown-item">
+                        <Link
+                          to={`/ticket/${ticket.id}`}
+                          className="dropdown-item"
+                          onClick={() => setActionDropdown(null)}
+                        >
                           <FiEye /> View
                         </Link>
+
                         <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
                           <FiEdit /> Edit
                         </Link>
