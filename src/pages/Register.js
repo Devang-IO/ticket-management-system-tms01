@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('user'); // Default role
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -54,7 +55,7 @@ export default function RegisterPage() {
 
     // Simulate registration process
     setTimeout(() => {
-      console.log('Registering with', { name, email, password, phone });
+      console.log('Registering with', { name, email, password, phone, role });
       navigate('/login');
     }, 1000); // Delay navigation to allow the toast to be visible
   };
@@ -141,16 +142,33 @@ export default function RegisterPage() {
           </div>
         </div>
         {passwordError && <p className="error-text">{passwordError}</p>}
-        <div className="form-group">
-          <label className="form-label">Phone Number (Optional)</label>
-          <input
-            type="tel"
-            placeholder="Enter your phone number"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="form-input"
-          />
+        
+        <div className="form-grid">
+          <div className="form-group">
+            <label className="form-label">Phone Number (Optional)</label>
+            <input
+              type="tel"
+              placeholder="Enter your phone number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="form-input"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Role <span className="required">*</span></label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              required
+              className="form-input"
+            >
+              <option value="user">User</option>
+              <option value="employee">Employee</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
         </div>
+
         <button type="submit" className="submit-btn">
           Sign-Up
         </button>

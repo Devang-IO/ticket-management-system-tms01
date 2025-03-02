@@ -14,9 +14,11 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+
+    // Show toast immediately before navigating
     toast.success('Logged out successfully!', {
       position: 'top-center',
-      autoClose: 1000,
+      autoClose: 1500, // Increased duration
       hideProgressBar: true,
       closeOnClick: true,
       pauseOnHover: true,
@@ -26,7 +28,15 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
     // Delay navigation slightly to allow the toast to display
     setTimeout(() => {
       navigate('/login');
-    }, 1200); // Increased delay to 1200ms
+    }, 1600);
+  };
+
+  // Manual test function to check toast functionality
+  const testToast = () => {
+    toast.success("Test Notification!", {
+      position: "top-center",
+      autoClose: 1500
+    });
   };
 
   return (
