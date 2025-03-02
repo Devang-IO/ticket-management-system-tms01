@@ -41,7 +41,7 @@ body {
 }
 /* Navbar */
 .navbar {
-  @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 h-16;
+  @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-50 h-16;
 }
 
 /*navbar options*/
@@ -52,11 +52,11 @@ body {
 }
 
 .dropdown div {
-  @apply p-4 border-b border-gray-200;
+  @apply p-4 border-b border-blue-200;
 }
 
 .dropdown a {
-  @apply block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100;
+  @apply block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100;
 }
 
 /* Mobile Menu Adjustments */
@@ -64,7 +64,6 @@ body {
   @apply block;
 }
 
-/*------------------------------------*/
 
 /* Navbar Container */
 .navbar-container {
@@ -104,53 +103,6 @@ body {
   @apply flex items-center gap-2 text-white no-underline hover:underline transition-all duration-200;
 }
 
-/* global.css */
-
-.navbar {
-  @apply flex justify-between items-center p-4 bg-white shadow-md z-10;
-}
-
-.navbar-right {
-  @apply flex items-center gap-4;
-}
-
-.new-ticket-btn {
-  @apply bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700;
-}
-
-.notifications-dropdown,
-.profile-dropdown {
-  @apply absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-50;
-}
-
-.dropdown-header {
-  @apply p-4 border-b border-gray-200 font-semibold text-gray-800;
-}
-
-.dropdown-content {
-  @apply max-h-48 overflow-y-auto;
-}
-
-.dropdown-item {
-  @apply p-4 border-b border-gray-200 hover:bg-gray-50;
-}
-
-.time-text {
-  @apply text-xs text-gray-500 mt-1;
-}
-
-.dropdown-footer {
-  @apply p-4 text-center;
-}
-
-.view-all-link {
-  @apply text-sm text-blue-500 hover:underline;
-}
-
-/* Profile Placeholder */
-.profile-placeholder {
-  @apply w-10 h-10 rounded-full bg-gray-300;
-}
 
 /* Login & Register */
 .login-container, .register-container {
@@ -288,77 +240,47 @@ body {
   @apply bg-green-600 hover:bg-green-700;
 }
 
-/*sidebar*/
+/* Sidebar */
 .sidebar {
-  @apply h-screen bg-white text-gray-800 fixed top-0 left-0 pt-16 transition-all 
-         shadow-lg border-r border-gray-300 flex flex-col justify-between z-50;
-
+  @apply h-screen bg-gray-800 text-white fixed top-0 left-0 pt-16 transition-all;
 }
 
 .sidebar-open {
-  @apply w-52;
+  @apply w-64;
 }
 
 .sidebar-closed {
-  @apply w-14;
+  @apply w-20;
 }
 
 .sidebar-list {
-  @apply mt-[-40px] list-none pl-0;
+  @apply mt-4 list-none pl-0;
 }
 
-/* Sidebar Items with More Space */
 .sidebar-item {
-  @apply flex items-center p-3 text-gray-700 no-underline rounded-lg 
-         transition duration-300 relative my-2; /* Added more vertical margin */
+  @apply flex items-center p-4 text-white no-underline hover:bg-gray-700;
 }
 
-/* Hover Effect: Rounded Blue Background */
-.sidebar-item {
-  @apply w-full flex items-center transition-all duration-300 px-4 py-2;
-}
-.sidebar-item:hover {
-  @apply bg-blue-500 text-white shadow-md rounded-[15px] px-3;
-  width: calc(100% - 30px); /* Reduce width slightly without touching the border */
-  margin-left: 5px; /* Adjust positioning */
-}
-
-/* Sidebar Icons */
-.sidebar-item svg {
-  @apply text-gray-600 transition-all duration-300;
-}
-
-/* Hover: White Icons */
-.sidebar-item:hover svg {
-  @apply text-white;
-}
-
-/* Sidebar Text */
 .sidebar-item-text {
-  @apply ml-4 text-base;
+  @apply ml-4;
 }
 
-/* Collapse Button */
 .collapse-btn {
-  @apply p-2 text-gray-700 flex justify-center items-center bg-transparent border-none 
-         hover:text-blue-600 transition duration-300;
+  @apply p-2 text-gray-300 flex justify-center items-center bg-transparent border-none hover:text-white;
 }
 
-/* Admin Title */
 .sidebar-admin-title {
-  @apply text-gray-500 mt-6 font-semibold px-4;
+  @apply text-gray-300 mt-6;
 }
 
-/* Logout Button - Default State */
-.logout-btn {
-  @apply flex items-center w-full p-3 text-red-500 transition duration-300 my-3 absolute bottom-4 left-0; /* Added space */
+.sidebar-item-logout {
+  @apply mt-6;
 }
 /* Login Page Styles */
 
-
 .login-container {
   @apply flex flex-col items-center justify-center min-h-screen bg-[#23486A] px-6 py-12;
-
+}
 
 .login-title {
   @apply text-4xl font-bold text-[#EFB036] mb-6;
@@ -538,7 +460,7 @@ body {
 }
 
 .dropdown-item {
-  @apply flex items-center gap-3 px-5 py-3 text-gray-700 transition-all duration-300
+  @apply flex items-center gap-3 px-5 py-3 text-blue-700 transition-all duration-300
          hover:bg-[#EFB036] hover:text-[#23486A] cursor-pointer w-full text-left;
 }
 
@@ -636,12 +558,12 @@ body {
 
 /* Dropdown styling */
 .dropdown {
-  @apply absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-xl z-10 transition-all duration-300;
+  @apply absolute right-0 mt-2 w-36 bg-white border border-blue-200 rounded-lg shadow-xl z-10 transition-all duration-300;
 }
 
 /* Dropdown items */
 .dropdown-item {
-  @apply flex items-center gap-3 px-4 py-2 text-gray-700 transition-all duration-300 hover:bg-gray-100 hover:text-yellow-600 cursor-pointer;
+  @apply flex items-center gap-3 px-4 py-2 text-blue-700 transition-all duration-300 hover:bg-blue-100 hover:text-yellow-600 cursor-pointer;
 }
 
 /* Delete button */
