@@ -152,6 +152,7 @@ body {
   color: white;
 }
 
+
 /* Login & Register */
 .login-container, .register-container {
   @apply flex flex-col justify-center items-center h-screen bg-gray-50 p-4;
@@ -292,14 +293,15 @@ body {
 .sidebar {
   @apply h-screen bg-[#3B6790] text-white fixed top-0 left-0 pt-16 transition-all 
          shadow-lg border-r border-[#4C7B8B] flex flex-col justify-between z-50;
+
 }
 
 .sidebar-open {
-  @apply w-52;
+  @apply w-64;
 }
 
 .sidebar-closed {
-  @apply w-14;
+  @apply w-20;
 }
 
 .sidebar-list {
@@ -352,6 +354,7 @@ body {
 .sidebar-item:hover svg {
   @apply text-[#23486A];
 }
+/* Login Page Styles */
 
 /* Sidebar Text - Bold & More Shadow */
 .sidebar-item-text {
@@ -424,94 +427,134 @@ body {
 }
 /* Login & Register */
 
-/* Container for the password input and toggle */
 .password-container {
   @apply relative flex items-center;
 }
 
-/* Password input: full width with right padding (approx 36px, adjust if needed) */
 .password-input {
   @apply w-full pr-9;
 }
 
-/* Password toggle: absolutely positioned with a small right offset, pointer cursor, and gray color */
 .password-toggle {
-  @apply absolute right-2.5 cursor-pointer text-gray-600;
+  @apply absolute right-2.5 cursor-pointer text-[#3B6790];
 }
 
-/* Error text: red, small font size (approx 14px), a little top margin, bold */
 .error-text {
   @apply text-red-500 text-sm mt-1 font-bold;
 }
 
+.form-select {
+  @apply w-full px-4 py-2 border border-[#4C7B8B] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EFB036] transition-colors;
+}
+
+.submit-btn {
+  @apply w-full py-3 bg-[#EFB036] text-white font-bold rounded-lg hover:bg-[#3B6790] transition-colors;
+}
+
+.login-link {
+  @apply mt-3 text-sm text-center text-[#3B6790];
+}
+
+.login-link-text {
+  @apply font-semibold text-[#EFB036] cursor-pointer hover:underline;
+}
 
 /* ---------------- Modal Styles ---------------- */
+
 .modal-overlay {
   @apply fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 backdrop-blur-md;
 }
 
 .modal {
-  @apply bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full sm:max-w-2xl relative; /* Increased max-width */
+  @apply bg-white p-4 sm:p-6 rounded-3xl shadow-2xl w-full sm:max-w-xl relative border-t-4 border-[#EFB036]; /* Reduced max-width & padding */
 }
 
 .close-btn {
-  @apply absolute top-4 right-4 text-gray-400 text-3xl cursor-pointer transition-colors hover:text-red-600;
+  @apply absolute top-3 right-3 text-gray-400 text-2xl cursor-pointer transition-colors hover:text-red-600;
 }
 
 .modal-title {
-  @apply text-3xl font-extrabold mb-6 text-gray-800;
+  @apply text-2xl font-extrabold mb-4 text-[#23486A]; /* Smaller title */
 }
 
-/* ---------------- Horizontal Form Styles ---------------- */
+/* ---------------- Form Styles ---------------- */
 .form-grid {
-  @apply grid grid-cols-2 gap-4; /* Create 2-column grid */
+  @apply grid grid-cols-2 gap-3; /* Reduced gap */
 }
 
 .form-group {
-  @apply col-span-1; /* Each form group takes 1 column */
+  @apply col-span-1;
 }
 
 .form-group.full-width {
-  @apply col-span-2; /* For elements that need full width */
+  @apply col-span-2;
 }
 
 .form-label {
-  @apply block text-gray-700 text-sm font-semibold mb-2;
+  @apply block text-[#3B6790] text-sm font-semibold mb-1;
 }
 
 .form-input,
 .form-select,
 .form-textarea {
-  @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors;
+  @apply w-full px-3 py-2 border border-[#3B6790] rounded-xl bg-white text-[#23486A] 
+         focus:outline-none focus:ring-2 focus:ring-[#EFB036] transition-colors shadow-sm;
 }
 
+/* Styled Dropdown */
+.form-select {
+  @apply cursor-pointer;
+}
+
+/* Dropdown Options */
+.form-select option {
+  @apply bg-white text-[#23486A];
+}
+
+/* File Input Hidden */
 .form-input-file {
   @apply hidden;
 }
 
+/* Dropzone */
 .dropzone {
-  @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-colors hover:border-blue-400 hover:bg-blue-50;
+  @apply border-2 border-dashed border-[#3B6790] rounded-xl p-4 text-center cursor-pointer transition-colors
+         text-[#23486A] bg-[#F8F9FA] hover:border-[#EFB036];
 }
 
-.dropzone-text {
-  @apply text-gray-600 text-sm;
+/* Dropdown Option Styles */
+.dropdown {
+  @apply bg-[#F1D07C] hover:bg-[#EFB036] text-[#23486A] border border-[#EFB036] rounded-lg shadow-lg;
 }
 
+.dropdown-item {
+  @apply flex items-center gap-3 px-5 py-3 text-blue-700 transition-all duration-300
+         hover:bg-[#EFB036] hover:text-[#23486A] cursor-pointer w-full text-left;
+}
+
+
+/* Image Preview */
 .image-preview {
-  @apply mt-4;
+  @apply mt-3;
 }
 
 .image-preview img {
-  @apply w-full max-h-64 object-cover rounded-lg;
+  @apply w-full max-h-48 object-cover rounded-xl border border-[#3B6790];
 }
 
+/* ---------------- Error Message ---------------- */
 .error-message {
   @apply text-red-500 text-xs mt-1 font-medium;
 }
 
+/* ---------------- Submit Button ---------------- */
 .form-button {
-  @apply w-full py-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors;
+  @apply w-full py-2 bg-[#EFB036] text-white rounded-xl font-bold hover:bg-[#3B6790] transition-colors;
 }
+
+
+
+
 
 /* Tickets List Container */
 .tickets-container {
@@ -595,6 +638,7 @@ body {
 /* Dropdown styling */
 .dropdown {
   @apply absolute right-0 mt-2 w-40 bg-white border border-[#D1D5DB] rounded-lg shadow-xl z-10 transition-all duration-300;
+
 }
 
 .dropdown-item {

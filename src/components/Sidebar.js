@@ -11,19 +11,24 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+
   const handleLogout = () => {
     localStorage.removeItem('user');
+
+    // Show toast immediately before navigating
     toast.success('Logged out successfully!', {
       position: 'top-center',
-      autoClose: 1000,
+      autoClose: 1500, // Increased duration
       hideProgressBar: true,
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
     });
+
+    // Delay navigation slightly to allow the toast to display
     setTimeout(() => {
       navigate('/login');
-    }, 1000);
+    }, 1600);
   };
 
   const openSettingsModal = () => setIsSettingsModalOpen(true); // Open modal
@@ -135,6 +140,5 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
       <SettingsModal isOpen={isSettingsModalOpen} onClose={closeSettingsModal} />
     </>
   );
-};
-
+}
 export default Sidebar;
