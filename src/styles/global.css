@@ -219,7 +219,8 @@ body {
 
 /* Custom Bullet for Activity List */
 .list-bullet {
-  @apply inline-block w-2 h-2 rounded-full bg-blue-500 mr-2;
+  @apply inline-block w-2 h-2 rounded-full bg-[#23486A] mr-2;
+
 }
 
 /* Quick Actions Container */
