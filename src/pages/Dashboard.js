@@ -41,9 +41,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container" style={{ backgroundColor: "#F4F6F8" }}>
-      {/* Sidebar */}
-      <Sidebar onOpenTicket={() => setIsModalOpen(true)} style={{ backgroundColor: themeColors.primary }} />
+    <div className="dashboard-container">
 
       <div className="dashboard-main">
         {/* Navbar */}
