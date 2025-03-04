@@ -9,20 +9,10 @@ import Tickets from "../pages/Tickets";
 import TicketDetails from "../pages/TicketDetails";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
-
 import Navbar from "../components/Navbar"; // Import Navbar
 import ClosedTickets from "../pages/ClosedTickets";
-import Sidebar from "../components/Sidebar"; 
-
 
 const AppRoutes = () => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Check if the user is an admin
-  const location = useLocation();
-
-  // Conditionally render the Sidebar based on authentication and route
-  const showSidebar = isAuthenticated && location.pathname !== "/" && location.pathname !== "/register" && location.pathname !== "/login";
-
   return (
     <Router>
       <AuthWrapper />
@@ -38,32 +28,19 @@ const AppRoutes = () => {
         <Route path="/tickets/closed" element={<ClosedTickets />} />
       </Routes>
 
-
       {/* Toast Notifications */}
       <ToastContainer position="top-center" autoClose={3000} />
-    </div>
-  );
-};
-
-// Wrapper to conditionally show Navbar based on authentication status
-const AuthWrapper = ({ isAuthenticated }) => {
-  const location = useLocation();
-  
-  const noNavbarPaths = ["/", "/login", "/register"];
-  
-  // Conditionally render Navbar only if the user is authenticated and not on excluded paths
-  return isAuthenticated && !noNavbarPaths.includes(location.pathname) ? <Navbar /> : null;
-};
-
-const MainApp = () => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-
-  return (
-    <Router>
-      <AuthWrapper isAuthenticated={isAuthenticated} />
-      <AppRoutes />
     </Router>
   );
 };
 
-export default MainApp;
+// Wrapper to conditionally show Navbar based on localStorage
+const AuthWrapper = () => {
+  const location = useLocation();
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const noNavbarPaths = ["/", "/login", "/register"];
+
+  return isAuthenticated && !noNavbarPaths.includes(location.pathname) ? <Navbar /> : null;
+};
+
+export default AppRoutes;
