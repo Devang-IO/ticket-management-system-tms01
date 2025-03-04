@@ -40,6 +40,22 @@ body {
   @apply text-xl font-semibold;
 }
 /* Navbar */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.username {
+  font-size: 0.875rem; /* Text-sm */
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 0.75rem; /* Text-xs */
+  color: #a0aec0; /* Gray-400 */
+}
+
 .navbar {
   @apply bg-[#23486A] text-white p-4 shadow-md fixed top-0 left-0 right-0 h-16 flex items-center;
 }
@@ -349,16 +365,22 @@ body {
 
 /* Footer (Settings & Logout) */
 .sidebar-footer {
-  @apply flex flex-col py-3 px-2 mt-auto border-t border-[#4C7B8B] space-y-2 mr-[26px];
-}
-
-.sidebar-footer-closed .sidebar-item{
-  @apply flex-col-reverse ml-[11px];
+  @apply flex flex-col py-3 px-2 mt-auto border-t border-[#4C7B8B] space-y-2 w-full;
 }
 
 /* Footer Buttons */
 .sidebar-footer .sidebar-item {
-  @apply flex items-center justify-center p-2 w-full hover:bg-[#EFB036] hover:text-[#23486A] rounded-xl ;
+  @apply flex items-center justify-center p-3 w-full rounded-xl transition-all 
+         hover:bg-[#EFB036] hover:text-[#23486A];
+}
+
+/* Ensure correct alignment when sidebar is closed */
+.sidebar-footer-closed {
+  @apply items-center text-center;
+}
+
+.sidebar-footer-closed .sidebar-item {
+  @apply flex flex-col-reverse justify-center ml-0 w-full;
 }
 
 /* Login & Register */
@@ -581,15 +603,23 @@ th, td {
 
 /* Dropdown styling */
 .dropdown {
-  @apply absolute right-0 mt-2 w-40 bg-white border border-[#D1D5DB] rounded-lg shadow-xl z-10 transition-all duration-300;
-
+  @apply absolute right-0 mt-2 w-44 bg-white border border-[#4C7B8B] 
+         rounded-lg shadow-lg z-10 transition-all duration-300 ease-in-out;
 }
 
+/* Dropdown Items */
 .dropdown-item {
-  @apply flex items-center gap-3 px-5 py-3 text-gray-700 transition-all duration-300 
-         hover:bg-[#F1F5F9] hover:text-[#3B6790] cursor-pointer w-full text-left;
+  @apply flex items-center gap-3 px-5 py-3 text-[#23486A] font-medium 
+         transition-all duration-300 hover:bg-[#E1EAF2] hover:text-[#3B6790] 
+         cursor-pointer w-full text-left rounded-md;
   line-height: 1.2;
 }
+
+/* Subtle hover shadow for a modern look */
+.dropdown-item:hover {
+  @apply shadow-sm;
+}
+
 
 .delete-btn {
   @apply flex items-center gap-3 px-5 py-3 text-red-600 transition-all duration-300 
