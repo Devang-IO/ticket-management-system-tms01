@@ -1,124 +1,151 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FiHome, FiFileText, FiBell, FiUser, FiMenu, FiX, FiSettings } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FiBell, FiArrowLeft, FiMenu } from "react-icons/fi";
 
-const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+const Navbar = ({ sidebarOpen }) => {
+  const navigate = useNavigate();
+  const location = useLocation();  // Get the current path
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Dummy notifications data
   const notifications = [
     { id: 1, text: "Your ticket has been resolved.", time: "2 hours ago" },
     { id: 2, text: "New ticket assigned to you.", time: "5 hours ago" },
     { id: 3, text: "System maintenance scheduled.", time: "1 day ago" },
   ];
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleToggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  // Function to map the pathname to the page name
+  const getPageName = (path) => {
+    switch (path) {
+      case "/dashboard":
+        return "User Dashboard";
+      case "/tickets":
+        return "My Tickets";
+      case "/settings":
+        return "Settings";
+      case "/profile":
+        return "Profile";
+      case "/home":
+        return "Home";
+      default:
+        return "Page Not Found";
+    }
+  };
+
+  const pageName = getPageName(location.pathname); // Get the page name based on the current path
+
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        {/* Logo */}
-        <Link to="/dashboard" className="logo">
-          <img src="/logo2.png" alt="Logo" className="logo-img" />
-          <span className="logo-text">QuickAssist</span>
-        </Link>
+    <nav className="navbar flex items-center justify-between px-4 py-2 bg-gray-800">
+      {/* Hamburger Menu for Mobile */}
+      <button onClick={handleToggleMenu} className="block lg:hidden text-white">
+        <FiMenu size={24} />
+      </button>
 
-        {/* Hamburger Menu (Mobile) */}
-        <button
-          className="menu-toggle"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle Menu"
-        >
-          {menuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-        </button>
+      {/* Back Button (Icon Only) */}
+      <button
+        onClick={handleBack}
+        className={`back-btn text-white ${sidebarOpen ? "-[370px]" : "mr-0"} lg:ml-0 transition-all`}
+      >
+        <FiArrowLeft size={24} />
+      </button>
 
-        {/* Navigation Links */}
-        <div className={`nav-links ${menuOpen ? "mobile" : ""}`}>
-          <Link to="/dashboard" className="nav-item" onClick={() => setMenuOpen(false)}>
-            <FiHome size={20} />
-            <span>Dashboard</span>
-          </Link>
-          <Link to="/tickets" className="nav-item" onClick={() => setMenuOpen(false)}>
-            <FiFileText size={20} />
-            <span>Tickets</span>
-          </Link>
+      {/* Page Title (Centered) */}
+      <div className="page-title">{pageName}</div>
 
-          {/* Notifications Dropdown */}
-          <div className="nav-item relative">
-            <button
-              className="flex items-center"
-              onClick={() => {
-                setNotificationsOpen(!notificationsOpen);
-                setProfileOpen(false); // Close profile dropdown if open
-              }}
-            >
-              <FiBell size={20} />
-              <span>Notifications</span>
-            </button>
-            {notificationsOpen && (
-              <div className="dropdown absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="font-semibold text-gray-800">Notifications</h3>
-                </div>
-                <div className="max-h-48 overflow-y-auto">
-                  {notifications.slice(0, 3).map((notification) => (
-                    <div key={notification.id} className="p-4 border-b border-gray-200 hover:bg-gray-50">
-                      <p className="text-sm text-gray-700">{notification.text}</p>
-                      <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-4 text-center">
-                  <Link
-                    to="/notifications"
-                    className="text-sm text-blue-500 hover:underline"
-                    onClick={() => setNotificationsOpen(false)}
-                  >
-                    View All
-                  </Link>
-                </div>
+      <div className="navbar-right">
+        {/* Notifications */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setNotificationsOpen(!notificationsOpen);
+              setProfileOpen(false);
+            }}
+            className="relative p-2"
+          >
+            <FiBell size={24} className="text-white" />
+          </button>
+          {notificationsOpen && (
+            <div className="notifications-dropdown">
+              <div className="dropdown-header">
+                <h3>Notifications</h3>
               </div>
-            )}
-          </div>
-
-          {/* Profile Dropdown */}
-          <div className="nav-item relative">
-            <button
-              className="flex items-center"
-              onClick={() => {
-                setProfileOpen(!profileOpen);
-                setNotificationsOpen(false); // Close notifications dropdown if open
-              }}
-            >
-              <FiUser size={20} />
-              <span>Profile</span>
-            </button>
-            {profileOpen && (
-              <div className="dropdown absolute top-10 right-0 bg-white shadow-lg rounded-lg w-48 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="font-semibold text-gray-800">Profile</h3>
-                </div>
-                <div className="p-2">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    View Profile
-                  </Link>
-                  <Link
-                    to="/settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    <FiSettings className="inline-block mr-2" />
-                    Settings
-                  </Link>
-                </div>
+              <div className="dropdown-content">
+                {notifications.slice(0, 3).map((notification) => (
+                  <div key={notification.id} className="dropdown-item">
+                    <p>{notification.text}</p>
+                    <p className="time-text">{notification.time}</p>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+              <div className="dropdown-footer">
+                <a
+                  href="/notifications"
+                  className="view-all-link"
+                  onClick={() => setNotificationsOpen(false)}
+                >
+                  View All
+                </a>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Search Bar */}
+        <input type="text" placeholder="Search Tickets" className="search-input" />
+
+        {/* Profile Placeholder */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setProfileOpen(!profileOpen);
+              setNotificationsOpen(false);
+            }}
+            className="profile-placeholder"
+          >
+            <div className="profile-pic-placeholder"></div>
+          </button>
+          {profileOpen && (
+            <div className="profile-dropdown">
+              <div className="dropdown-header">
+                <h3>Profile</h3>
+              </div>
+              <div className="dropdown-content">
+                <a href="/profile" className="dropdown-item" onClick={() => setProfileOpen(false)}>
+                  View Profile
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <div
+        className={`mobile-menu lg:hidden ${menuOpen ? "block" : "hidden"} absolute top-0 right-0 bg-gray-800 p-4 w-48`}
+      >
+        <ul>
+          <li>
+            <a href="/dashboard" className="text-white">Dashboard</a>
+          </li>
+          <li>
+            <a href="/tickets" className="text-white">My Tickets</a>
+          </li>
+          <li>
+            <a href="/settings" className="text-white">Settings</a>
+          </li>
+          <li>
+            <button onClick={() => navigate("/login")} className="text-white">Logout</button>
+          </li>
+        </ul>
       </div>
     </nav>
   );

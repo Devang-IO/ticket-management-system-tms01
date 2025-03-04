@@ -20,7 +20,6 @@ const TicketList = () => {
       title: `Issue ${i + 1}`,
       status: ["Open", "Closed", "Pending", "Resolved"][i % 4],
       priority: ["High", "Medium", "Low"][i % 3],
-      createdBy: ["John", "Emma", "Liam", "Sophia"][i % 4],
       date: `2025-02-${24 - i}`,
     }));
     setTickets(mockTickets);
@@ -29,9 +28,10 @@ const TicketList = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (!event.target.closest('.dropdown-wrapper')) {
         setActionDropdown(null);
       }
+
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -45,7 +45,6 @@ const TicketList = () => {
       (statusFilter === "All" || ticket.status === statusFilter) &&
       (priorityFilter === "All" || ticket.priority === priorityFilter)
   );
-  
 
   const indexOfLastTicket = currentPage * entriesPerPage;
   const indexOfFirstTicket = indexOfLastTicket - entriesPerPage;
@@ -105,7 +104,6 @@ const TicketList = () => {
               <th>Title</th>
               <th>Status</th>
               <th>Priority</th>
-              <th>Created By</th>
               <th>Created At</th>
               <th>Actions</th>
             </tr>
@@ -121,7 +119,6 @@ const TicketList = () => {
                 </td>
                 <td>{ticket.status}</td>
                 <td>{ticket.priority}</td>
-                <td>{ticket.createdBy}</td>
                 <td>{ticket.date}</td>
                 <td className="action-cell">
                   <div className="dropdown-wrapper" ref={dropdownRef}>
@@ -135,9 +132,14 @@ const TicketList = () => {
                     </button>
                     {actionDropdown === ticket.id && (
                       <div className="dropdown">
-                        <Link to={`/ticket/${ticket.id}`} className="dropdown-item">
+                        <Link
+                          to={`/ticket/${ticket.id}`}
+                          className="dropdown-item"
+                          onClick={() => setActionDropdown(null)}
+                        >
                           <FiEye /> View
                         </Link>
+
                         <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
                           <FiEdit /> Edit
                         </Link>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -17,27 +17,49 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
 
   const onSubmit = (data) => {
     console.log(data);
-    toast.success("Ticket submitted successfully!", {
-      position: "top-center",
-      autoClose: 3000,
-    });
+    const toastId = "ticket-submit-toast";
+  
+    if (!toast.isActive(toastId)) {
+      toast.success("Ticket submitted successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+        toastId,
+        hideProgressBar:true,
+      });
+    }
+  
     setTimeout(() => {
+      onClose();  // Close the modal after submission
       navigate("/dashboard");
     }, 1000);
   };
+  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) setImagePreview(URL.createObjectURL(file));
-    else setImagePreview(null);
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl);
+    } else {
+      setImagePreview(null);
+    }
   };
+
+  // Cleanup object URL to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
       <div className="modal">
-        <button className="close-btn" onClick={onClose}>
+        <button className="close-btn" onClick={onClose ? onClose : () => {}}>
           ×
         </button>
         <h2 className="modal-title">Submit a Ticket</h2>
@@ -49,6 +71,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </label>
             <input
               id="name"
+              placeholder="Enter your name"
               type="text"
               className="form-input"
               {...register("name", { required: "Name is required" })}
@@ -63,6 +86,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </label>
             <input
               id="email"
+              placeholder="Enter your email"
               type="email"
               className="form-input"
               {...register("email", {
@@ -117,6 +141,20 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </select>
             {errors.priority && <p className="error-message">{errors.priority.message}</p>}
           </div>
+          
+          {/* title Textarea */}
+          <div className="form-group full-width">
+            <label className="form-label" htmlFor="description">
+             Title
+            </label>
+            <textarea
+              id="title"
+              placeholder="Enter a brief title for the issue"
+              className="form-textarea"
+              {...register("title", { required: "Title is required" })}
+            ></textarea>
+            {errors.description && <p className="error-message">{errors.title.message}</p>}
+          </div>
 
           {/* Description Textarea */}
           <div className="form-group full-width">
@@ -125,6 +163,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </label>
             <textarea
               id="description"
+              placeholder="Describe your issue in detail..."
               className="form-textarea"
               {...register("description", { required: "Description is required" })}
             ></textarea>
