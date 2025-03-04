@@ -47,6 +47,7 @@ const Dashboard = () => {
 
       <div className="dashboard-main">
         {/* Navbar */}
+
         <Navbar style={{ backgroundColor: themeColors.primary, color: "white" }} />
 
         {/* Main Dashboard Content */}

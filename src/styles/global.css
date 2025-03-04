@@ -41,67 +41,115 @@ body {
 }
 /* Navbar */
 .navbar {
-  @apply bg-blue-800 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-50 h-16;
+  @apply bg-[#23486A] text-white p-4 shadow-md fixed top-0 left-0 right-0 h-16 flex items-center;
 }
 
-/*navbar options*/
+.navbar-left {
+  @apply flex items-center gap-4;
+}
 
-/* Dropdown Styles */
-.dropdown {
+.navbar-right {
+  @apply flex items-center gap-4;
+}
+
+.page-title {
+  @apply text-center flex-1 text-white font-semibold text-xl;
+}
+
+.back-btn {
+  @apply text-white text-lg font-semibold;
+}
+
+.search-input {
+  @apply px-2 py-2 border border-gray-300 rounded-lg w-48 bg-[#4C7B8B] text-white placeholder-gray-200;
+}
+
+.notifications-dropdown,
+.profile-dropdown {
   @apply absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-50;
 }
 
-.dropdown div {
-  @apply p-4 border-b border-gray-200;
+.dropdown-header {
+  @apply p-4 border-b border-gray-200 font-semibold text-gray-800;
 }
 
-.dropdown a {
-  @apply block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100;
+.dropdown-content {
+  @apply max-h-48 overflow-y-auto;
 }
 
-/* Mobile Menu Adjustments */
-.nav-links.mobile .nav-item.relative {
-  @apply block;
+.dropdown-item {
+  @apply p-4 border-b border-gray-200 hover:bg-gray-50;
 }
 
-/*------------------------------------*/
-
-/* Navbar Container */
-.navbar-container {
-  @apply max-w-6xl mx-auto flex justify-between items-center;
+.time-text {
+  @apply text-xs text-gray-500 mt-1;
 }
 
-/* Logo */
-.logo {
-  @apply flex items-center gap-2;
+.dropdown-footer {
+  @apply p-4 text-center;
 }
 
-.logo-img {
-  @apply h-10;
+.view-all-link {
+  @apply text-sm text-blue-500 hover:underline;
 }
 
-.logo-text {
-  @apply text-lg font-bold;
+.profile-placeholder {
+  @apply w-10 h-10 rounded-full bg-gray-300;
+}
+/* For the hamburger menu icon on small screens */
+.block lg:hidden {
+  /* Displays the hamburger menu only on small screens */
+  display: block;
 }
 
-/* Navigation Links (Desktop) */
-.nav-links {
-  @apply hidden md:flex items-center gap-6; /* Hidden on mobile, flex on desktop */
+.lg:hidden {
+  /* Hides the element on large screens and above */
+  display: none;
 }
 
-/* Mobile Menu Toggle */
-.menu-toggle {
-  @apply text-white text-2xl md:hidden; /* Show only on mobile */
+/* For the navbar items, hide them on small screens */
+.mobile-menu {
+  /* Ensures the mobile menu is absolutely positioned */
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: rgba(31, 41, 55, 1); /* Tailwind's bg-gray-800 */
+  padding: 1rem;
+  width: 12rem; /* Equivalent to 48 units in Tailwind's scale (w-48) */
 }
 
-/* Mobile Menu (Fixed Alignment) */
-.nav-links.mobile {
-  @apply flex flex-col items-start gap-4 absolute top-16 left-0 w-full bg-blue-800 p-4 shadow-lg md:hidden; 
+/* This shows the mobile menu when it's toggled */
+.mobile-menu.block {
+  display: block;
+}
+/* General responsiveness for page title */
+.text-center {
+  /* Centers the page title */
+  text-align: center;
 }
 
-/* Navigation Items */
-.nav-item {
-  @apply flex items-center gap-2 text-white no-underline hover:underline transition-all duration-200;
+/* For hiding the menu on larger screens */
+.lg:hidden {
+  display: none; /* Hides the mobile menu button on large screens */
+}
+
+/* For the mobile menu on small screens */
+.absolute {
+  position: absolute;
+}
+
+/* Show the mobile menu when toggled */
+.mobile-menu.block {
+  display: block;
+}
+
+/* Adjusts for notifications and profile dropdown for small screens */
+.relative {
+  position: relative;
+}
+
+.text-white {
+  color: white;
 }
 
 
@@ -243,16 +291,10 @@ body {
 }
 
 /* Sidebar */
-.sidebar-item {
-  @apply flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 rounded-md transition;
-}
-
-.sidebar-item-text {
-  @apply text-base;
-}
-
 .sidebar {
-  @apply h-screen bg-gray-800 text-white fixed top-0 left-0 pt-16 transition-all;
+  @apply h-screen bg-[#3B6790] text-white fixed top-0 left-0 pt-16 transition-all 
+         shadow-lg border-r border-[#4C7B8B] flex flex-col justify-between z-50;
+
 }
 
 .sidebar-open {
@@ -264,173 +306,320 @@ body {
 }
 
 .sidebar-list {
-  @apply mt-4 list-none pl-0;
+  @apply mt-[-40px] list-none pl-0 flex flex-col justify-between h-full;
+  /* Ensure full height to push elements down */
 }
 
+/* Sidebar Items - More Visible & Weighted */
 .sidebar-item {
-  @apply flex items-center p-4 text-white no-underline hover:bg-gray-700;
+  @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg 
+         transition duration-300 relative my-3 ; /* Adjusted margin for spacing */
 }
 
+/* Hover Effect for Open Sidebar */
+.sidebar-open .sidebar-item:hover {
+  @apply bg-[#EFB036] text-[#23486A] shadow-xl rounded-[15px] px-3;
+  width: calc(100% - 30px);
+  margin-left: 5px;
+}
+/* Sidebar Title */
+/* Sidebar Title */
+.sidebar-title {
+  @apply flex justify-center items-center p-4 text-white;
+}
+
+.title-text {
+  @apply font-bold text-2xl;
+}
+
+
+
+/* Collapsed Sidebar - Keep Items Square */
+.sidebar-closed .sidebar-item {
+  @apply justify-center px-0;
+}
+
+.sidebar-closed .sidebar-item:hover {
+  @apply bg-[#EFB036] text-[#23486A] shadow-lg;
+  width: 100%;
+  margin-left: 0;
+  border-radius: 10px;
+}
+
+/* Sidebar Icons - Increase Visibility */
+.sidebar-item svg {
+  @apply text-[#EFB036] transition-all duration-300 ;
+}
+
+/* Hover: Darker Icons */
+.sidebar-item:hover svg {
+  @apply text-[#23486A];
+}
+/* Login Page Styles */
+
+/* Sidebar Text - Bold & More Shadow */
 .sidebar-item-text {
-  @apply ml-4;
+  @apply ml-4 text-base font-bold ;
 }
 
+/* Hide Text When Sidebar is Collapsed */
+.sidebar-closed .sidebar-item-text {
+  @apply hidden;
+}
+
+/* Collapse Button */
 .collapse-btn {
-  @apply p-2 text-gray-300 flex justify-center items-center bg-transparent border-none hover:text-white;
+  @apply p-2 text-[#EFB036] flex justify-center items-center bg-transparent border-none 
+         hover:text-[#4C7B8B] transition duration-300 font-bold shadow-md;
 }
 
+/* Admin Title */
 .sidebar-admin-title {
-  @apply text-gray-300 mt-6;
+  @apply text-[#EFB036] mt-6 font-semibold px-4 drop-shadow-lg;
 }
 
-.sidebar-item-logout {
-  @apply mt-6;
+/* Logout Button - Full Width in Open Sidebar */
+.logout-btn {
+  @apply flex items-center w-full p-3 text-[#EFB036] font-bold transition duration-300 my-3 
+         absolute bottom-4 left-0 ;
 }
 
+/* Settings Link */
+.sidebar-item-settings {
+  margin-top: auto; /* Push the settings down to the bottom */
+}
 
+/* Logout Button - Fix for Collapsed Sidebar */
+.sidebar-closed .logout-btn {
+  @apply justify-center p-3 w-full;
+}
+
+/* Logout Button on Hover */
+.logout-btn:hover {
+  @apply bg-[#EFB036] text-[#23486A] rounded-[15px] ;
+  width: calc(100% - 30px);
+  margin-left: 5px;
+}
+
+/* Logout Icon - Ensure Centering */
+.logout-btn svg {
+  @apply mr-2 transition-all duration-300 ;
+}
+
+/* Hide Text When Sidebar is Collapsed */
+.sidebar-closed .logout-btn-text {
+  @apply hidden;
+}
+
+/* Keep Logout Icon Visible */
+.sidebar-closed .logout-btn svg {
+  @apply mx-auto;
+}
+
+/* Hover Effect for Collapsed Logout */
+.sidebar-closed .logout-btn:hover {
+  width: 100%;
+  margin-left: 0;
+}
+
+/* Ensure Settings stays at the bottom when expanded/collapsed */
+.sidebar-item-settings {
+  margin-top: auto; /* This ensures the Settings link is pushed to the bottom */
+}
 /* Login & Register */
 
-/* Container for the password input and toggle */
 .password-container {
   @apply relative flex items-center;
 }
 
-/* Password input: full width with right padding (approx 36px, adjust if needed) */
 .password-input {
   @apply w-full pr-9;
 }
 
-/* Password toggle: absolutely positioned with a small right offset, pointer cursor, and gray color */
 .password-toggle {
-  @apply absolute right-2.5 cursor-pointer text-gray-600;
+  @apply absolute right-2.5 cursor-pointer text-[#3B6790];
 }
 
-/* Error text: red, small font size (approx 14px), a little top margin, bold */
 .error-text {
   @apply text-red-500 text-sm mt-1 font-bold;
 }
 
+.form-select {
+  @apply w-full px-4 py-2 border border-[#4C7B8B] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EFB036] transition-colors;
+}
+
+.submit-btn {
+  @apply w-full py-3 bg-[#EFB036] text-white font-bold rounded-lg hover:bg-[#3B6790] transition-colors;
+}
+
+.login-link {
+  @apply mt-3 text-sm text-center text-[#3B6790];
+}
+
+.login-link-text {
+  @apply font-semibold text-[#EFB036] cursor-pointer hover:underline;
+}
 
 /* ---------------- Modal Styles ---------------- */
+
 .modal-overlay {
   @apply fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 backdrop-blur-md;
 }
 
 .modal {
-  @apply bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full sm:max-w-2xl relative; /* Increased max-width */
+  @apply bg-white p-4 sm:p-6 rounded-3xl shadow-2xl w-full sm:max-w-xl relative border-t-4 border-[#EFB036]; /* Reduced max-width & padding */
 }
 
 .close-btn {
-  @apply absolute top-4 right-4 text-gray-400 text-3xl cursor-pointer transition-colors hover:text-gray-600;
+  @apply absolute top-3 right-3 text-gray-400 text-2xl cursor-pointer transition-colors hover:text-red-600;
 }
 
 .modal-title {
-  @apply text-3xl font-extrabold mb-6 text-gray-800;
+  @apply text-2xl font-extrabold mb-4 text-[#23486A]; /* Smaller title */
 }
 
-/* ---------------- Horizontal Form Styles ---------------- */
+/* ---------------- Form Styles ---------------- */
 .form-grid {
-  @apply grid grid-cols-2 gap-4; /* Create 2-column grid */
+  @apply grid grid-cols-2 gap-3; /* Reduced gap */
 }
 
 .form-group {
-  @apply col-span-1; /* Each form group takes 1 column */
+  @apply col-span-1;
 }
 
 .form-group.full-width {
-  @apply col-span-2; /* For elements that need full width */
+  @apply col-span-2;
 }
 
 .form-label {
-  @apply block text-gray-700 text-sm font-semibold mb-2;
+  @apply block text-[#3B6790] text-sm font-semibold mb-1;
 }
 
 .form-input,
 .form-select,
 .form-textarea {
-  @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors;
+  @apply w-full px-3 py-2 border border-[#3B6790] rounded-xl bg-white text-[#23486A] 
+         focus:outline-none focus:ring-2 focus:ring-[#EFB036] transition-colors shadow-sm;
 }
 
+/* Styled Dropdown */
+.form-select {
+  @apply cursor-pointer;
+}
+
+/* Dropdown Options */
+.form-select option {
+  @apply bg-white text-[#23486A];
+}
+
+/* File Input Hidden */
 .form-input-file {
   @apply hidden;
 }
 
+/* Dropzone */
 .dropzone {
-  @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-colors hover:border-blue-400 hover:bg-blue-50;
+  @apply border-2 border-dashed border-[#3B6790] rounded-xl p-4 text-center cursor-pointer transition-colors
+         text-[#23486A] bg-[#F8F9FA] hover:border-[#EFB036];
 }
 
-.dropzone-text {
-  @apply text-gray-600 text-sm;
+/* Dropdown Option Styles */
+.dropdown {
+  @apply bg-[#F1D07C] hover:bg-[#EFB036] text-[#23486A] border border-[#EFB036] rounded-lg shadow-lg;
 }
 
+.dropdown-item {
+  @apply flex items-center gap-3 px-5 py-3 text-blue-700 transition-all duration-300
+         hover:bg-[#EFB036] hover:text-[#23486A] cursor-pointer w-full text-left;
+}
+
+
+/* Image Preview */
 .image-preview {
-  @apply mt-4;
+  @apply mt-3;
 }
 
 .image-preview img {
-  @apply w-full max-h-64 object-cover rounded-lg;
+  @apply w-full max-h-48 object-cover rounded-xl border border-[#3B6790];
 }
 
+/* ---------------- Error Message ---------------- */
 .error-message {
   @apply text-red-500 text-xs mt-1 font-medium;
 }
 
+/* ---------------- Submit Button ---------------- */
 .form-button {
-  @apply w-full py-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors;
+  @apply w-full py-2 bg-[#EFB036] text-white rounded-xl font-bold hover:bg-[#3B6790] transition-colors;
 }
+
+
+
+
 
 /* Tickets List Container */
 .tickets-container {
-  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-lg shadow-md;
+  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-xl shadow-lg;
   margin-top: 80px; /* Adjust this based on your navbar height */
+  background-color: #f9f9f9; /* Light background for better contrast */
 }
 
 /* Header */
 .tickets-header {
-  @apply flex justify-between items-center mb-4;
+  @apply flex justify-between items-center mb-6;
 }
 
 .tickets-header h2 {
-  @apply text-2xl font-bold text-gray-800;
+  @apply text-3xl font-semibold text-[#23486A] leading-tight;
+  letter-spacing: 0.5px;
 }
 
 .btn-primary {
-  @apply flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-bold transition duration-300 hover:bg-blue-700;
+  @apply flex items-center bg-[#EFB036] text-white px-5 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-[#3B6790] hover:scale-105;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Controls */
 .tickets-controls {
-  @apply flex flex-wrap gap-4 bg-gray-200 p-4 rounded-md mb-4;
+  @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 shadow-md;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .filter-group {
-  @apply flex items-center gap-2;
+  @apply flex items-center gap-3;
 }
 
 .filter-group label {
-  @apply text-sm font-bold;
+  @apply text-sm font-medium text-[#23486A];
 }
 
 .search-input {
-  @apply px-3 py-2 border border-gray-300 rounded-md w-48;
+  @apply px-4 py-1 border border-[#D1D5DB] rounded-xl w-56 bg-[#4C7B8B] text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-[#EFB036];
 }
 
 /* Table */
 .table-container {
-  @apply overflow-x-auto bg-white rounded-md shadow-md;
+  @apply overflow-x-auto bg-white rounded-xl shadow-lg;
+  max-width: 90%; /* Keep the table compact */
+  margin: 0 auto; /* Center the table */
 }
 
 .table-container table {
-  @apply w-full border-collapse;
+  @apply w-full border-collapse rounded-xl;
 }
 
 .table-container th,
 .table-container td {
-  @apply p-4 border-b border-gray-300;
+  @apply p-4 border-b border-[#E5E7EB] text-center;
 }
 
 .table-container th {
-  @apply bg-gray-900 text-white text-left;
+  @apply bg-[#23486A] text-white text-left font-medium;
+}
+
+.table-container td {
+  @apply text-gray-700;
+  font-size: 14px; /* Smaller font size for better fit */
 }
 
 /* Actions column styling */
@@ -439,45 +628,102 @@ body {
 }
 
 .action-btn {
-  @apply flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-white 
-         bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg 
-         hover:from-indigo-600 hover:to-blue-500 hover:shadow-xl 
+  @apply flex items-center gap-3 px-3 py-2 rounded-full font-semibold text-white 
+         bg-gradient-to-r from-[#3B6790] to-[#23486A] shadow-lg 
+         hover:from-[#23486A] hover:to-[#3B6790] hover:shadow-xl 
          transition-all duration-300 transform hover:scale-105 active:scale-95;
+  position: relative; 
+  z-index: 1; 
 }
-
 
 /* Dropdown styling */
 .dropdown {
-  @apply absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-xl z-10 transition-all duration-300;
+  @apply absolute right-0 mt-2 w-40 bg-white border border-[#D1D5DB] rounded-lg shadow-xl z-10 transition-all duration-300;
+
 }
 
-/* Dropdown items */
 .dropdown-item {
-  @apply flex items-center gap-3 px-4 py-2 text-gray-700 transition-all duration-300 hover:bg-gray-100 hover:text-blue-600 cursor-pointer;
+  @apply flex items-center gap-3 px-5 py-3 text-gray-700 transition-all duration-300 
+         hover:bg-[#F1F5F9] hover:text-[#3B6790] cursor-pointer w-full text-left;
+  line-height: 1.2;
 }
 
-/* Delete button */
 .delete-btn {
-  @apply flex items-center gap-3 px-4 py-2 text-red-600 transition-all duration-300 hover:bg-red-100 hover:text-red-700 cursor-pointer w-full text-left rounded-b-lg;
+  @apply flex items-center gap-3 px-5 py-3 text-red-600 transition-all duration-300 
+         hover:bg-red-100 hover:text-red-700 cursor-pointer w-full text-left rounded-b-lg;
 }
 
+.dropdown-item svg,
+.delete-btn svg {
+  @apply w-5 h-5;
+  display: inline-block; 
+  flex-shrink: 0; 
+}
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .tickets-container {
     @apply max-w-[95%] p-4;
   }
 
+  .tickets-header h2 {
+    @apply text-2xl; /* Adjust font size on medium screens */
+  }
+
+  .btn-primary {
+    @apply w-full; /* Make button full-width on smaller screens */
+  }
+
   .tickets-controls {
-    @apply flex-col gap-2;
+    @apply flex-col gap-3; /* Stack controls vertically */
   }
 
   .search-input {
-    @apply w-full;
+    @apply w-full; /* Make search input full-width */
+  }
+
+  .table-container {
+    @apply w-full; /* Ensure table takes full width */
   }
 
   .table-container th,
   .table-container td {
-    @apply p-3;
+    @apply p-3; /* Smaller padding for table cells */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Further adjustments for small screens */
+  .tickets-container {
+    @apply max-w-[95%] p-4;
+  }
+
+  .tickets-header {
+    @apply flex-col text-center mb-4;
+  }
+
+  .tickets-header h2 {
+    @apply text-2xl font-semibold text-[#23486A] leading-tight;
+  }
+
+  .tickets-controls {
+    @apply flex-col gap-3; /* Stack controls vertically */
+  }
+
+  .search-input {
+    @apply w-full; /* Full width search input */
+  }
+
+  .table-container {
+    @apply w-full; /* Full width table */
+  }
+
+  .table-container th,
+  .table-container td {
+    @apply p-3 text-sm; /* Smaller font for table cells */
+  }
+
+  .btn-primary {
+    @apply w-full; /* Full-width button */
   }
 }
