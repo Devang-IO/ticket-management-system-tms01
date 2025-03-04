@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaComments, FaFileAlt, FaInfoCircle, FaPaperclip, FaEdit, FaSave, FaTimes } from "react-icons/fa";
 
-// Sample mock data for 15 tickets
 const mockTickets = Array.from({ length: 15 }, (_, i) => ({
   id: i + 1,
   title: `Issue ${i + 1}`,
@@ -23,7 +22,6 @@ const TicketDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const ticket = mockTickets.find((t) => t.id === parseInt(id));
-
   const [comments, setComments] = useState(ticket?.comments || []);
   const [newComment, setNewComment] = useState("");
   const [editMode, setEditMode] = useState(null);
@@ -34,72 +32,72 @@ const TicketDetails = () => {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-3xl mt-16">
-        {/* Page Header */}
+    <div className="w-full min-h-screen bg-[#EEF3F7] p-6">
+      {/* { Main Container } */}
+      <div className="bg-white shadow-lg rounded-lg p-6 w-full mt-16">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-blue-600">Ticket Details</h1>
-          <hr className="my-4 border-t-2 border-gray-300" />
+          <h1 className="text-3xl font-bold text-[#23486A]">Ticket Details</h1>
+          <hr className="my-4 border-t-2 border-[#3B6790]" />
         </div>
 
-        {/* Ticket Details */}
-        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-          <h2 className="text-2xl font-semibold text-gray-800">{ticket.title}</h2>
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center gap-2">
-              <FaInfoCircle className="text-blue-500 text-xl" />
+        {/* Ticket Info Section */}
+        <div className="bg-[#F9F9F9] p-4 rounded-lg shadow-md mb-4">
+          <h2 className="text-2xl font-semibold text-[#3B6790]">{ticket.title}</h2>
+          {/* Status & Priority Container */}
+          <div className="flex items-center gap-x-6 mt-3">
+            {/* {Status section } */}
+            <div className="flex items-center gap-3">
+              <FaInfoCircle className="text-[#3B6790] text-xl" />
               <span className="font-bold text-lg">Status:</span>
-              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg ${
-                ticket.status === "Open" ? "bg-green-500" :
-                ticket.status === "Closed" ? "bg-gray-500" :
-                ticket.status === "Pending" ? "bg-yellow-500" : "bg-blue-500"
+              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg  shadow ${
+                ticket.status === "Open" ? "bg-[#EFB036]" :
+                ticket.status === "Closed" ? "bg-[#23486A]" :
+                ticket.status === "Pending" ?  "bg-[#3B6790]" : "bg-[#4C7B8B]"
               }`}>{ticket.status}</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* {Priority section } */}
+            <div className="flex items-center gap-3">
               <span className="font-bold text-lg">Priority:</span>
-              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg ${
-                ticket.priority === "High" ? "bg-red-500" :
-                ticket.priority === "Medium" ? "bg-yellow-400" : "bg-blue-500"
+              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg  shadow ${
+                ticket.priority === "High" ? "bg-[#EFB036]" :
+                ticket.priority === "Medium" ? "bg-[#3B6790]" : "bg-[#4C7B8B]"
               }`}>{ticket.priority}</span>
             </div>
           </div>
 
-          {/* Description */}
           <div className="mt-4 flex items-center gap-3">
-            <FaFileAlt className="text-gray-600 text-xl" />
-            <p className="text-lg text-gray-700">{ticket.description}</p>
+            <FaFileAlt className="text-[#3B6790] text-xl" />
+            <p className="text-lg text-[#23486A]">{ticket.description}</p>
           </div>
         </div>
-
-        {/* Attachments Section (Moved Above Comments) */}
+                {/* Attachments */}
         <div className="bg-white p-4 rounded-lg shadow-md mt-4">
           <h3 className="text-xl font-bold flex items-center gap-3">
-            <FaPaperclip className="text-green-500 text-2xl" /> Attachments
+            <FaPaperclip className="text-[#3B6790] text-2xl" /> Attachments
           </h3>
           {ticket.attachments.map((file, index) => (
             <p key={index} className="mt-2">
-              <a href={file.link} className="text-blue-500 hover:underline text-lg">
+              <a href={file.link} className="text-[#3B6790] hover:underline text-lg">
                 {file.name}
               </a>
             </p>
           ))}
         </div>
-
-        {/* Live Comments Section (Now Placed at the End, Above the Back Button) */}
+          {/* Comments Section */}
         <div className="bg-white p-4 rounded-lg shadow-md mt-4">
           <h3 className="text-xl font-bold flex items-center gap-3">
-            <FaComments className="text-blue-500 text-2xl" /> Live Conversation
+            <FaComments className="text-[#3B6790] text-2xl" /> Live Conversation
           </h3>
           <div className="mt-3">
             {comments.map((comment) => (
               <div key={comment.id} className="border-t py-3 flex justify-between items-center">
                 <div>
-                  <p className="font-semibold text-lg">
+                  <p className="font-semibold text-lg text-[#23486A]">
                     {comment.user}: 
                     {editMode === comment.id ? (
                       <input
                         type="text"
-                        className="ml-2 border p-1 rounded w-2/3"
+                        className="ml-2 border p-2 rounded-md shadow w-2/3"
                         value={editedComment}
                         onChange={(e) => setEditedComment(e.target.value)}
                       />
@@ -109,50 +107,14 @@ const TicketDetails = () => {
                   </p>
                   <p className="text-sm text-gray-500">{comment.time}</p>
                 </div>
-                {comment.user === "You" && (
-                  <div className="flex gap-2">
-                    {editMode === comment.id ? (
-                      <>
-                        <button 
-                          onClick={() => {
-                            setComments(comments.map(comment => 
-                              comment.id === editMode ? { ...comment, text: editedComment } : comment
-                            ));
-                            setEditMode(null);
-                          }} 
-                          className="text-green-500 text-xl"
-                        >
-                          <FaSave />
-                        </button>
-                        <button 
-                          onClick={() => setEditMode(null)} 
-                          className="text-red-500 text-xl"
-                        >
-                          <FaTimes />
-                        </button>
-                      </>
-                    ) : (
-                      <button 
-                        onClick={() => {
-                          setEditMode(comment.id);
-                          setEditedComment(comment.text);
-                        }} 
-                        className="text-blue-500 text-xl"
-                      >
-                        <FaEdit />
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             ))}
           </div>
-
-          {/* Add New Comment */}
+            {/* New Comment Input */}
           <div className="mt-4 flex">
             <input
               type="text"
-              className="border rounded p-2 w-full"
+              className="border rounded-md shadow p-2 w-full"
               placeholder="Type a new comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
@@ -168,19 +130,18 @@ const TicketDetails = () => {
                 }]);
                 setNewComment("");
               }} 
-              className="bg-blue-500 text-white px-4 py-2 rounded ml-2"
+               className="bg-[#3B6790] text-white px-4 py-2 rounded-md ml-2 shadow-md  hover:bg-[#EFB036]"
             >
               Send
             </button>
           </div>
         </div>
-
-        {/* Back Button at the Bottom */}
+               {/* Back Button */}
         <div className="mt-6 flex justify-center">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
-          >
+            className="flex items-center gap-2 bg-[#3B6790] hover:bg-[#EFB036] text-white px-4 py-2 rounded-lg shadow-md"
+            >
             <FaArrowLeft /> Back to Tickets
           </button>
         </div>
