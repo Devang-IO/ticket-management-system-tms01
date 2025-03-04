@@ -333,7 +333,7 @@ body {
 
 /* Collapse button */
 .collapse-btn {
-  @apply absolute right-4 p-2 text-[#EFB036] rounded-full bg-transparent border-none shadow-md
+  @apply absolute right-4 p-2 text-[#EFB036] rounded-full bg-transparent border-none
          hover:text-[#4C7B8B] transition duration-300;
 }
 
