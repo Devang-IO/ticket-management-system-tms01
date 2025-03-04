@@ -290,142 +290,77 @@ body {
   @apply bg-green-600 hover:bg-green-700;
 }
 
-/* Sidebar */
+/* Sidebar container */
 .sidebar {
-  @apply h-screen bg-[#3B6790] text-white fixed top-0 left-0 pt-16 transition-all 
+  @apply h-screen bg-[#23486A] text-white fixed top-0 left-0 transition-all 
          shadow-lg border-r border-[#4C7B8B] flex flex-col justify-between z-50;
-
 }
 
+/* Sidebar */
 .sidebar-open {
-  @apply w-64;
+  @apply w-56 rounded-2xl;
 }
 
 .sidebar-closed {
-  @apply w-20;
+  @apply w-14 rounded-2xl;
 }
 
-.sidebar-list {
-  @apply mt-[-40px] list-none pl-0 flex flex-col justify-between h-full;
-  /* Ensure full height to push elements down */
+/* Sidebar Header */
+.sidebar-header {
+  @apply flex items-center justify-between px-4 py-4 relative ml-[20px];
 }
 
-/* Sidebar Items - More Visible & Weighted */
-.sidebar-item {
-  @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg 
-         transition duration-300 relative my-3 ; /* Adjusted margin for spacing */
-}
-
-/* Hover Effect for Open Sidebar */
-.sidebar-open .sidebar-item:hover {
-  @apply bg-[#EFB036] text-[#23486A] shadow-xl rounded-[15px] px-3;
-  width: calc(100% - 30px);
-  margin-left: 5px;
-}
-/* Sidebar Title */
 /* Sidebar Title */
 .sidebar-title {
-  @apply flex justify-center items-center p-4 text-white;
+  @apply text-xl font-bold text-white;
 }
 
-.title-text {
-  @apply font-bold text-2xl;
+/* Collapse button */
+.collapse-btn {
+  @apply absolute right-4 p-2 text-[#EFB036] rounded-full bg-transparent border-none shadow-md
+         hover:text-[#4C7B8B] transition duration-300;
 }
 
-
-
-/* Collapsed Sidebar - Keep Items Square */
-.sidebar-closed .sidebar-item {
-  @apply justify-center px-0;
+/* Sidebar List */
+.sidebar-list {
+  @apply list-none flex flex-col space-y-3 px-1 mt-3;
 }
 
-.sidebar-closed .sidebar-item:hover {
-  @apply bg-[#EFB036] text-[#23486A] shadow-lg;
-  width: 100%;
-  margin-left: 0;
-  border-radius: 10px;
+/* Sidebar Items */
+.sidebar-item {
+  @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg ml-[1px]
+         transition duration-300 hover:bg-[#EFB036]  hover:text-[#23486A] hover:rounded-2xl hover:shadow-xl;
 }
 
-/* Sidebar Icons - Increase Visibility */
-.sidebar-item svg {
-  @apply text-[#EFB036] transition-all duration-300 ;
+/* Active Sidebar Item */
+.sidebar-item-active {
+  @apply bg-[#EFB036] text-[#23486A] shadow-lg rounded-2xl;
 }
 
-/* Hover: Darker Icons */
-.sidebar-item:hover svg {
-  @apply text-[#23486A];
-}
-/* Login Page Styles */
-
-/* Sidebar Text - Bold & More Shadow */
+/* Sidebar Item Text */
 .sidebar-item-text {
-  @apply ml-4 text-base font-bold ;
+  @apply ml-4 text-base font-bold;
 }
 
 /* Hide Text When Sidebar is Collapsed */
 .sidebar-closed .sidebar-item-text {
-  @apply hidden;
+  @apply hidden ;
 }
 
-/* Collapse Button */
-.collapse-btn {
-  @apply p-2 text-[#EFB036] flex justify-center items-center bg-transparent border-none 
-         hover:text-[#4C7B8B] transition duration-300 font-bold shadow-md;
+/* Footer (Settings & Logout) */
+.sidebar-footer {
+  @apply flex flex-col py-3 px-2 mt-auto border-t border-[#4C7B8B] space-y-2 mr-[26px];
 }
 
-/* Admin Title */
-.sidebar-admin-title {
-  @apply text-[#EFB036] mt-6 font-semibold px-4 drop-shadow-lg;
+.sidebar-footer-closed .sidebar-item{
+  @apply flex-col-reverse ml-[11px];
 }
 
-/* Logout Button - Full Width in Open Sidebar */
-.logout-btn {
-  @apply flex items-center w-full p-3 text-[#EFB036] font-bold transition duration-300 my-3 
-         absolute bottom-4 left-0 ;
+/* Footer Buttons */
+.sidebar-footer .sidebar-item {
+  @apply flex items-center justify-center p-2 w-full hover:bg-[#EFB036] hover:text-[#23486A] rounded-xl ;
 }
 
-/* Settings Link */
-.sidebar-item-settings {
-  margin-top: auto; /* Push the settings down to the bottom */
-}
-
-/* Logout Button - Fix for Collapsed Sidebar */
-.sidebar-closed .logout-btn {
-  @apply justify-center p-3 w-full;
-}
-
-/* Logout Button on Hover */
-.logout-btn:hover {
-  @apply bg-[#EFB036] text-[#23486A] rounded-[15px] ;
-  width: calc(100% - 30px);
-  margin-left: 5px;
-}
-
-/* Logout Icon - Ensure Centering */
-.logout-btn svg {
-  @apply mr-2 transition-all duration-300 ;
-}
-
-/* Hide Text When Sidebar is Collapsed */
-.sidebar-closed .logout-btn-text {
-  @apply hidden;
-}
-
-/* Keep Logout Icon Visible */
-.sidebar-closed .logout-btn svg {
-  @apply mx-auto;
-}
-
-/* Hover Effect for Collapsed Logout */
-.sidebar-closed .logout-btn:hover {
-  width: 100%;
-  margin-left: 0;
-}
-
-/* Ensure Settings stays at the bottom when expanded/collapsed */
-.sidebar-item-settings {
-  margin-top: auto; /* This ensures the Settings link is pushed to the bottom */
-}
 /* Login & Register */
 
 .password-container {
@@ -553,11 +488,19 @@ body {
   @apply w-full py-2 bg-[#EFB036] text-white rounded-xl font-bold hover:bg-[#3B6790] transition-colors;
 }
 
-
-
-
-
 /* Tickets List Container */
+.table-container {
+  @apply max-h-96 overflow-y-auto border rounded-lg shadow-md;
+}
+
+table {
+  @apply w-full border-collapse;
+}
+
+th, td {
+  @apply px-4 py-2 border;
+}
+
 .tickets-container {
   @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-xl shadow-lg;
   margin-top: 80px; /* Adjust this based on your navbar height */
@@ -722,7 +665,6 @@ body {
   .table-container td {
     @apply p-3 text-sm; /* Smaller font for table cells */
   }
-
   .btn-primary {
     @apply w-full; /* Full-width button */
   }
