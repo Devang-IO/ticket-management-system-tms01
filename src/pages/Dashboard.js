@@ -35,9 +35,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
-      <Sidebar onOpenTicket={() => setIsModalOpen(true)} />
-
       <div className="dashboard-main">
         {/* Navbar */}
         <Navbar onOpenTicket={() => setIsModalOpen(true)} />
