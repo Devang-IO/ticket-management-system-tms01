@@ -41,7 +41,8 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ backgroundColor: "#F4F6F8" }}>
+  
 
       <div className="dashboard-main">
         {/* Navbar */}
