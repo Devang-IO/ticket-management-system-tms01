@@ -29,45 +29,60 @@ const Navbar = ({ sidebarOpen }) => {
   ];
 
   const handleBack = () => {
-    navigate(-1);
+    navigate(-1); // Navigate back to the previous page
   };
 
   const handleToggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    setMenuOpen(!menuOpen); // Toggle the state for mobile menu
   };
 
   const getPageName = (path) => {
-    switch (path) {
-      case "/dashboard":
-        return "User Dashboard";
-      case "/tickets":
-        return "My Tickets";
-      case "/settings":
-        return "Settings";
-      case "/profile":
-        return "Profile";
-      case "/home":
-        return "Home";
-        case "/tickets/closed":
-        return "Closed Tickets";
-        case "/ticket/:id":
-          return "Ticket Details";
-      default:
-        return "Page Not Found";
-    }
-  };
+  if (path.startsWith("/ticket/")) {
+    return "Ticket Details";
+  }
+
+  switch (path) {
+    case "/dashboard":
+      return "User Dashboard";
+    case "/tickets":
+      return "My Tickets";
+    case "/settings":
+      return "Settings";
+    case "/profile":
+      return "Profile";
+    case "/home":
+      return "Home";
+    case "/tickets/closed":
+      return "Closed Tickets";
+    default:
+      return "Page Not Found";
+  }
+};
 
   const pageName = getPageName(location.pathname);
 
   return (
     <nav className="navbar flex items-center justify-between px-4 py-2 bg-gray-800">
+      {/* Hamburger menu button */}
       <button onClick={handleToggleMenu} className="block lg:hidden text-white">
         <FiMenu size={24} />
       </button>
-      <button onClick={handleBack} className="back-btn text-white lg:ml-0 transition-all">
-        <FiArrowLeft size={24} />
-      </button>
-      <div className="page-title text-white font-semibold">{pageName}</div>
+
+      {/* Container for back button and title centered */}
+      <div className="flex items-center justify-center gap-2 w-full">
+        {/* Back button */}
+        <button
+          onClick={handleBack}
+          className="back-btn text-white transition-all absolute left-4"
+        >
+          <FiArrowLeft size={24} />
+        </button>
+
+        {/* Page title */}
+        <div className="page-title text-white font-semibold">{pageName}</div>
+      </div>
+
+      {/* Navbar right side */}
       <div className="navbar-right flex items-center gap-4">
         <button
           onClick={() => {
@@ -94,6 +109,16 @@ const Navbar = ({ sidebarOpen }) => {
             <div className="profile-pic-placeholder"></div>
           </button>
         </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div className={`mobile-menu ${menuOpen ? "block" : "hidden"}`}>
+        <ul>
+          <li className="text-white">Dashboard</li>
+          <li className="text-white">Tickets</li>
+          <li className="text-white">Settings</li>
+          <li className="text-white">Profile</li>
+        </ul>
       </div>
     </nav>
   );

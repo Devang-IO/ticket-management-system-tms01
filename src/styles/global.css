@@ -68,12 +68,25 @@ body {
   @apply flex items-center gap-4;
 }
 
-.page-title {
-  @apply text-center flex-1 text-white font-semibold text-xl;
+/* Container for back button and title centered */
+.page-title-container {
+  @apply flex items-center justify-center gap-2 w-full; /* Flex container for back button and title, centered */
 }
 
+/* Page title centered */
+.page-title {
+  @apply text-white font-semibold text-xl;
+  position: absolute;
+  left: 300px; /* Adjust the distance from the left edge */
+  margin-left:300px ;
+}
+
+/* Back button on the left */
 .back-btn {
   @apply text-white text-lg font-semibold;
+  position: absolute;
+  left: 300px; /* Adjust the distance from the left edge */
+  margin-left:200px;
 }
 
 .search-input {
@@ -112,20 +125,18 @@ body {
 .profile-placeholder {
   @apply w-10 h-10 rounded-full bg-gray-300;
 }
+
 /* For the hamburger menu icon on small screens */
 .block lg:hidden {
-  /* Displays the hamburger menu only on small screens */
   display: block;
 }
 
 .lg:hidden {
-  /* Hides the element on large screens and above */
   display: none;
 }
 
 /* For the navbar items, hide them on small screens */
 .mobile-menu {
-  /* Ensures the mobile menu is absolutely positioned */
   position: absolute;
   top: 0;
   right: 0;
@@ -138,9 +149,9 @@ body {
 .mobile-menu.block {
   display: block;
 }
+
 /* General responsiveness for page title */
 .text-center {
-  /* Centers the page title */
   text-align: center;
 }
 
@@ -306,7 +317,7 @@ body {
   @apply bg-green-600 hover:bg-green-700;
 }
 
-/* Sidebar container */
+/*-------------------------------------- Sidebar container------------------------------------------------ */
 .sidebar {
   @apply h-screen bg-[#23486A] text-white fixed top-0 left-0 transition-all 
          shadow-lg border-r border-[#4C7B8B] flex flex-col justify-between z-50;
@@ -314,7 +325,7 @@ body {
 
 /* Sidebar */
 .sidebar-open {
-  @apply w-56 rounded-2xl;
+  @apply w-52 rounded-2xl;
 }
 
 .sidebar-closed {
@@ -328,23 +339,23 @@ body {
 
 /* Sidebar Title */
 .sidebar-title {
-  @apply text-xl font-bold text-white;
+  @apply text-xl font-bold text-white mt-2;
 }
 
 /* Collapse button */
 .collapse-btn {
-  @apply absolute right-4 p-2 text-[#EFB036] rounded-full bg-transparent border-none
+  @apply absolute right-4 p-1 text-[#EFB036] rounded-full bg-transparent border-none 
          hover:text-[#4C7B8B] transition duration-300;
 }
 
 /* Sidebar List */
 .sidebar-list {
-  @apply list-none flex flex-col space-y-3 px-1 mt-3;
+  @apply list-none flex flex-col space-y-3 px-1 mt-5;
 }
 
 /* Sidebar Items */
 .sidebar-item {
-  @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg ml-[1px]
+  @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg
          transition duration-300 hover:bg-[#EFB036]  hover:text-[#23486A] hover:rounded-2xl hover:shadow-xl;
 }
 
@@ -359,10 +370,15 @@ body {
 }
 
 /* Hide Text When Sidebar is Collapsed */
-.sidebar-closed .sidebar-item-text {
+.sidebar-closed .sidebar-item-text  {
   @apply hidden ;
 }
-
+.sidebar-closed .collapse-btn {
+  @apply mt-10
+}
+.sidebar-closed .sidebar-list {
+  @apply mt-10
+}
 /* Footer (Settings & Logout) */
 .sidebar-footer {
   @apply flex flex-col py-3 px-2 mt-auto border-t border-[#4C7B8B] space-y-2 w-full;
@@ -383,7 +399,8 @@ body {
   @apply flex flex-col-reverse justify-center ml-0 w-full;
 }
 
-/* Login & Register */
+
+/* ----------------------------------------Login & Register-------------------------------------- */
 
 .password-container {
   @apply relative flex items-center;
@@ -417,7 +434,7 @@ body {
   @apply font-semibold text-[#EFB036] cursor-pointer hover:underline;
 }
 
-/* ---------------- Modal Styles ---------------- */
+/* ------------------------------------- Modal Styles ----------------------------------- */
 
 .modal-overlay {
   @apply fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 backdrop-blur-md;
@@ -482,7 +499,7 @@ body {
 
 /* Dropdown Option Styles */
 .dropdown {
-  @apply bg-[#F1D07C] hover:bg-[#EFB036] text-[#23486A] border border-[#EFB036] rounded-lg shadow-lg;
+  @apply bg-[#F1D07C] text-[#23486A] border border-[#EFB036] rounded-lg shadow-lg;
 }
 
 .dropdown-item {
@@ -505,16 +522,16 @@ body {
   @apply text-red-500 text-xs mt-1 font-medium;
 }
 
-/* ---------------- Submit Button ---------------- */
+/* Submit Button */
 .form-button {
   @apply w-full py-2 bg-[#EFB036] text-white rounded-xl font-bold hover:bg-[#3B6790] transition-colors;
 }
 
-/* Tickets List Container */
+/* -------------------------------------Tickets List Container------------------------------------- */
 .table-container {
-  @apply max-h-96 overflow-y-auto border rounded-lg shadow-md;
+  @apply max-h-96 overflow-y-auto border rounded-lg;
+  scrollbar-width: none; 
 }
-
 table {
   @apply w-full border-collapse;
 }
@@ -524,9 +541,8 @@ th, td {
 }
 
 .tickets-container {
-  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-xl shadow-lg;
-  margin-top: 80px; /* Adjust this based on your navbar height */
-  background-color: #f9f9f9; /* Light background for better contrast */
+  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-xl;
+  margin-top: 80px;
 }
 
 /* Header */
@@ -535,19 +551,21 @@ th, td {
 }
 
 .tickets-header h2 {
-  @apply text-3xl font-semibold text-[#23486A] leading-tight;
+  @apply text-3xl font-semibold text-[#23486A] leading-tight ml-[70px];
   letter-spacing: 0.5px;
 }
 
 .btn-primary {
-  @apply flex items-center bg-[#EFB036] text-white px-5 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-[#3B6790] hover:scale-105;
+  @apply flex items-center bg-[#EFB036] text-white px-3 py-3 rounded-xl font-semibold transition-all duration-300 hover:bg-[#3B6790] hover:scale-105;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Controls */
 .tickets-controls {
-  @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 shadow-md;
+  @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 justify-center items-center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 1050px; /* Adjust width as needed */
+  margin: 0 auto; /* Center the container itself */
 }
 
 .filter-group {
@@ -564,13 +582,13 @@ th, td {
 
 /* Table */
 .table-container {
-  @apply overflow-x-auto bg-white rounded-xl shadow-lg;
+  @apply overflow-x-auto bg-white rounded-2xl;
   max-width: 90%; /* Keep the table compact */
   margin: 0 auto; /* Center the table */
 }
 
 .table-container table {
-  @apply w-full border-collapse rounded-xl;
+  @apply w-full border-collapse rounded-2xl;
 }
 
 .table-container th,
@@ -584,12 +602,12 @@ th, td {
 
 .table-container td {
   @apply text-gray-700;
-  font-size: 14px; /* Smaller font size for better fit */
+  font-size: 14px; 
 }
 
 /* Actions column styling */
 .action-cell {
-  @apply relative text-center;
+  @apply flex justify-center items-center text-center relative;
 }
 
 .action-btn {
@@ -597,14 +615,14 @@ th, td {
          bg-gradient-to-r from-[#3B6790] to-[#23486A] shadow-lg 
          hover:from-[#23486A] hover:to-[#3B6790] hover:shadow-xl 
          transition-all duration-300 transform hover:scale-105 active:scale-95;
-  position: relative; 
-  z-index: 1; 
+  position: relative;
+  z-index: 10;
 }
 
 /* Dropdown styling */
 .dropdown {
-  @apply absolute right-0 mt-2 w-44 bg-white border border-[#4C7B8B] 
-         rounded-lg shadow-lg z-10 transition-all duration-300 ease-in-out;
+  @apply absolute left-1/2 top-full transform -translate-x-1/2 mt-2 w-44 bg-white 
+         border border-[#4C7B8B] rounded-xl shadow-lg z-20 transition-all duration-300 ease-in-out;
 }
 
 /* Dropdown Items */
@@ -614,13 +632,10 @@ th, td {
          cursor-pointer w-full text-left rounded-md;
   line-height: 1.2;
 }
-
 /* Subtle hover shadow for a modern look */
 .dropdown-item:hover {
   @apply shadow-sm;
 }
-
-
 .delete-btn {
   @apply flex items-center gap-3 px-5 py-3 text-red-600 transition-all duration-300 
          hover:bg-red-100 hover:text-red-700 cursor-pointer w-full text-left rounded-b-lg;
