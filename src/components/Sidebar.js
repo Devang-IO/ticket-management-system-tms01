@@ -1,31 +1,13 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiLogOut, FiArrowLeftCircle, FiArrowRightCircle } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom';
+import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiArrowLeftCircle, FiArrowRightCircle } from 'react-icons/fi';
 import SettingsModal from './SettingsModel';
 import { Link } from 'react-router-dom';
 
 const Sidebar = ({ isAdmin, onOpenTicket }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    toast.success('Logged out successfully!', {
-      position: 'top-center',
-      autoClose: 1500,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
-
-    setTimeout(() => {
-      navigate('/login');
-    }, 1600);
-  };
 
   const openSettingsModal = () => setIsSettingsModalOpen(true);
   const closeSettingsModal = () => setIsSettingsModalOpen(false);
@@ -70,16 +52,11 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
           </li>
         </ul>
 
-        {/* Settings Above Logout When Sidebar is Closed */}
+        {/* Settings Section */}
         <div className={`sidebar-footer ${isOpen ? '' : 'sidebar-footer-closed'}`}>
           <button onClick={openSettingsModal} className="sidebar-item settings-btn">
             <FiSettings size={20} />
             {isOpen && <span className="sidebar-item-text">Settings</span>}
-          </button>
-
-          <button onClick={handleLogout} className="sidebar-item logout-btn">
-            <FiLogOut size={20} />
-            {isOpen && <span className="sidebar-item-text">Logout</span>}
           </button>
         </div>
       </aside>
