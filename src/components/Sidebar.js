@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiArrowLeftCircle, FiArrowRightCircle } from 'react-icons/fi';
-import SettingsModal from './SettingsModel';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import TicketSubmissionModal from "./TicketSubmissionModal"; // Import the modal
 
-const Sidebar = ({ isAdmin, onOpenTicket }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+const Sidebar = ({ isAdmin }) => {
+  const [isOpen, setIsOpen] = useState(true); // Sidebar open/close state
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false); // Modal open/close state
   const location = useLocation();
 
-  const openSettingsModal = () => setIsSettingsModalOpen(true);
-  const closeSettingsModal = () => setIsSettingsModalOpen(false);
+  // Function to open the ticket submission modal
+  const handleOpenTicketModal = () => {
+    setIsTicketModalOpen(true);
+  };
+
+  // Function to close the ticket submission modal
+  const handleCloseTicketModal = () => {
+    setIsTicketModalOpen(false);
+  };
 
   return (
     <>
@@ -38,7 +45,7 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
           </li>
 
           <li>
-            <button onClick={onOpenTicket} className="sidebar-item w-full">
+            <button onClick={handleOpenTicketModal} className="sidebar-item w-full">
               <FiPlusCircle size={20} />
               {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
             </button>
@@ -54,16 +61,20 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
 
         {/* Settings Section */}
         <div className={`sidebar-footer ${isOpen ? '' : 'sidebar-footer-closed'}`}>
-          <button onClick={openSettingsModal} className="sidebar-item settings-btn">
+          <button onClick={() => setIsSettingsModalOpen(true)} className="sidebar-item settings-btn">
             <FiSettings size={20} />
             {isOpen && <span className="sidebar-item-text">Settings</span>}
           </button>
         </div>
       </aside>
 
-      <SettingsModal isOpen={isSettingsModalOpen} onClose={closeSettingsModal} />
+      {/* Render the TicketSubmissionModal */}
+      <TicketSubmissionModal
+        isOpen={isTicketModalOpen}
+        onClose={handleCloseTicketModal}
+      />
     </>
   );
-}
+};
 
 export default Sidebar;
