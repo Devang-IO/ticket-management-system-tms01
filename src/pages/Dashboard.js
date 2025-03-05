@@ -42,8 +42,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container" style={{ backgroundColor: "#F4F6F8" }}>
-      {/* Sidebar */}
-      <Sidebar onOpenTicket={() => setIsModalOpen(true)} style={{ backgroundColor: themeColors.primary }} />
+  
 
       <div className="dashboard-main">
         {/* Navbar */}
@@ -141,7 +140,6 @@ const Dashboard = () => {
 
         </div>
       </div>
-
       {/* Ticket Submission Modal */}
       {isModalOpen && (
         <TicketSubmissionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleTicketSubmit} />
