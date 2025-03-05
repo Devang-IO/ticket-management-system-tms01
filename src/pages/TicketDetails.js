@@ -32,9 +32,9 @@ const TicketDetails = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#EEF3F7] p-6">
+    <div className="w-full min-h-screen bg-[#EEF3F7] p-6 pl-20">
       {/* { Main Container } */}
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full mt-16">
+      <div className="bg-white shadow-lg rounded-lg p-6 w-full  mt-16">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-[#23486A]">Ticket Details</h1>
           <hr className="my-4 border-t-2 border-[#3B6790]" />
