@@ -7,6 +7,17 @@ body {
   @apply bg-gray-100 text-gray-900 transition-all;
 }
 
+/* Smooth transitions for dark mode */
+html.dark {
+  background-color: #1a202c; /* Dark background color */
+  color: #ffffff; /* Light text color */
+}
+
+/* Ensure the body takes full height */
+body {
+  min-height: 100vh;
+}
+
 /* Container */
 .container {
   @apply max-w-6xl mx-auto px-4;
