@@ -71,12 +71,12 @@ const Navbar = ({ sidebarOpen }) => {
       {/* Container for back button and title centered */}
       <div className="flex items-center justify-center gap-2 w-full">
         {/* Back button */}
-        <button
+        {/* <button
           onClick={handleBack}
           className="back-btn text-white transition-all absolute left-4"
         >
           <FiArrowLeft size={24} />
-        </button>
+        </button> */}
 
         {/* Page title */}
         <div className="page-title text-white font-semibold">{pageName}</div>
