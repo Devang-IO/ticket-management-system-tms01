@@ -1,38 +1,56 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiLogOut, FiArrowLeftCircle, FiArrowRightCircle } from 'react-icons/fi';
-import { toast } from 'react-toastify';
-import SettingsModal from './SettingsModel';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiArrowLeftCircle, FiArrowRightCircle, FiSun, FiMoon } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import TicketSubmissionModal from "./TicketSubmissionModal"; // Import the ticket submission modal
 
-const Sidebar = ({ isAdmin, onOpenTicket }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const navigate = useNavigate();
+const Sidebar = ({ isAdmin }) => {
+  const [isOpen, setIsOpen] = useState(true); // Sidebar open/close state
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false); // Ticket modal state
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false); // Settings modal state
+  const [isDarkMode, setIsDarkMode] = useState(false); // Dark mode state
   const location = useLocation();
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    toast.success('Logged out successfully!', {
-      position: 'top-center',
-      autoClose: 1500,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
+  // Ref for the settings modal
+  const settingsModalRef = useRef(null);
 
-    setTimeout(() => {
-      navigate('/login');
-    }, 1600);
+  // Function to open the ticket submission modal
+  const handleOpenTicketModal = () => {
+    setIsTicketModalOpen(true);
   };
 
-  const openSettingsModal = () => setIsSettingsModalOpen(true);
-  const closeSettingsModal = () => setIsSettingsModalOpen(false);
+  // Function to close the ticket submission modal
+  const handleCloseTicketModal = () => {
+    setIsTicketModalOpen(false);
+  };
+
+  // Function to toggle dark mode
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark", !isDarkMode); // Apply dark mode to the entire app
+  };
+
+  // Close settings modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        settingsModalRef.current &&
+        !settingsModalRef.current.contains(event.target) &&
+        !event.target.closest(".settings-btn") // Exclude the settings button
+      ) {
+        setIsSettingsModalOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
-      <aside className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+      <aside className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'} bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white`}>
         <div className="sidebar-header">
           {isOpen && <span className="sidebar-title">QuickAssist</span>}
           <button className="collapse-btn" onClick={() => setIsOpen(!isOpen)}>
@@ -56,7 +74,7 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
           </li>
 
           <li>
-            <button onClick={onOpenTicket} className="sidebar-item w-full">
+            <button onClick={handleOpenTicketModal} className="sidebar-item w-full">
               <FiPlusCircle size={20} />
               {isOpen && <span className="sidebar-item-text">Create Ticket</span>}
             </button>
@@ -70,23 +88,55 @@ const Sidebar = ({ isAdmin, onOpenTicket }) => {
           </li>
         </ul>
 
-        {/* Settings Above Logout When Sidebar is Closed */}
+        {/* Settings Section */}
         <div className={`sidebar-footer ${isOpen ? '' : 'sidebar-footer-closed'}`}>
-          <button onClick={openSettingsModal} className="sidebar-item settings-btn">
+          <button
+            onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)}
+            className="sidebar-item settings-btn relative"
+          >
             <FiSettings size={20} />
             {isOpen && <span className="sidebar-item-text">Settings</span>}
           </button>
 
-          <button onClick={handleLogout} className="sidebar-item logout-btn">
-            <FiLogOut size={20} />
-            {isOpen && <span className="sidebar-item-text">Logout</span>}
-          </button>
+          {/* Settings Popup Modal */}
+          {isSettingsModalOpen && (
+            <div
+              ref={settingsModalRef}
+              className={`absolute ${
+                isOpen ? "left-16" : "left-12" // Adjust position based on sidebar state
+              } bottom-16 bg-white dark:bg-gray-800 w-64 p-3 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50`}
+            >
+              <div className="flex justify-between items-center mb-4">
+              </div>
+
+              {/* Light/Dark Mode Toggle */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 dark:text-white">Dark Mode</span>
+                <button
+                  onClick={toggleDarkMode}
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                    isDarkMode ? "bg-blue-500" : "bg-gray-300"
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                      isDarkMode ? "translate-x-6" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 
-      <SettingsModal isOpen={isSettingsModalOpen} onClose={closeSettingsModal} />
+      {/* Render the TicketSubmissionModal */}
+      <TicketSubmissionModal
+        isOpen={isTicketModalOpen}
+        onClose={handleCloseTicketModal}
+      />
     </>
   );
-}
+};
 
 export default Sidebar;
