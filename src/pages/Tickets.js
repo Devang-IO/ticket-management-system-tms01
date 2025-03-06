@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FiPlus, FiChevronDown, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
 
-const TicketList = () => {
+const TicketList = ({ isSidebarOpen }) => {
   const [tickets, setTickets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,10 +28,9 @@ const TicketList = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.dropdown-wrapper')) {
+      if (!event.target.closest(".dropdown-wrapper")) {
         setActionDropdown(null);
       }
-
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -51,7 +50,7 @@ const TicketList = () => {
   const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
 
   return (
-    <div className="tickets-container">
+    <div className={`tickets-container ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
       <div className="tickets-header">
         <h2>Ticket List</h2>
         <button onClick={() => setIsModalOpen(true)} className="btn-primary">
@@ -123,23 +122,16 @@ const TicketList = () => {
                 <td className="action-cell">
                   <div className="dropdown-wrapper" ref={dropdownRef}>
                     <button
-                      onClick={() =>
-                        setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)
-                      }
+                      onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
                       className="action-btn"
                     >
                       Actions <FiChevronDown />
                     </button>
                     {actionDropdown === ticket.id && (
                       <div className="dropdown">
-                        <Link
-                          to={`/ticket/${ticket.id}`}
-                          className="dropdown-item"
-                          onClick={() => setActionDropdown(null)}
-                        >
+                        <Link to={`/ticket/${ticket.id}`} className="dropdown-item" onClick={() => setActionDropdown(null)}>
                           <FiEye /> View
                         </Link>
-
                         <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
                           <FiEdit /> Edit
                         </Link>
@@ -156,7 +148,6 @@ const TicketList = () => {
         </table>
       </div>
 
-      {/* Ticket Submission Modal */}
       {isModalOpen && <TicketSubmissionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </div>
   );

@@ -7,63 +7,53 @@ import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Tickets from "../pages/Tickets";
 import TicketDetails from "../pages/TicketDetails";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; 
-
-import Navbar from "../components/Navbar"; // Import Navbar
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Navbar from "../components/Navbar"; 
+import Sidebar from "../components/Sidebar"; // ✅ Import Sidebar
 import ClosedTickets from "../pages/ClosedTickets";
-import Sidebar from "../components/Sidebar"; 
-
 
 const AppRoutes = () => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Check if the user is an admin
-  const location = useLocation();
-
-  // Conditionally render the Sidebar based on authentication and route
-  const showSidebar = isAuthenticated && location.pathname !== "/" && location.pathname !== "/register" && location.pathname !== "/login";
-
+  
   return (
     <Router>
-      <AuthWrapper />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/tickets" element={<Tickets />} />
-        <Route path="/home/*" element={<Home />} />
-        <Route path="*" element={<NotFound />} />
-        <Route path="/ticket/:id" element={<TicketDetails />} />
-        <Route path="/tickets/closed" element={<ClosedTickets />} />
-      </Routes>
-
-
-      {/* Toast Notifications */}
-      <ToastContainer position="top-center" autoClose={3000} />
-    </div>
-  );
-};
-
-// Wrapper to conditionally show Navbar based on authentication status
-const AuthWrapper = ({ isAuthenticated }) => {
-  const location = useLocation();
-  
-  const noNavbarPaths = ["/", "/login", "/register"];
-  
-  // Conditionally render Navbar only if the user is authenticated and not on excluded paths
-  return isAuthenticated && !noNavbarPaths.includes(location.pathname) ? <Navbar /> : null;
-};
-
-const MainApp = () => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-
-  return (
-    <Router>
-      <AuthWrapper isAuthenticated={isAuthenticated} />
-      <AppRoutes />
+      <MainLayout />
     </Router>
   );
 };
 
-export default MainApp;
+const MainLayout = () => {
+  const location = useLocation();
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const noSidebarPaths = ["/", "/login", "/register"]; // ❌ Hide Sidebar on these pages
+  const noNavbarPaths = ["/", "/login", "/register"]; // ❌ Hide Navbar on these pages
+
+  return (
+    <div style={{ display: "flex" }}>
+      {/* ✅ Show Sidebar only if NOT on login/register pages */}
+      {!noSidebarPaths.includes(location.pathname) && <Sidebar />}
+
+      <div style={{ flex: 1 }}>
+        {/* ✅ Conditionally Render Navbar */}
+        {isAuthenticated && !noNavbarPaths.includes(location.pathname) && <Navbar />}
+
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/tickets" element={<Tickets />} />
+          <Route path="/home/*" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
+          <Route path="/ticket/:id" element={<TicketDetails />} />
+          <Route path="/tickets/closed" element={<ClosedTickets />} />
+        </Routes>
+
+        {/* ✅ Toast Notifications */}
+        <ToastContainer position="top-center" autoClose={3000} />
+      </div>
+    </div>
+  );
+};
+
+export default AppRoutes;

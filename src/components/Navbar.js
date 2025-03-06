@@ -1,30 +1,68 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiBell, FiArrowLeft, FiMenu } from "react-icons/fi";
+import { FiBell, FiArrowLeft, FiMenu, FiUser, FiLogOut } from "react-icons/fi";
+import { toast } from "react-toastify"; // Import toast for notifications
 
 const Navbar = ({ sidebarOpen }) => {
   const navigate = useNavigate();
-  const location = useLocation();  // Get the current path
+  const location = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [username, setUsername] = useState("Guest");
+  const [role, setRole] = useState("User");
+
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    const storedRole = localStorage.getItem("role");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+    if (storedRole) {
+      setRole(storedRole);
+    }
+  }, []);
 
   const notifications = [
     { id: 1, text: "Your ticket has been resolved.", time: "2 hours ago" },
     { id: 2, text: "New ticket assigned to you.", time: "5 hours ago" },
     { id: 3, text: "System maintenance scheduled.", time: "1 day ago" },
+    { id: 4, text: "Your account has been updated.", time: "2 days ago" },
+    { id: 5, text: "New feature released: Dark Mode.", time: "3 days ago" },
+    { id: 6, text: "Reminder: Submit your weekly report.", time: "4 days ago" },
   ];
 
   const handleBack = () => {
-    navigate(-1);
+    navigate(-1); // Navigate back to the previous page
   };
 
   const handleToggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    setMenuOpen(!menuOpen); // Toggle the state for mobile menu
   };
 
-  // Function to map the pathname to the page name
+  // Logout functionality
+  const handleLogout = () => {
+    localStorage.removeItem("username"); // Remove username from localStorage
+    localStorage.removeItem("role"); // Remove role from localStorage
+    toast.success("Logged out successfully!", {
+      position: "top-center",
+      autoClose: 1500,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+
+    setTimeout(() => {
+      navigate("/login"); // Redirect to login page after 1.6 seconds
+    }, 1600);
+  };
+
   const getPageName = (path) => {
+    if (path.startsWith("/ticket/")) {
+      return "Ticket Details";
+    }
+
     switch (path) {
       case "/dashboard":
         return "User Dashboard";
@@ -36,33 +74,31 @@ const Navbar = ({ sidebarOpen }) => {
         return "Profile";
       case "/home":
         return "Home";
+      case "/tickets/closed":
+        return "Closed Tickets";
       default:
         return "Page Not Found";
     }
   };
 
-  const pageName = getPageName(location.pathname); // Get the page name based on the current path
+  const pageName = getPageName(location.pathname);
 
   return (
     <nav className="navbar flex items-center justify-between px-4 py-2 bg-gray-800">
-      {/* Hamburger Menu for Mobile */}
+      {/* Hamburger menu button */}
       <button onClick={handleToggleMenu} className="block lg:hidden text-white">
         <FiMenu size={24} />
       </button>
 
-      {/* Back Button (Icon Only) */}
-      <button
-        onClick={handleBack}
-        className={`back-btn text-white ${sidebarOpen ? "-[370px]" : "mr-0"} lg:ml-0 transition-all`}
-      >
-        <FiArrowLeft size={24} />
-      </button>
+      {/* Container for back button and title centered */}
+      <div className="flex items-center justify-center gap-2 w-full">
+        {/* Page title */}
+        <div className="page-title text-white font-semibold">{pageName}</div>
+      </div>
 
-      {/* Page Title (Centered) */}
-      <div className="page-title">{pageName}</div>
-
-      <div className="navbar-right">
-        {/* Notifications */}
+      {/* Navbar right side */}
+      <div className="navbar-right flex items-center gap-4">
+        {/* Notifications dropdown */}
         <div className="relative">
           <button
             onClick={() => {
@@ -74,77 +110,73 @@ const Navbar = ({ sidebarOpen }) => {
             <FiBell size={24} className="text-white" />
           </button>
           {notificationsOpen && (
-            <div className="notifications-dropdown">
-              <div className="dropdown-header">
-                <h3>Notifications</h3>
-              </div>
-              <div className="dropdown-content">
-                {notifications.slice(0, 3).map((notification) => (
-                  <div key={notification.id} className="dropdown-item">
-                    <p>{notification.text}</p>
-                    <p className="time-text">{notification.time}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="dropdown-footer">
-                <a
-                  href="/notifications"
-                  className="view-all-link"
-                  onClick={() => setNotificationsOpen(false)}
-                >
-                  View All
-                </a>
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out">
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-800 mb-2">Notifications</h3>
+                <ul className="max-h-48 overflow-y-auto">
+                  {notifications.map((notification) => (
+                    <li key={notification.id} className="py-2 border-b border-gray-200 last:border-b-0">
+                      <p className="text-sm text-gray-700">{notification.text}</p>
+                      <p className="text-xs text-gray-500">{notification.time}</p>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           )}
         </div>
 
-        {/* Search Bar */}
-        <input type="text" placeholder="Search Tickets" className="search-input" />
+        {/* Search input */}
+        <input
+          type="text"
+          placeholder="Search Tickets"
+          className="search-input bg-gray-700 text-white px-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
 
-        {/* Profile Placeholder */}
+        {/* Profile dropdown */}
         <div className="relative">
-          <button
-            onClick={() => {
-              setProfileOpen(!profileOpen);
-              setNotificationsOpen(false);
-            }}
-            className="profile-placeholder"
-          >
-            <div className="profile-pic-placeholder"></div>
-          </button>
+          <div className="flex items-center gap-2 profile-section">
+            <div className="user-info text-white">
+              <p className="username font-bold">{username}</p>
+              <p className="user-role text-sm text-gray-300">{role}</p>
+            </div>
+            <button
+              onClick={() => {
+                setProfileOpen(!profileOpen);
+                setNotificationsOpen(false);
+              }}
+              className="profile-placeholder"
+            >
+              {/* <div className="profile-pic-placeholder w-11 h-11 bg-gray-600 rounded-full"></div> */}
+            </button>
+          </div>
           {profileOpen && (
-            <div className="profile-dropdown">
-              <div className="dropdown-header">
-                <h3>Profile</h3>
-              </div>
-              <div className="dropdown-content">
-                <a href="/profile" className="dropdown-item" onClick={() => setProfileOpen(false)}>
-                  View Profile
-                </a>
-              </div>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out">
+              <ul className="py-2">
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                  <FiUser className="text-gray-700" />
+                  <span className="text-sm text-gray-700">View Profile</span>
+                </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                  onClick={handleLogout} // Add logout functionality here
+                >
+                  <FiLogOut className="text-red-500" />
+                  <span className="text-sm text-red-500">Logout</span>
+                </li>
+              </ul>
             </div>
           )}
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <div
-        className={`mobile-menu lg:hidden ${menuOpen ? "block" : "hidden"} absolute top-0 right-0 bg-gray-800 p-4 w-48`}
-      >
+      {/* Mobile menu */}
+      <div className={`mobile-menu ${menuOpen ? "block" : "hidden"}`}>
         <ul>
-          <li>
-            <a href="/dashboard" className="text-white">Dashboard</a>
-          </li>
-          <li>
-            <a href="/tickets" className="text-white">My Tickets</a>
-          </li>
-          <li>
-            <a href="/settings" className="text-white">Settings</a>
-          </li>
-          <li>
-            <button onClick={() => navigate("/login")} className="text-white">Logout</button>
-          </li>
+          <li className="text-white">Dashboard</li>
+          <li className="text-white">Tickets</li>
+          <li className="text-white">Settings</li>
+          <li className="text-white">Profile</li>
         </ul>
       </div>
     </nav>

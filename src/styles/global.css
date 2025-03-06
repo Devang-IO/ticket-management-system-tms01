@@ -7,6 +7,17 @@ body {
   @apply bg-gray-100 text-gray-900 transition-all;
 }
 
+/* Smooth transitions for dark mode */
+html.dark {
+  background-color: #1a202c; /* Dark background color */
+  color: #ffffff; /* Light text color */
+}
+
+/* Ensure the body takes full height */
+body {
+  min-height: 100vh;
+}
+
 /* Container */
 .container {
   @apply max-w-6xl mx-auto px-4;
@@ -40,6 +51,22 @@ body {
   @apply text-xl font-semibold;
 }
 /* Navbar */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.username {
+  font-size: 0.875rem; /* Text-sm */
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 0.75rem; /* Text-xs */
+  color: #a0aec0; /* Gray-400 */
+}
+
 .navbar {
   @apply bg-[#23486A] text-white p-4 shadow-md fixed top-0 left-0 right-0 h-16 flex items-center;
 }
@@ -52,12 +79,25 @@ body {
   @apply flex items-center gap-4;
 }
 
-.page-title {
-  @apply text-center flex-1 text-white font-semibold text-xl;
+/* Container for back button and title centered */
+.page-title-container {
+  @apply flex items-center justify-center gap-2 w-full; /* Flex container for back button and title, centered */
 }
 
+/* Page title centered */
+.page-title {
+  @apply text-white font-semibold text-xl;
+  position: absolute;
+  left: 300px; /* Adjust the distance from the left edge */
+  margin-left:300px ;
+}
+
+/* Back button on the left */
 .back-btn {
   @apply text-white text-lg font-semibold;
+  position: absolute;
+  left: 300px; /* Adjust the distance from the left edge */
+  margin-left:200px;
 }
 
 .search-input {
@@ -96,20 +136,18 @@ body {
 .profile-placeholder {
   @apply w-10 h-10 rounded-full bg-gray-300;
 }
+
 /* For the hamburger menu icon on small screens */
 .block lg:hidden {
-  /* Displays the hamburger menu only on small screens */
   display: block;
 }
 
 .lg:hidden {
-  /* Hides the element on large screens and above */
   display: none;
 }
 
 /* For the navbar items, hide them on small screens */
 .mobile-menu {
-  /* Ensures the mobile menu is absolutely positioned */
   position: absolute;
   top: 0;
   right: 0;
@@ -122,9 +160,9 @@ body {
 .mobile-menu.block {
   display: block;
 }
+
 /* General responsiveness for page title */
 .text-center {
-  /* Centers the page title */
   text-align: center;
 }
 
@@ -290,143 +328,90 @@ body {
   @apply bg-green-600 hover:bg-green-700;
 }
 
-/* Sidebar */
+/*-------------------------------------- Sidebar container------------------------------------------------ */
 .sidebar {
-  @apply h-screen bg-[#3B6790] text-white fixed top-0 left-0 pt-16 transition-all 
+  @apply h-screen bg-[#23486A] text-white fixed top-0 left-0 transition-all 
          shadow-lg border-r border-[#4C7B8B] flex flex-col justify-between z-50;
-
 }
 
+/* Sidebar */
 .sidebar-open {
-  @apply w-64;
+  @apply w-52 rounded-2xl;
 }
 
 .sidebar-closed {
-  @apply w-20;
+  @apply w-14 rounded-2xl;
 }
 
-.sidebar-list {
-  @apply mt-[-40px] list-none pl-0 flex flex-col justify-between h-full;
-  /* Ensure full height to push elements down */
+/* Sidebar Header */
+.sidebar-header {
+  @apply flex items-center justify-between px-4 py-4 relative ml-[20px];
 }
 
-/* Sidebar Items - More Visible & Weighted */
-.sidebar-item {
-  @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg 
-         transition duration-300 relative my-3 ; /* Adjusted margin for spacing */
-}
-
-/* Hover Effect for Open Sidebar */
-.sidebar-open .sidebar-item:hover {
-  @apply bg-[#EFB036] text-[#23486A] shadow-xl rounded-[15px] px-3;
-  width: calc(100% - 30px);
-  margin-left: 5px;
-}
-/* Sidebar Title */
 /* Sidebar Title */
 .sidebar-title {
-  @apply flex justify-center items-center p-4 text-white;
+  @apply text-xl font-bold text-white mt-2;
 }
 
-.title-text {
-  @apply font-bold text-2xl;
-}
-
-
-
-/* Collapsed Sidebar - Keep Items Square */
-.sidebar-closed .sidebar-item {
-  @apply justify-center px-0;
-}
-
-.sidebar-closed .sidebar-item:hover {
-  @apply bg-[#EFB036] text-[#23486A] shadow-lg;
-  width: 100%;
-  margin-left: 0;
-  border-radius: 10px;
-}
-
-/* Sidebar Icons - Increase Visibility */
-.sidebar-item svg {
-  @apply text-[#EFB036] transition-all duration-300 ;
-}
-
-/* Hover: Darker Icons */
-.sidebar-item:hover svg {
-  @apply text-[#23486A];
-}
-/* Login Page Styles */
-
-/* Sidebar Text - Bold & More Shadow */
-.sidebar-item-text {
-  @apply ml-4 text-base font-bold ;
-}
-
-/* Hide Text When Sidebar is Collapsed */
-.sidebar-closed .sidebar-item-text {
-  @apply hidden;
-}
-
-/* Collapse Button */
+/* Collapse button */
 .collapse-btn {
-  @apply p-2 text-[#EFB036] flex justify-center items-center bg-transparent border-none 
-         hover:text-[#4C7B8B] transition duration-300 font-bold shadow-md;
+  @apply absolute right-4 p-1 text-[#EFB036] rounded-full bg-transparent border-none 
+         hover:text-[#4C7B8B] transition duration-300;
 }
 
-/* Admin Title */
-.sidebar-admin-title {
-  @apply text-[#EFB036] mt-6 font-semibold px-4 drop-shadow-lg;
+/* Sidebar List */
+.sidebar-list {
+  @apply list-none flex flex-col space-y-3 px-1 mt-5;
 }
 
-/* Logout Button - Full Width in Open Sidebar */
-.logout-btn {
-  @apply flex items-center w-full p-3 text-[#EFB036] font-bold transition duration-300 my-3 
-         absolute bottom-4 left-0 ;
+/* Sidebar Items */
+.sidebar-item {
+  @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg
+         transition duration-300 hover:bg-[#EFB036]  hover:text-[#23486A] hover:rounded-2xl hover:shadow-xl;
 }
 
-/* Settings Link */
-.sidebar-item-settings {
-  margin-top: auto; /* Push the settings down to the bottom */
+/* Active Sidebar Item */
+.sidebar-item-active {
+  @apply bg-[#EFB036] text-[#23486A] shadow-lg rounded-2xl;
 }
 
-/* Logout Button - Fix for Collapsed Sidebar */
-.sidebar-closed .logout-btn {
-  @apply justify-center p-3 w-full;
-}
-
-/* Logout Button on Hover */
-.logout-btn:hover {
-  @apply bg-[#EFB036] text-[#23486A] rounded-[15px] ;
-  width: calc(100% - 30px);
-  margin-left: 5px;
-}
-
-/* Logout Icon - Ensure Centering */
-.logout-btn svg {
-  @apply mr-2 transition-all duration-300 ;
+/* Sidebar Item Text */
+.sidebar-item-text {
+  @apply ml-4 text-base font-bold;
 }
 
 /* Hide Text When Sidebar is Collapsed */
-.sidebar-closed .logout-btn-text {
-  @apply hidden;
+.sidebar-closed .sidebar-item-text  {
+  @apply hidden ;
+}
+.sidebar-closed .collapse-btn {
+  @apply mt-10
+}
+.sidebar-closed .sidebar-list {
+  @apply mt-10
+}
+/* Footer (Settings & Logout) */
+.sidebar-footer {
+  @apply flex flex-col py-3 px-2 mt-auto border-t border-[#4C7B8B] space-y-2 w-full;
 }
 
-/* Keep Logout Icon Visible */
-.sidebar-closed .logout-btn svg {
-  @apply mx-auto;
+/* Footer Buttons */
+.sidebar-footer .sidebar-item {
+  @apply flex items-center justify-center p-3 w-full rounded-xl transition-all 
+         hover:bg-[#EFB036] hover:text-[#23486A];
 }
 
-/* Hover Effect for Collapsed Logout */
-.sidebar-closed .logout-btn:hover {
-  width: 100%;
-  margin-left: 0;
+/* Ensure correct alignment when sidebar is closed */
+.sidebar-footer-closed {
+  @apply items-center text-center;
 }
 
-/* Ensure Settings stays at the bottom when expanded/collapsed */
-.sidebar-item-settings {
-  margin-top: auto; /* This ensures the Settings link is pushed to the bottom */
+.sidebar-footer-closed .sidebar-item {
+  @apply flex flex-col-reverse justify-center ml-0 w-full;
 }
-/* Login & Register */
+
+
+/* ----------------------------------------Login & Register-------------------------------------- */
 
 .password-container {
   @apply relative flex items-center;
@@ -460,7 +445,7 @@ body {
   @apply font-semibold text-[#EFB036] cursor-pointer hover:underline;
 }
 
-/* ---------------- Modal Styles ---------------- */
+/* ------------------------------------- Modal Styles ----------------------------------- */
 
 .modal-overlay {
   @apply fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 backdrop-blur-md;
@@ -525,7 +510,7 @@ body {
 
 /* Dropdown Option Styles */
 .dropdown {
-  @apply bg-[#F1D07C] hover:bg-[#EFB036] text-[#23486A] border border-[#EFB036] rounded-lg shadow-lg;
+  @apply bg-[#F1D07C] text-[#23486A] border border-[#EFB036] rounded-lg shadow-lg;
 }
 
 .dropdown-item {
@@ -548,20 +533,27 @@ body {
   @apply text-red-500 text-xs mt-1 font-medium;
 }
 
-/* ---------------- Submit Button ---------------- */
+/* Submit Button */
 .form-button {
   @apply w-full py-2 bg-[#EFB036] text-white rounded-xl font-bold hover:bg-[#3B6790] transition-colors;
 }
 
+/* -------------------------------------Tickets List Container------------------------------------- */
+.table-container {
+  @apply max-h-96 overflow-y-auto border rounded-lg;
+  scrollbar-width: none; 
+}
+table {
+  @apply w-full border-collapse;
+}
 
+th, td {
+  @apply px-4 py-2 border;
+}
 
-
-
-/* Tickets List Container */
 .tickets-container {
-  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-xl shadow-lg;
-  margin-top: 80px; /* Adjust this based on your navbar height */
-  background-color: #f9f9f9; /* Light background for better contrast */
+  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-xl;
+  margin-top: 80px;
 }
 
 /* Header */
@@ -570,19 +562,21 @@ body {
 }
 
 .tickets-header h2 {
-  @apply text-3xl font-semibold text-[#23486A] leading-tight;
+  @apply text-3xl font-semibold text-[#23486A] leading-tight ml-[70px];
   letter-spacing: 0.5px;
 }
 
 .btn-primary {
-  @apply flex items-center bg-[#EFB036] text-white px-5 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-[#3B6790] hover:scale-105;
+  @apply flex items-center bg-[#EFB036] text-white px-3 py-3 rounded-xl font-semibold transition-all duration-300 hover:bg-[#3B6790] hover:scale-105;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Controls */
 .tickets-controls {
-  @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 shadow-md;
+  @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 justify-center items-center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 1050px; /* Adjust width as needed */
+  margin: 0 auto; /* Center the container itself */
 }
 
 .filter-group {
@@ -599,13 +593,13 @@ body {
 
 /* Table */
 .table-container {
-  @apply overflow-x-auto bg-white rounded-xl shadow-lg;
+  @apply overflow-x-auto bg-white rounded-2xl;
   max-width: 90%; /* Keep the table compact */
   margin: 0 auto; /* Center the table */
 }
 
 .table-container table {
-  @apply w-full border-collapse rounded-xl;
+  @apply w-full border-collapse rounded-2xl;
 }
 
 .table-container th,
@@ -619,12 +613,12 @@ body {
 
 .table-container td {
   @apply text-gray-700;
-  font-size: 14px; /* Smaller font size for better fit */
+  font-size: 14px; 
 }
 
 /* Actions column styling */
 .action-cell {
-  @apply relative text-center;
+  @apply flex justify-center items-center text-center relative;
 }
 
 .action-btn {
@@ -632,22 +626,27 @@ body {
          bg-gradient-to-r from-[#3B6790] to-[#23486A] shadow-lg 
          hover:from-[#23486A] hover:to-[#3B6790] hover:shadow-xl 
          transition-all duration-300 transform hover:scale-105 active:scale-95;
-  position: relative; 
-  z-index: 1; 
+  position: relative;
+  z-index: 10;
 }
 
 /* Dropdown styling */
 .dropdown {
-  @apply absolute right-0 mt-2 w-40 bg-white border border-[#D1D5DB] rounded-lg shadow-xl z-10 transition-all duration-300;
-
+  @apply absolute left-1/2 top-full transform -translate-x-1/2 mt-2 w-44 bg-white 
+         border border-[#4C7B8B] rounded-xl shadow-lg z-20 transition-all duration-300 ease-in-out;
 }
 
+/* Dropdown Items */
 .dropdown-item {
-  @apply flex items-center gap-3 px-5 py-3 text-gray-700 transition-all duration-300 
-         hover:bg-[#F1F5F9] hover:text-[#3B6790] cursor-pointer w-full text-left;
+  @apply flex items-center gap-3 px-5 py-3 text-[#23486A] font-medium 
+         transition-all duration-300 hover:bg-[#E1EAF2] hover:text-[#3B6790] 
+         cursor-pointer w-full text-left rounded-md;
   line-height: 1.2;
 }
-
+/* Subtle hover shadow for a modern look */
+.dropdown-item:hover {
+  @apply shadow-sm;
+}
 .delete-btn {
   @apply flex items-center gap-3 px-5 py-3 text-red-600 transition-all duration-300 
          hover:bg-red-100 hover:text-red-700 cursor-pointer w-full text-left rounded-b-lg;
@@ -722,7 +721,6 @@ body {
   .table-container td {
     @apply p-3 text-sm; /* Smaller font for table cells */
   }
-
   .btn-primary {
     @apply w-full; /* Full-width button */
   }
