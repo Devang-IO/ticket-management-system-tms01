@@ -58,6 +58,7 @@ const Navbar = ({ sidebarOpen }) => {
       case "/profile": return "Profile";
       case "/home": return "Home";
       case "/tickets/closed": return "Closed Tickets";
+      case "/assigntickets": return "Assign Tickets";
       default: return "Page Not Found";
     }
   };
