@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { supabase } from '../utils/supabase'; // Import Supabase client
 
 export default function RegisterPage() {
   // State variables
@@ -25,7 +26,7 @@ export default function RegisterPage() {
   };
 
   // Form submission handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validatePassword(password)) {
@@ -42,22 +43,49 @@ export default function RegisterPage() {
 
     setPasswordError(''); // Clear error if valid
 
-    // Display success toast notification
-    toast.success('🦄 Registration successful!', {
-      position: 'top-center',
-      autoClose: 1000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    try {
+      // Create user in Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    // Simulate registration process
-    setTimeout(() => {
-      console.log('Registering with', { name, email, password, phone, role });
-      navigate('/login');
-    }, 1000); // Delay navigation to allow the toast to be visible
+      if (error) throw error;
+
+      // Insert user profile into the `users` table
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert([
+          {
+            id: data.user.id,
+            email,
+            name,
+            phone,
+            role,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (insertError) throw insertError;
+
+      // Display success toast notification
+      toast.success('🦄 Registration successful!', {
+        position: 'top-center',
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      // Redirect to login page after successful registration
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000); // Delay navigation to allow the toast to be visible
+    } catch (error) {
+      toast.error(error.message); // Display error toast
+    }
   };
 
   // Password visibility toggle handlers
