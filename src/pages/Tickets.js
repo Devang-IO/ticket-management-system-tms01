@@ -25,7 +25,6 @@ const TicketList = ({ isSidebarOpen }) => {
     setTickets(mockTickets);
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".dropdown-wrapper")) {
@@ -50,7 +49,7 @@ const TicketList = ({ isSidebarOpen }) => {
   const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
 
   return (
-    <div className={`tickets-container ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+    <div className={`tickets-container transition-all duration-300 ${isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"}`}>
       <div className="tickets-header">
         <h2>Ticket List</h2>
         <button onClick={() => setIsModalOpen(true)} className="btn-primary">
