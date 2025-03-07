@@ -30,24 +30,26 @@ const MainLayout = () => {
   // Sidebar state for toggling width dynamically
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  const showSidebar = !noSidebarPaths.includes(location.pathname);
+  const showNavbar = isAuthenticated && !noNavbarPaths.includes(location.pathname);
+
   return (
     <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
       {/* Show Sidebar only if NOT on login/register pages */}
-      {!noSidebarPaths.includes(location.pathname) && (
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      )}
+      {showSidebar && <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}
 
-      {/* Main content section that shrinks/expands based on sidebar */}
+      {/* Main content section */}
       <div
         style={{
           flexGrow: 1,
           overflow: "auto",
           transition: "margin-left 0.3s ease",
-          marginLeft: sidebarOpen ? "250px" : "60px", // Adjust sidebar width dynamically
+          marginLeft: showSidebar ? (sidebarOpen ? "250px" : "60px") : "0px", // No margin when sidebar is hidden
+          width: showSidebar ? "calc(100% - 250px)" : "100%", // Full width when sidebar is hidden
         }}
       >
         {/* Conditionally Render Navbar */}
-        {isAuthenticated && !noNavbarPaths.includes(location.pathname) && <Navbar />}
+        {showNavbar && <Navbar />}
 
         <Routes>
           <Route path="/" element={<Login />} />
