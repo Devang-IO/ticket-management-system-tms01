@@ -1,29 +1,30 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { FiHome, FiFileText, FiPlusCircle, FiCheckCircle, FiSettings, FiArrowLeftCircle, FiArrowRightCircle, FiSun, FiMoon } from "react-icons/fi";
+import { 
+  FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
+  FiSettings, FiArrowLeftCircle, FiArrowRightCircle 
+} from "react-icons/fi";
 import { Link } from "react-router-dom";
 import TicketSubmissionModal from "./TicketSubmissionModal";
+import SettingsModal from "./SettingsModel";
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen, isAdmin }) => {
-  const [isTicketModalOpen, setIsTicketModalOpen] = React.useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
-  const [isDarkMode, setIsDarkMode] = React.useState(false);
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const location = useLocation();
   const settingsModalRef = useRef(null);
+  const settingsButtonRef = useRef(null);
 
   const handleOpenTicketModal = () => setIsTicketModalOpen(true);
   const handleCloseTicketModal = () => setIsTicketModalOpen(false);
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark", !isDarkMode);
-  };
 
+  // Close settings modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         settingsModalRef.current &&
         !settingsModalRef.current.contains(event.target) &&
-        !event.target.closest(".settings-btn")
+        !settingsButtonRef.current.contains(event.target)
       ) {
         setIsSettingsModalOpen(false);
       }
@@ -70,20 +71,31 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, isAdmin }) => {
         </ul>
 
         <div className={`sidebar-footer ${sidebarOpen ? "" : "sidebar-footer-closed"}`}>
-          <button onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)} className="sidebar-item settings-btn relative">
+          <button 
+            ref={settingsButtonRef}
+            onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)} 
+            className="sidebar-item settings-btn relative"
+          >
             <FiSettings size={20} />
             {sidebarOpen && <span className="sidebar-item-text">Settings</span>}
           </button>
+
+          {/* Settings Modal */}
           {isSettingsModalOpen && (
-            <div ref={settingsModalRef} className={`absolute ${sidebarOpen ? "left-16" : "left-12"} bottom-16 settings-modal`}>
-              <div className="flex items-center justify-between">
-                <span>Dark Mode</span>
-                <button onClick={toggleDarkMode} className={`dark-mode-toggle ${isDarkMode ? "dark" : "light"}`}>
-                  <div className={`toggle-thumb ${isDarkMode ? "toggle-on" : "toggle-off"}`} />
-                </button>
-              </div>
-            </div>
-          )}
+  <div 
+    ref={settingsModalRef} 
+    className="absolute z-50 bg-blue dark:bg-gray-900 p-4 rounded-lg shadow-lg w-60"
+    style={{
+      top: settingsButtonRef.current 
+        ? settingsButtonRef.current.getBoundingClientRect().top - 200 + "px"  // Moves it UP
+        : "0px",
+      left: sidebarOpen ? "120px" : "60px",
+    }}
+  >
+    <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
+  </div>
+)}
+
         </div>
       </aside>
 
