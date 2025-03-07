@@ -221,20 +221,21 @@ body {
 
 /* Dashboard Container */
 .dashboard-container {
-  @apply flex h-screen bg-gray-100;
+  @apply flex h-screen w-full bg-gray-100;
 }
 
 /* Main Content Area
    Adding a left margin equal to the sidebar width (w-64 is 16rem) ensures that
    the content doesn't overlap the sidebar.
 */
+/* Main Dashboard Container - Full Width */
 .dashboard-main {
-  @apply flex-1 mt-16 p-4 ml-16;
+  @apply flex-1 mt-16 p-4 w-full;
 }
 
-/* Dashboard Content Wrapper */
+/* Dashboard Content Wrapper - Full Width */
 .dashboard-content {
-  @apply max-w-6xl mx-auto p-6;
+  @apply w-full p-6;
 }
 
 /* Dashboard Title */
@@ -295,7 +296,6 @@ body {
 /* Custom Bullet for Activity List */
 .list-bullet {
   @apply inline-block w-2 h-2 rounded-full bg-[#23486A] mr-2;
-
 }
 
 /* Quick Actions Container */
@@ -320,16 +320,16 @@ body {
 /*-------------------------------------- Sidebar container------------------------------------------------ */
 .sidebar {
   @apply h-screen bg-[#23486A] text-white fixed top-0 left-0 transition-all 
-         shadow-lg border-r border-[#4C7B8B] flex flex-col justify-between z-50;
+         shadow-lg flex flex-col justify-between z-50;
 }
 
 /* Sidebar */
 .sidebar-open {
-  @apply w-52 rounded-2xl;
+  @apply w-52 ;
 }
 
 .sidebar-closed {
-  @apply w-14 rounded-2xl;
+  @apply w-14 ;
 }
 
 /* Sidebar Header */
@@ -528,21 +528,11 @@ body {
 }
 
 /* -------------------------------------Tickets List Container------------------------------------- */
-.table-container {
-  @apply max-h-96 overflow-y-auto border rounded-lg;
-  scrollbar-width: none; 
-}
-table {
-  @apply w-full border-collapse;
-}
-
-th, td {
-  @apply px-4 py-2 border;
-}
-
+/* Tickets Container - Full Width */
 .tickets-container {
-  @apply max-w-[80%] mx-auto my-8 p-6 bg-gray-100 rounded-xl;
+  @apply w-full mx-auto my-8 p-6 bg-gray-100 rounded-xl;
   margin-top: 80px;
+  max-width: 95%;
 }
 
 /* Header */
@@ -551,23 +541,28 @@ th, td {
 }
 
 .tickets-header h2 {
-  @apply text-3xl font-semibold text-[#23486A] leading-tight ml-[70px];
+  @apply text-3xl font-semibold text-[#23486A] leading-tight;
   letter-spacing: 0.5px;
 }
 
+/* Primary Button */
 .btn-primary {
-  @apply flex items-center bg-[#EFB036] text-white px-3 py-3 rounded-xl font-semibold transition-all duration-300 hover:bg-[#3B6790] hover:scale-105;
+  @apply flex items-center bg-[#EFB036] text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  @apply bg-[#3B6790] scale-105;
 }
 
 /* Controls */
 .tickets-controls {
   @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 justify-center items-center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 1050px; /* Adjust width as needed */
-  margin: 0 auto; /* Center the container itself */
+  width: 100%;
 }
 
+/* Filters */
 .filter-group {
   @apply flex items-center gap-3;
 }
@@ -577,18 +572,34 @@ th, td {
 }
 
 .search-input {
-  @apply px-4 py-1 border border-[#D1D5DB] rounded-xl w-56 bg-[#4C7B8B] text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-[#EFB036];
+  @apply px-4 py-2 border border-[#D1D5DB] rounded-xl bg-[#4C7B8B] text-white placeholder-gray-200;
+  min-width: 250px;
+  max-width: 300px;
+}
+
+/* Scrollable Table */
+.table-container {
+  @apply bg-white rounded-2xl border;
+  width: 100%;
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4C7B8B transparent;
+}
+
+.table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #4C7B8B;
+  border-radius: 10px;
 }
 
 /* Table */
-.table-container {
-  @apply overflow-x-auto bg-white rounded-2xl;
-  max-width: 90%; /* Keep the table compact */
-  margin: 0 auto; /* Center the table */
-}
-
 .table-container table {
-  @apply w-full border-collapse rounded-2xl;
+  @apply w-full border-collapse;
 }
 
 .table-container th,
@@ -602,10 +613,10 @@ th, td {
 
 .table-container td {
   @apply text-gray-700;
-  font-size: 14px; 
+  font-size: 14px;
 }
 
-/* Actions column styling */
+/* Actions */
 .action-cell {
   @apply flex justify-center items-center text-center relative;
 }
@@ -615,75 +626,60 @@ th, td {
          bg-gradient-to-r from-[#3B6790] to-[#23486A] shadow-lg 
          hover:from-[#23486A] hover:to-[#3B6790] hover:shadow-xl 
          transition-all duration-300 transform hover:scale-105 active:scale-95;
-  position: relative;
-  z-index: 10;
 }
 
-/* Dropdown styling */
+/* Dropdown */
 .dropdown {
   @apply absolute left-1/2 top-full transform -translate-x-1/2 mt-2 w-44 bg-white 
          border border-[#4C7B8B] rounded-xl shadow-lg z-20 transition-all duration-300 ease-in-out;
 }
 
-/* Dropdown Items */
 .dropdown-item {
   @apply flex items-center gap-3 px-5 py-3 text-[#23486A] font-medium 
          transition-all duration-300 hover:bg-[#E1EAF2] hover:text-[#3B6790] 
          cursor-pointer w-full text-left rounded-md;
-  line-height: 1.2;
 }
-/* Subtle hover shadow for a modern look */
+
 .dropdown-item:hover {
   @apply shadow-sm;
 }
+
 .delete-btn {
   @apply flex items-center gap-3 px-5 py-3 text-red-600 transition-all duration-300 
          hover:bg-red-100 hover:text-red-700 cursor-pointer w-full text-left rounded-b-lg;
 }
 
-.dropdown-item svg,
-.delete-btn svg {
-  @apply w-5 h-5;
-  display: inline-block; 
-  flex-shrink: 0; 
-}
-
-/* Responsive Styles */
+/* Responsive Adjustments */
 @media (max-width: 1024px) {
   .tickets-container {
-    @apply max-w-[95%] p-4;
+    @apply p-4;
   }
 
   .tickets-header h2 {
-    @apply text-2xl; /* Adjust font size on medium screens */
-  }
-
-  .btn-primary {
-    @apply w-full; /* Make button full-width on smaller screens */
+    @apply text-2xl;
   }
 
   .tickets-controls {
-    @apply flex-col gap-3; /* Stack controls vertically */
+    @apply flex-col gap-3;
   }
 
   .search-input {
-    @apply w-full; /* Make search input full-width */
+    @apply w-full;
   }
 
   .table-container {
-    @apply w-full; /* Ensure table takes full width */
+    @apply w-full;
   }
 
   .table-container th,
   .table-container td {
-    @apply p-3; /* Smaller padding for table cells */
+    @apply p-3;
   }
 }
 
 @media (max-width: 768px) {
-  /* Further adjustments for small screens */
   .tickets-container {
-    @apply max-w-[95%] p-4;
+    @apply p-4;
   }
 
   .tickets-header {
@@ -691,26 +687,23 @@ th, td {
   }
 
   .tickets-header h2 {
-    @apply text-2xl font-semibold text-[#23486A] leading-tight;
+    @apply text-2xl;
   }
 
   .tickets-controls {
-    @apply flex-col gap-3; /* Stack controls vertically */
+    @apply flex-col gap-3;
   }
 
   .search-input {
-    @apply w-full; /* Full width search input */
+    @apply w-full;
   }
 
   .table-container {
-    @apply w-full; /* Full width table */
+    @apply w-full;
   }
 
   .table-container th,
   .table-container td {
-    @apply p-3 text-sm; /* Smaller font for table cells */
-  }
-  .btn-primary {
-    @apply w-full; /* Full-width button */
+    @apply p-3 text-sm;
   }
 }
