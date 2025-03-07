@@ -12,8 +12,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="settings-modal absolute top-[-120%] left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 flex justify-center items-center z-50">
-  <div className="bg-white dark:bg-[#23486A] p-6 rounded-lg shadow-lg w-80">
+    <div className="settings-modal absolute top-[-120%] left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 flex justify-center rounded-xl items-center z-50">
+  <div className="bg-white dark:bg-[#23486A] p-6 rounded-xl shadow-lg w-80">
     {/* Centered Heading */}
     <h2 className="text-lg font-semibold mb-4 text-[#23486A] dark:text-[#EFB036] text-center">
       Settings
