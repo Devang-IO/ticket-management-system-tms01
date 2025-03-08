@@ -57,7 +57,7 @@ body {
 }
 
 .navbar {
-  @apply bg-[#23486A] text-white p-4 shadow-md fixed top-0 left-0 right-0 h-16 flex items-center;
+  @apply bg-[#23486A] text-white p-4 shadow-md fixed top-0 left-0 right-0 h-14 flex items-center;
 }
 
 .navbar-left {
@@ -90,7 +90,7 @@ body {
 }
 
 .search-input {
-  @apply px-2 py-2 border border-gray-300 rounded-lg w-48 bg-[#4C7B8B] text-white placeholder-gray-200;
+  @apply px-2 py-2 border border-gray-300 rounded-lg w-48 h-8 bg-[#4C7B8B] text-white placeholder-gray-200;
 }
 
 .notifications-dropdown,
@@ -320,7 +320,7 @@ body {
 /*-------------------------------------- Sidebar container------------------------------------------------ */
 .sidebar {
   @apply h-screen bg-[#23486A] text-white fixed top-0 left-0 transition-all 
-         shadow-lg flex flex-col justify-between z-50;
+ flex flex-col justify-between z-50;
 }
 
 /* Sidebar */
