@@ -110,37 +110,46 @@ const TicketList = ({ isSidebarOpen }) => {
             {currentTickets.map((ticket) => (
               <tr key={ticket.id}>
                 <td>{ticket.id}</td>
-                <td>
+                <td className="text-left">
                   <Link to={`/ticket/${ticket.id}`} className="ticket-link">
                     {ticket.title}
                   </Link>
                 </td>
                 <td>{ticket.status}</td>
-                <td>{ticket.priority}</td>
+                <td className="priority-cell">
+                  <span className={`priority-badge priority-${ticket.priority.toLowerCase()}`}>
+                    {ticket.priority}
+                  </span>
+                </td>
                 <td>{ticket.date}</td>
                 <td className="action-cell">
-                  <div className="dropdown-wrapper" ref={dropdownRef}>
-                    <button
-                      onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
-                      className="action-btn"
-                    >
-                      Actions <FiChevronDown />
-                    </button>
-                    {actionDropdown === ticket.id && (
-                      <div className="dropdown">
-                        <Link to={`/ticket/${ticket.id}`} className="dropdown-item" onClick={() => setActionDropdown(null)}>
-                          <FiEye /> View
-                        </Link>
-                        <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
-                          <FiEdit /> Edit
-                        </Link>
-                        <button className="delete-btn">
-                          <FiTrash2 /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </td>
+  <button
+    onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
+    className="action-btn"
+  >
+    Actions <FiChevronDown />
+  </button>
+
+  {actionDropdown === ticket.id && (
+    <div className="dropdown-wrapper" ref={dropdownRef}>
+      <div className="dropdown">
+        <Link
+          to={`/ticket/${ticket.id}`}
+          className="dropdown-item"
+          onClick={() => setActionDropdown(null)}
+        >
+          <FiEye /> View
+        </Link>
+        <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
+          <FiEdit /> Edit
+        </Link>
+        <button className="delete-btn">
+          <FiTrash2 /> Delete
+        </button>
+      </div>
+    </div>
+  )}
+</td>
               </tr>
             ))}
           </tbody>
