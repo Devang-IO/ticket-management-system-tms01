@@ -70,6 +70,8 @@ export default function LoginPage() {
 
       if (error) throw error;
 
+      console.log("Logged in user:", data.user);
+
       // Fetch user profile data from the `users` table
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -77,8 +79,12 @@ export default function LoginPage() {
         .eq('id', data.user.id)
         .single();
 
+      console.log("Fetched user data:", userData);
+
       // If user data does not exist in the `users` table, insert it
       if (!userData) {
+        console.log("User does not exist in `users` table. Inserting new user...");
+
         const { data: newUser, error: insertError } = await supabase
           .from('users')
           .insert([
@@ -92,13 +98,20 @@ export default function LoginPage() {
           ])
           .single();
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Insert error:", insertError);
+          throw insertError;
+        }
+
+        console.log("New user inserted:", newUser);
 
         // Store user profile data in localStorage
         localStorage.setItem("username", newUser.name);
         localStorage.setItem("role", newUser.role);
         localStorage.setItem("profilePicture", newUser.profile_picture);
       } else {
+        console.log("User already exists in `users` table.");
+
         // Store user profile data in localStorage
         localStorage.setItem("username", userData.name);
         localStorage.setItem("role", userData.role);
@@ -132,6 +145,7 @@ export default function LoginPage() {
         }
       }, 1000); // Delay navigation to allow the toast to be visible
     } catch (error) {
+      console.error("Login error:", error);
       toast.error(error.message); // Display error toast
     }
   };
@@ -184,23 +198,23 @@ export default function LoginPage() {
           {/* Password validation checkboxes */}
           {isPasswordFocused && (
             <div className="password-checks space-y-2 mt-2">
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.uppercase ? 'text-green-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.uppercase ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.uppercase} readOnly className="form-checkbox" />
                 <span>Uppercase letter</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.lowercase ? 'text-green-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.lowercase ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.lowercase} readOnly className="form-checkbox" />
                 <span>Lowercase letter</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.number ? 'text-green-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.number ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.number} readOnly className="form-checkbox" />
                 <span>Number</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.specialChar ? 'text-green-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.specialChar ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.specialChar} readOnly className="form-checkbox" />
                 <span>Special character</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.minLength ? 'text-green-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.minLength ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.minLength} readOnly className="form-checkbox" />
                 <span>8 characters or more</span>
               </div>
