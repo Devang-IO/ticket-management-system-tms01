@@ -707,3 +707,41 @@ body {
     @apply p-3 text-sm;
   }
 }
+
+/* Dropzone Styling */
+.dropzone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.dropzone:hover {
+  border-color: #EFB036  ; /* Change border color on hover */
+}
+
+.dropzone-text {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Image Preview Styling */
+.image-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Hidden File Input */
+.hidden {
+  display: none;
+}

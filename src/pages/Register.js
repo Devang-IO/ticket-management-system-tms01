@@ -16,6 +16,8 @@ export default function RegisterPage() {
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
+  const [isUploading, setIsUploading] = useState(false); // State for upload loading
   const navigate = useNavigate();
 
   // Password validation function
@@ -23,6 +25,29 @@ export default function RegisterPage() {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
+  };
+
+  // Handle profile picture upload to Cloudinary
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET); // Upload preset from Cloudinary
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      return data.secure_url; // Return the uploaded image URL
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
   };
 
   // Form submission handler
@@ -44,10 +69,26 @@ export default function RegisterPage() {
     setPasswordError(''); // Clear error if valid
 
     try {
+      setIsUploading(true); // Start loading
+
+      // Upload profile picture to Cloudinary (if selected)
+      let profilePictureUrl = null;
+      if (profilePicture) {
+        profilePictureUrl = await uploadImage(profilePicture);
+      }
+
       // Create user in Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            name,
+            phone,
+            role,
+            profile_picture: profilePictureUrl, // Add profile picture URL to user metadata
+          },
+        },
       });
 
       if (error) throw error;
@@ -62,6 +103,7 @@ export default function RegisterPage() {
             name,
             phone,
             role,
+            profile_picture: profilePictureUrl, // Store profile picture URL
             created_at: new Date().toISOString(),
           },
         ]);
@@ -69,9 +111,9 @@ export default function RegisterPage() {
       if (insertError) throw insertError;
 
       // Display success toast notification
-      toast.success('🦄 Registration successful!', {
+      toast.success('🦄 Registration successful! Email confirmation is required before login', {
         position: 'top-center',
-        autoClose: 1000,
+        autoClose: 5000, // Show for 5 seconds
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
@@ -85,6 +127,8 @@ export default function RegisterPage() {
       }, 1000); // Delay navigation to allow the toast to be visible
     } catch (error) {
       toast.error(error.message); // Display error toast
+    } finally {
+      setIsUploading(false); // Stop loading
     }
   };
 
@@ -197,8 +241,37 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <button type="submit" className="submit-btn">
-          Sign-Up
+        {/* Profile Picture Upload */}
+<div className="form-group full-width">
+  <label className="form-label" htmlFor="profile-picture">
+    Profile Picture (Optional)
+  </label>
+  <label htmlFor="profile-picture" className="dropzone block">
+    {profilePicture ? (
+      <div className="image-preview">
+        <img
+          src={URL.createObjectURL(profilePicture)} // Show preview of the selected image
+          alt="Preview"
+          className="preview-image"
+        />
+      </div>
+    ) : (
+      <p className="dropzone-text">
+        Drag & drop an image here, or click to select one.
+      </p>
+    )}
+  </label>
+  <input
+    id="profile-picture"
+    type="file"
+    accept="image/*"
+    className="form-input-file hidden"
+    onChange={(e) => setProfilePicture(e.target.files[0])} // Update state with the selected file
+  />
+</div>
+
+        <button type="submit" className="submit-btn" disabled={isUploading}>
+          {isUploading ? 'Uploading...' : 'Sign-Up'}
         </button>
       </form>
       <div className="login-link">
