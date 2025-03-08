@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
   const [passwordChecks, setPasswordChecks] = useState({
     uppercase: false,
     lowercase: false,
@@ -44,25 +43,9 @@ export default function LoginPage() {
     });
   };
 
-  // Fetch profile picture when email is entered
-  const handleEmailChange = async (e) => {
-    const value = e.target.value;
-    setEmail(value);
-
-    // Fetch profile picture from the `users` table
-    if (value) {
-      const { data, error } = await supabase
-        .from('users')
-        .select('profile_picture')
-        .eq('email', value)
-        .single();
-
-      if (!error && data) {
-        setProfilePicture(data.profile_picture);
-      } else {
-        setProfilePicture(null);
-      }
-    }
+  // Handle email input change
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
   };
 
   // Form submission handler
@@ -94,12 +77,33 @@ export default function LoginPage() {
         .eq('id', data.user.id)
         .single();
 
-      if (userError) throw userError;
+      // If user data does not exist in the `users` table, insert it
+      if (!userData) {
+        const { data: newUser, error: insertError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.email.split('@')[0], // Default name
+              role: 'user', // Default role
+              profile_picture: null, // Default profile picture
+            },
+          ])
+          .single();
 
-      // Store user profile data in localStorage
-      localStorage.setItem("username", userData.name);
-      localStorage.setItem("role", userData.role);
-      localStorage.setItem("profilePicture", userData.profile_picture);
+        if (insertError) throw insertError;
+
+        // Store user profile data in localStorage
+        localStorage.setItem("username", newUser.name);
+        localStorage.setItem("role", newUser.role);
+        localStorage.setItem("profilePicture", newUser.profile_picture);
+      } else {
+        // Store user profile data in localStorage
+        localStorage.setItem("username", userData.name);
+        localStorage.setItem("role", userData.role);
+        localStorage.setItem("profilePicture", userData.profile_picture);
+      }
 
       // Display success toast notification
       toast.success("🦄 Login successful!", {
@@ -116,7 +120,7 @@ export default function LoginPage() {
       setTimeout(() => {
         localStorage.setItem("isAuthenticated", "true"); // Store login state
 
-        switch (userData.role) {
+        switch (userData?.role || 'user') {
           case 'admin':
             navigate("/admin-dashboard");
             break;
@@ -148,16 +152,6 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="login-form">
         <div className="form-group">
           <label className="form-label">Email</label>
-          {/* Show profile picture above email input */}
-          {profilePicture && (
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-              <img
-                src={profilePicture}
-                alt="Profile"
-                style={{ width: '50px', height: '50px', borderRadius: '50%' }}
-              />
-            </div>
-          )}
           <input
             type="email"
             placeholder="name@example.com"
