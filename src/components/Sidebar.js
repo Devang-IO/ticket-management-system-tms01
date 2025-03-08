@@ -11,9 +11,21 @@ import SettingsModal from "./SettingsModel";
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [userRole, setUserRole] = useState(localStorage.getItem("role")); // Track role state
+
   const location = useLocation();
   const settingsModalRef = useRef(null);
   const settingsButtonRef = useRef(null);
+
+  useEffect(() => {
+    // Update role if localStorage changes
+    const handleStorageChange = () => {
+      setUserRole(localStorage.getItem("role"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const handleOpenTicketModal = () => setIsTicketModalOpen(true);
   const handleCloseTicketModal = () => setIsTicketModalOpen(false);
@@ -44,32 +56,66 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         <ul className="sidebar-list">
-          <li>
-            <Link to="/dashboard" className={`sidebar-item ${location.pathname === "/dashboard" ? "sidebar-item-active" : ""}`}>
-              <FiHome size={20} />
-              {sidebarOpen && <span className="sidebar-item-text">Dashboard</span>}
-            </Link>
-          </li>
-          <li>
-            <Link to="/tickets" className={`sidebar-item ${location.pathname === "/tickets" ? "sidebar-item-active" : ""}`}>
-              <FiFileText size={20} />
-              {sidebarOpen && <span className="sidebar-item-text">My Tickets</span>}
-            </Link>
-          </li>
-          <li>
-            <button onClick={handleOpenTicketModal} className="sidebar-item w-full">
-              <FiPlusCircle size={20} />
-              {sidebarOpen && <span className="sidebar-item-text">Create Ticket</span>}
-            </button>
-          </li>
-          <li>
-            <Link to="/tickets/closed" className={`sidebar-item ${location.pathname === "/tickets/closed" ? "sidebar-item-active" : ""}`}>
-              <FiCheckCircle size={20} />
-              {sidebarOpen && <span className="sidebar-item-text">Closed Tickets</span>}
-            </Link>
-          </li>
+          {/* USER ROLE */}
+          {userRole === "user" && (
+            <>
+              <li>
+                <Link to="/dashboard" className={`sidebar-item ${location.pathname === "/dashboard" ? "sidebar-item-active" : ""}`}>
+                  <FiHome size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Dashboard</span>}
+                </Link>
+              </li>
+              <li>
+                <Link to="/tickets" className={`sidebar-item ${location.pathname === "/tickets" ? "sidebar-item-active" : ""}`}>
+                  <FiFileText size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">My Tickets</span>}
+                </Link>
+              </li>
+              <li>
+                <button onClick={handleOpenTicketModal} className="sidebar-item w-full">
+                  <FiPlusCircle size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Create Ticket</span>}
+                </button>
+              </li>
+              <li>
+                <Link to="/tickets/closed" className={`sidebar-item ${location.pathname === "/tickets/closed" ? "sidebar-item-active" : ""}`}>
+                  <FiCheckCircle size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Closed Tickets</span>}
+                </Link>
+              </li>
+            </>
+          )}
+
+          {/* EMPLOYEE ROLE  */}
+          {userRole === "employee" && (
+            <li>
+              <Link to="/csrdashboard" className={`sidebar-item ${location.pathname === "/csrdashboard" ? "sidebar-item-active" : ""}`}>
+                <FiHome size={20} />
+                {sidebarOpen && <span className="sidebar-item-text">Dashboard</span>}
+              </Link>
+            </li>
+          )}
+
+          {/* ADMIN ROLE */}
+          {userRole === "admin" && (
+            <>
+              <li>
+                <Link to="/admindashboard" className={`sidebar-item ${location.pathname === "/admindashboard" ? "sidebar-item-active" : ""}`}>
+                  <FiHome size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Dashboard</span>}
+                </Link>
+              </li>
+              <li>
+                <Link to="/assigntickets" className={`sidebar-item ${location.pathname === "/assigntickets" ? "sidebar-item-active" : ""}`}>
+                  <FiCheckCircle size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Assign Tickets</span>}
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
 
+        {/* SETTINGS BUTTON */}
         <div className={`sidebar-footer ${sidebarOpen ? "" : "sidebar-footer-closed"}`}>
           <button 
             ref={settingsButtonRef}
@@ -82,20 +128,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
           {/* Settings Modal */}
           {isSettingsModalOpen && (
-  <div 
-    ref={settingsModalRef} 
-    className="absolute z-50 bg-blue dark:bg-gray-900 p-4 rounded-lg shadow-lg w-60"
-    style={{
-      top: settingsButtonRef.current 
-        ? settingsButtonRef.current.getBoundingClientRect().top - 200 + "px"  // Moves it UP
-        : "0px",
-      left: sidebarOpen ? "120px" : "60px",
-    }}
-  >
-    <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
-  </div>
-)}
-
+            <div 
+              ref={settingsModalRef} 
+              className="absolute z-50 bg-blue dark:bg-gray-900 p-4 rounded-lg shadow-lg w-60"
+              style={{
+                top: settingsButtonRef.current 
+                  ? settingsButtonRef.current.getBoundingClientRect().top - 200 + "px"
+                  : "0px",
+                left: sidebarOpen ? "120px" : "60px",
+              }}
+            >
+              <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
+            </div>
+          )}
         </div>
       </aside>
 

@@ -26,14 +26,8 @@ const AdminTicketList = ({ isSidebarOpen }) => {
   const employees = [
     { name: "Alice Johnson", role: "Software Engineer", department: "IT" },
     { name: "Bob Smith", role: "Network Admin", department: "IT" },
-    { name: "Bob Smith", role: "Network Admin", department: "IT" },
-    { name: "Bob Smith", role: "Network Admin", department: "IT" },
-    { name: "Bob Smith", role: "Network Admin", department: "IT" },
-    { name: "Bob Smith", role: "Network Admin", department: "IT" },
     { name: "Charlie Brown", role: "Customer Support", department: "Helpdesk" },
     { name: "David White", role: "QA Analyst", department: "Quality" },
-    { name: "John Doe", role: "IT Specialist", department: "IT" },
-    { name: "John Doe", role: "IT Specialist", department: "IT" },
     { name: "John Doe", role: "IT Specialist", department: "IT" },
     { name: "Millie Brown", role: "Support Engineer", department: "Helpdesk" },
   ];
@@ -56,7 +50,6 @@ const AdminTicketList = ({ isSidebarOpen }) => {
       <div className="flex justify-between items-center mb-6 p-4 bg-white shadow-md rounded-2xl">
         <h2 className="text-2xl font-semibold text-[#23486A]">Assign Tickets</h2>
       </div>
-      {successMessage && <div className="p-4 bg-green-100 text-green-800 mb-4 rounded-xl">{successMessage}</div>}
       <div className="bg-white shadow-md rounded-2xl overflow-hidden">
         <table className="w-full border-collapse text-left">
           <thead className="bg-[#23486A] text-white">
@@ -102,50 +95,54 @@ const AdminTicketList = ({ isSidebarOpen }) => {
 
       {/* Assign Employee Modal */}
       <Modal
-  isOpen={isModalOpen}
-  onRequestClose={() => setIsModalOpen(false)}
-  className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
->
-  <div className="bg-white rounded-2xl p-6 shadow-lg w-[40rem] max-h-[80vh] overflow-y-auto">
-    {/* Modal Header */}
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="text-xl font-semibold text-center w-full">Assign Employee</h3>
-      <button onClick={() => setIsModalOpen(false)} className="text-gray-600 hover:text-gray-800">
-        <FiX size={24} />
-      </button>
-    </div>
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div className="bg-white rounded-2xl p-6 shadow-lg w-[40rem] max-h-[80vh] overflow-y-auto">
+          {/* Success Message at the top of Modal */}
+          {successMessage && (
+            <div className="p-2 mb-3 bg-green-100 text-green-800 rounded-xl text-center">{successMessage}</div>
+          )}
 
-    {/* Search Bar */}
-    <div className="relative mb-4">
-      <FiSearch className="absolute left-3 top-3 text-gray-500" />
-      <input
-        type="text"
-        placeholder="Search employee..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300"
-      />
-    </div>
-
-    {/* Employee List with Scroll */}
-    <div className="max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-      <ul>
-        {filteredEmployees.map((employee, index) => (
-          <li key={index} className="flex justify-between items-center py-3 border-b last:border-none">
-            <div>
-              <span className="text-gray-800 font-semibold">{employee.name}</span>
-              <p className="text-sm text-gray-500">{employee.role} - {employee.department}</p>
-            </div>
-            <button onClick={() => handleAssign(employee)} className="px-3 py-1 bg-green-500 text-white rounded-xl hover:bg-green-600">
-              Assign
+          {/* Modal Header */}
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-center w-full">Assign Employee</h3>
+            <button onClick={() => setIsModalOpen(false)} className="text-gray-600 hover:text-gray-800">
+              <FiX size={24} />
             </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </div>
-</Modal>
+          </div>
 
+          {/* Search Bar */}
+          <div className="relative mb-4">
+            <FiSearch className="absolute left-3 top-3 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search employee..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300"
+            />
+          </div>
+
+          {/* Employee List with Scroll */}
+          <div className="max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <ul>
+              {filteredEmployees.map((employee, index) => (
+                <li key={index} className="flex justify-between items-center py-3 border-b last:border-none">
+                  <div>
+                    <span className="text-gray-800 font-semibold">{employee.name}</span>
+                    <p className="text-sm text-gray-500">{employee.role} - {employee.department}</p>
+                  </div>
+                  <button onClick={() => handleAssign(employee)} className="px-3 py-1 bg-green-500 text-white rounded-xl hover:bg-green-600">
+                    Assign
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

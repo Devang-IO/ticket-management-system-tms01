@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FiPlus, FiChevronDown, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
 
 const TicketList = ({ isSidebarOpen }) => {
@@ -50,13 +51,14 @@ const TicketList = ({ isSidebarOpen }) => {
 
   return (
     <div className={`tickets-container transition-all duration-300 ${isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"}`}>
-      <div className="tickets-header">
-        <h2>Ticket List</h2>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary">
-          <FiPlus /> New Ticket
-        </button>
-      </div>
-
+  <div className="tickets-header flex items-center justify-between">
+    <h2 className="flex items-center text-3xl font-extrabold">
+      <FaTicketAlt className="mr-2 text-yellow-500 l" /> Support Tickets
+    </h2>
+    <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
+      <FiPlus className="mr-1" /> New Ticket
+    </button>
+  </div>
       <div className="tickets-controls">
         <div className="filter-group">
           <label>Show:</label>
