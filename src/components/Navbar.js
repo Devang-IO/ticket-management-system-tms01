@@ -136,10 +136,10 @@ const Navbar = ({ sidebarOpen }) => {
           <div className="relative">
             <div className="flex items-center justify-between w-full profile-section">
               {/* Username and Role (Left) */}
-              <div className="user-info text-white">
-                <p className="username font-bold">{username}</p>
-                <p className="user-role text-sm text-gray-300">{role}</p>
-              </div>
+<div className="user-info text-white" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+  <p className="username font-bold" style={{ whiteSpace: "nowrap" }}>{username}</p>
+  <p className="user-role text-sm text-gray-300" style={{ whiteSpace: "nowrap" }}>{role}</p>
+</div>
 
               {/* Profile Picture (Right) - Clickable */}
               <button
@@ -150,17 +150,29 @@ const Navbar = ({ sidebarOpen }) => {
                 className="focus:outline-none"
               >
                 {profilePicture && (
-                  <img
-                    src={profilePicture}
-                    alt="Profile"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      marginLeft: "10px", // Add margin to separate from text
-                    }}
-                  />
-                )}
+  <div
+    style={{
+      width: "40px",
+      height: "40px",
+      borderRadius: "50%",
+      marginLeft: "10px",
+      overflow: "hidden", // Ensures the image is clipped to the circle
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <img
+      src={profilePicture}
+      alt="Profile"
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover", // Ensures the image covers the area without distortion
+      }}
+    />
+  </div>
+)}
               </button>
             </div>
             {profileOpen && (
