@@ -528,11 +528,9 @@ body {
 }
 
 /* -------------------------------------Tickets List Container------------------------------------- */
-/* Tickets Container - Full Width */
+/* Tickets Container */
 .tickets-container {
-  @apply w-full mx-auto my-8 p-6 bg-gray-100 rounded-xl;
-  margin-top: 80px;
-  max-width: 95%;
+  @apply w-full max-w-[95%] mx-auto my-8 p-6 bg-gray-100 rounded-xl mt-20;
 }
 
 /* Header */
@@ -541,14 +539,12 @@ body {
 }
 
 .tickets-header h2 {
-  @apply text-3xl font-semibold text-[#23486A] leading-tight;
-  letter-spacing: 0.5px;
+  @apply text-3xl font-semibold text-[#23486A] leading-tight tracking-wide;
 }
 
 /* Primary Button */
 .btn-primary {
-  @apply flex items-center bg-[#EFB036] text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  @apply flex items-center bg-[#EFB036] text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md;
 }
 
 .btn-primary:hover {
@@ -557,9 +553,7 @@ body {
 
 /* Controls */
 .tickets-controls {
-  @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 justify-center items-center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 100%;
+  @apply flex flex-wrap gap-6 bg-[#F1F5F9] p-6 rounded-xl mb-6 justify-center items-center shadow-md w-full;
 }
 
 /* Filters */
@@ -572,9 +566,7 @@ body {
 }
 
 .search-input {
-  @apply px-4 py-2 border border-[#D1D5DB] rounded-xl bg-[#4C7B8B] text-white placeholder-gray-200;
-  min-width: 250px;
-  max-width: 300px;
+  @apply px-4 py-2 border border-[#D1D5DB] rounded-xl bg-[#4C7B8B] text-white placeholder-gray-200 w-[250px] max-w-[300px];
 }
 
 /* Scrollable Table */
@@ -589,8 +581,7 @@ body {
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background-color: #4C7B8B;
-  border-radius: 10px;
+  @apply bg-[#4C7B8B] rounded-lg;
 }
 
 /* Table */
@@ -598,41 +589,51 @@ body {
   @apply w-full border-collapse;
 }
 
+.table-container th,
+.table-container td {
+  @apply text-center border-b border-[#E5E7EB] p-4;
+}
+
+/* Fix Priority Column Alignment */
+.table-container th.priority-header,
+.table-container td.priority-cell {
+  @apply w-24 text-center p-3; /* Ensures heading and data align */
+}
+
 /* Table Headers */
 .table-container th {
-  @apply bg-[#23486A] text-white text-left font-medium p-4;
+  @apply bg-[#23486A] text-white font-medium;
 }
 
-/* Table Data */
+/* Table Cells */
 .table-container td {
-  @apply text-gray-700 p-4 text-center border-b border-[#E5E7EB];
-  font-size: 14px;
+  @apply text-gray-700 text-sm;
 }
 
-/* Priority Badge Colors */
+/* Priority Badges */
 .priority-badge {
-  @apply px-3 py-1 text-white text-xs font-semibold rounded-md;
+  @apply px-3 py-1 text-white text-xs font-semibold rounded-md w-full;
 }
 
 .priority-high {
-  @apply bg-[#EFB036];
+  @apply bg-[#EFB036] rounded-2xl;
 }
 
 .priority-medium {
-  @apply bg-[#3B6790];
+  @apply bg-[#3B6790] rounded-2xl;
 }
 
 .priority-low {
-  @apply bg-[#4C7B8B];
+  @apply bg-[#23486A] rounded-2xl;
 }
 
 /* Actions */
 .action-cell {
-  @apply flex justify-center items-center text-center relative;
+  @apply flex justify-center items-center relative;
 }
 
 .action-btn {
-  @apply flex items-center gap-3 px-3 py-2 rounded-full font-semibold text-white 
+  @apply flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-white 
          bg-gradient-to-r from-[#3B6790] to-[#23486A] shadow-lg 
          hover:from-[#23486A] hover:to-[#3B6790] hover:shadow-xl 
          transition-all duration-300 transform hover:scale-105 active:scale-95;
@@ -641,17 +642,13 @@ body {
 /* Dropdown */
 .dropdown {
   @apply absolute left-1/2 top-full transform -translate-x-1/2 mt-2 w-44 bg-white 
-         border border-[#4C7B8B] rounded-xl shadow-lg z-20 transition-all duration-300 ease-in-out;
+         border border-[#4C7B8B] rounded-xl shadow-lg z-20 transition-all duration-300;
 }
 
 .dropdown-item {
   @apply flex items-center gap-3 px-5 py-3 text-[#23486A] font-medium 
          transition-all duration-300 hover:bg-[#E1EAF2] hover:text-[#3B6790] 
          cursor-pointer w-full text-left rounded-md;
-}
-
-.dropdown-item:hover {
-  @apply shadow-sm;
 }
 
 .delete-btn {
@@ -664,54 +661,19 @@ body {
   .tickets-container {
     @apply p-4;
   }
-
   .tickets-header h2 {
     @apply text-2xl;
   }
-
-  .tickets-controls {
-    @apply flex-col gap-3;
-  }
-
+  .tickets-controls,
   .search-input {
-    @apply w-full;
-  }
-
-  .table-container {
-    @apply w-full;
-  }
-
-  .table-container th,
-  .table-container td {
-    @apply p-3;
+    @apply flex-col gap-3;
   }
 }
 
 @media (max-width: 768px) {
-  .tickets-container {
-    @apply p-4;
-  }
-
   .tickets-header {
     @apply flex-col text-center mb-4;
   }
-
-  .tickets-header h2 {
-    @apply text-2xl;
-  }
-
-  .tickets-controls {
-    @apply flex-col gap-3;
-  }
-
-  .search-input {
-    @apply w-full;
-  }
-
-  .table-container {
-    @apply w-full;
-  }
-
   .table-container th,
   .table-container td {
     @apply p-3 text-sm;
@@ -720,81 +682,17 @@ body {
 
 /* Dropzone Styling */
 .dropzone {
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.3s ease;
+  @apply border-2 border-dashed border-gray-400 rounded-lg p-5 text-center cursor-pointer transition-all duration-300;
 }
 
 .dropzone:hover {
-  border-color: #EFB036; /* Change border color on hover */
+  @apply border-[#EFB036];
 }
 
-.dropzone-text {
-  margin: 0;
-  color: #666;
-  font-size: 16px;
-}
-
-/* Image Preview Styling */
 .image-preview {
-  margin-top: 10px;
-  text-align: center;
+  @apply mt-2 text-center;
 }
 
 .preview-image {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-/* Hidden File Input */
-.hidden {
-  display: none;
-}
-/* Table Alignment */
-.table-container th {
-  text-align: center;
-  vertical-align: middle;
-}
-
-.table-container td {
-  text-align: center;
-  vertical-align: middle;
-}
-
-/* Priority Badge */
-.priority-cell {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.priority-badge {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 80px;
-  height: 30px;
-  border-radius: 15px;
-  font-size: 14px;
-  font-weight: bold;
-  color: white;
-  text-align: center;
-}
-
-/* Priority Colors */
-.priority-high {
-  background-color: #EFB036;
-}
-
-.priority-medium {
-  background-color: #3B6790;
-}
-
-.priority-low {
-  background-color: #23486A;
+  @apply max-w-full max-h-52 rounded-lg object-cover;
 }
