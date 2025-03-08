@@ -579,11 +579,7 @@ body {
 
 /* Scrollable Table */
 .table-container {
-  @apply bg-white rounded-2xl border;
-  width: 100%;
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: auto;
+  @apply bg-white rounded-2xl border w-full max-h-[450px] overflow-auto;
   scrollbar-width: thin;
   scrollbar-color: #4C7B8B transparent;
 }
@@ -602,18 +598,32 @@ body {
   @apply w-full border-collapse;
 }
 
-.table-container th,
-.table-container td {
-  @apply p-4 border-b border-[#E5E7EB] text-center;
-}
-
+/* Table Headers */
 .table-container th {
-  @apply bg-[#23486A] text-white text-left font-medium;
+  @apply bg-[#23486A] text-white text-left font-medium p-4;
 }
 
+/* Table Data */
 .table-container td {
-  @apply text-gray-700;
+  @apply text-gray-700 p-4 text-center border-b border-[#E5E7EB];
   font-size: 14px;
+}
+
+/* Priority Badge Colors */
+.priority-badge {
+  @apply px-3 py-1 text-white text-xs font-semibold rounded-md;
+}
+
+.priority-high {
+  @apply bg-[#EFB036];
+}
+
+.priority-medium {
+  @apply bg-[#3B6790];
+}
+
+.priority-low {
+  @apply bg-[#4C7B8B];
 }
 
 /* Actions */
@@ -719,7 +729,7 @@ body {
 }
 
 .dropzone:hover {
-  border-color: #EFB036  ; /* Change border color on hover */
+  border-color: #EFB036; /* Change border color on hover */
 }
 
 .dropzone-text {
@@ -744,4 +754,47 @@ body {
 /* Hidden File Input */
 .hidden {
   display: none;
+}
+/* Table Alignment */
+.table-container th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table-container td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Priority Badge */
+.priority-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.priority-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 30px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+}
+
+/* Priority Colors */
+.priority-high {
+  background-color: #EFB036;
+}
+
+.priority-medium {
+  background-color: #3B6790;
+}
+
+.priority-low {
+  background-color: #23486A;
 }

@@ -67,6 +67,8 @@ const Navbar = ({ sidebarOpen }) => {
         return "Profile";
       case "/home":
         return "Home";
+        case "/assigntickets":
+        return "Assign Tickets";
       case "/tickets/closed":
         return "Closed Tickets";
       default:
