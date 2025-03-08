@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FiBell, FiMenu, FiUser, FiLogOut } from "react-icons/fi";
-import { toast, ToastContainer } from "react-toastify"; // ✅ Ensure toast imports
-import "react-toastify/dist/ReactToastify.css"; // ✅ Import toast styles
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Navbar = ({ sidebarOpen }) => {
   const navigate = useNavigate();
@@ -12,12 +12,16 @@ const Navbar = ({ sidebarOpen }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [username, setUsername] = useState("Guest");
   const [role, setRole] = useState("User");
+  const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
 
+  // Fetch profile data from localStorage on component mount
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     const storedRole = localStorage.getItem("role");
+    const storedProfilePicture = localStorage.getItem("profilePicture");
     if (storedUsername) setUsername(storedUsername);
     if (storedRole) setRole(storedRole);
+    if (storedProfilePicture) setProfilePicture(storedProfilePicture);
   }, []);
 
   const notifications = [
@@ -32,11 +36,12 @@ const Navbar = ({ sidebarOpen }) => {
   const handleLogout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("role");
+    localStorage.removeItem("profilePicture");
     localStorage.setItem("isAuthenticated", "false");
 
     toast.success("Logged out successfully!", {
       position: "top-center",
-      autoClose: 1000, // ✅ Allow time for notification to appear
+      autoClose: 1000,
       hideProgressBar: true,
       closeOnClick: true,
       pauseOnHover: true,
@@ -45,20 +50,27 @@ const Navbar = ({ sidebarOpen }) => {
 
     setTimeout(() => {
       navigate("/login");
-    }, 1000); // ✅ Ensures redirection AFTER notification appears
+    }, 1000);
   };
 
   const getPageName = (path) => {
     if (path.startsWith("/ticket/")) return "Ticket Details";
 
     switch (path) {
-      case "/dashboard": return "User Dashboard";
-      case "/tickets": return "My Tickets";
-      case "/settings": return "Settings";
-      case "/profile": return "Profile";
-      case "/home": return "Home";
-      case "/tickets/closed": return "Closed Tickets";
-      default: return "Page Not Found";
+      case "/dashboard":
+        return "User Dashboard";
+      case "/tickets":
+        return "My Tickets";
+      case "/settings":
+        return "Settings";
+      case "/profile":
+        return "Profile";
+      case "/home":
+        return "Home";
+      case "/tickets/closed":
+        return "Closed Tickets";
+      default:
+        return "Page Not Found";
     }
   };
 
@@ -68,7 +80,10 @@ const Navbar = ({ sidebarOpen }) => {
     <>
       <nav className="navbar flex items-center justify-between px-4 py-2 bg-gray-800">
         {/* Hamburger menu button */}
-        <button onClick={() => setMenuOpen(!menuOpen)} className="block lg:hidden text-white">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="block lg:hidden text-white"
+        >
           <FiMenu size={24} />
         </button>
 
@@ -96,7 +111,10 @@ const Navbar = ({ sidebarOpen }) => {
                   <h3 className="font-semibold text-gray-800 mb-2">Notifications</h3>
                   <ul className="max-h-48 overflow-y-auto">
                     {notifications.map((notification) => (
-                      <li key={notification.id} className="py-2 border-b border-gray-200 last:border-b-0">
+                      <li
+                        key={notification.id}
+                        className="py-2 border-b border-gray-200 last:border-b-0"
+                      >
                         <p className="text-sm text-gray-700">{notification.text}</p>
                         <p className="text-xs text-gray-500">{notification.time}</p>
                       </li>
@@ -116,18 +134,46 @@ const Navbar = ({ sidebarOpen }) => {
 
           {/* Profile dropdown */}
           <div className="relative">
-            <div className="flex items-center gap-2 profile-section">
-              <div className="user-info text-white">
-                <p className="username font-bold">{username}</p>
-                <p className="user-role text-sm text-gray-300">{role}</p>
-              </div>
+            <div className="flex items-center justify-between w-full profile-section">
+              {/* Username and Role (Left) */}
+<div className="user-info text-white" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+  <p className="username font-bold" style={{ whiteSpace: "nowrap" }}>{username}</p>
+  <p className="user-role text-sm text-gray-300" style={{ whiteSpace: "nowrap" }}>{role}</p>
+</div>
+
+              {/* Profile Picture (Right) - Clickable */}
               <button
                 onClick={() => {
-                  setProfileOpen(!profileOpen);
-                  setNotificationsOpen(false);
+                  setProfileOpen(!profileOpen); // Toggle profile menu
+                  setNotificationsOpen(false); // Close notifications if open
                 }}
-                className="profile-placeholder"
-              />
+                className="focus:outline-none"
+              >
+                {profilePicture && (
+  <div
+    style={{
+      width: "40px",
+      height: "40px",
+      borderRadius: "50%",
+      marginLeft: "10px",
+      overflow: "hidden", // Ensures the image is clipped to the circle
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <img
+      src={profilePicture}
+      alt="Profile"
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover", // Ensures the image covers the area without distortion
+      }}
+    />
+  </div>
+)}
+              </button>
             </div>
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out">
@@ -138,7 +184,7 @@ const Navbar = ({ sidebarOpen }) => {
                   </li>
                   <li
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                    onClick={handleLogout} // ✅ Logout function fixed
+                    onClick={handleLogout}
                   >
                     <FiLogOut className="text-red-500" />
                     <span className="text-sm text-red-500">Logout</span>
@@ -150,7 +196,7 @@ const Navbar = ({ sidebarOpen }) => {
         </div>
       </nav>
 
-      {/* ✅ Toast Container - REQUIRED for notifications to work */}
+      {/* Toast Container */}
       <ToastContainer position="top-center" autoClose={3000} />
     </>
   );
