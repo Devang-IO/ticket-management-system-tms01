@@ -60,13 +60,15 @@ const Navbar = ({ sidebarOpen }) => {
       case "/dashboard":
         return "User Dashboard";
       case "/tickets":
-        return "My Tickets";
+        return "Support Tickets";
       case "/settings":
         return "Settings";
       case "/profile":
         return "Profile";
       case "/home":
         return "Home";
+        case "/assigntickets":
+        return "Assign Tickets";
       case "/tickets/closed":
         return "Closed Tickets";
       default:

@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
+import AssignTickets from "../pages/AssignTickets"
 
 const AppRoutes = () => {
   return (
@@ -61,6 +62,7 @@ const MainLayout = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/ticket/:id" element={<TicketDetails />} />
           <Route path="/tickets/closed" element={<ClosedTickets />} />
+          <Route path="/assigntickets" element={<AssignTickets />} />
         </Routes>
 
         {/* Toast Notifications */}
