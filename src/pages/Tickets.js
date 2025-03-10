@@ -53,12 +53,13 @@ const TicketList = ({ isSidebarOpen }) => {
     };
   }, []);
 
-  const filteredTickets = tickets.filter(
-    (ticket) =>
-      ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase()) &&
-      (statusFilter === "All" || ticket.status === statusFilter) &&
-      (priorityFilter === "All" || ticket.priority === priorityFilter)
-  );
+  // Update the filteredTickets calculation
+const filteredTickets = tickets.filter((ticket) => {
+  const matchesSearch = ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase());
+  const matchesStatus = statusFilter === "All" || ticket.status.toLowerCase() === statusFilter.toLowerCase();
+  const matchesPriority = priorityFilter === "All" || ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
+  return matchesSearch && matchesStatus && matchesPriority;
+});
 
   const indexOfLastTicket = currentPage * entriesPerPage;
   const indexOfFirstTicket = indexOfLastTicket - entriesPerPage;

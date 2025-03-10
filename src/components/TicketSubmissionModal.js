@@ -13,62 +13,100 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     formState: { errors },
   } = useForm();
 
+  const [imageFile, setImageFile] = useState(null); // Store the actual file
   const [imagePreview, setImagePreview] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  // Function to upload image to Cloudinary
+  const uploadImageToCloudinary = async (file) => {
+    if (!file) return null;
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      console.log("Uploading to Cloudinary...");
+      console.log("Cloud name:", process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
+      
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Cloudinary error details:", errorData);
+        throw new Error(`Failed to upload image to Cloudinary: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Cloudinary upload successful:", data);
+      return data.secure_url;
+    } catch (error) {
+      console.error("Error uploading image to Cloudinary:", error);
+      toast.error("Image upload failed. Submitting ticket without image.");
+      return null;
+    }
+  };
+
   const onSubmit = async (data) => {
-    setIsSubmitting(true); // Disable the submit button to prevent multiple submissions
+    setIsSubmitting(true);
     const toastId = "ticket-submit-toast";
 
     try {
-      // Upload image to Supabase Storage (if provided)
       let imageUrl = null;
-      if (data.image && data.image[0]) {
-        const file = data.image[0];
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("ticket-images") // Replace with your Supabase bucket name
-          .upload(fileName, file);
 
-        if (uploadError) throw uploadError;
+      // Upload image to Cloudinary if a file was selected
+      if (imageFile) {
+        console.log("Image file detected, uploading to Cloudinary:", imageFile.name);
+        imageUrl = await uploadImageToCloudinary(imageFile);
+        console.log("Image uploaded to Cloudinary. URL:", imageUrl);
+      } else {
+        console.log("No image file to upload");
+      }
 
-        // Get the public URL of the uploaded image
-        const { data: urlData } = supabase.storage
-          .from("ticket-images")
-          .getPublicUrl(fileName);
-        imageUrl = urlData.publicUrl;
+      // Check if environment variables are properly set
+      if (!process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || !process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET) {
+        console.warn("Cloudinary environment variables are not properly set");
       }
 
       // Insert ticket data into Supabase
-      const { error: insertError } = await supabase.from("tickets").insert([
-        {
-          name: data.name,
-          email: data.email,
-          category: data.category,
-          priority: data.priority,
-          title: data.title,
-          description: data.description,
-          image_url: imageUrl, // Store the image URL if available
-          status: "open", // Default status for new tickets
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      const { data: ticketData, error: insertError } = await supabase
+        .from("tickets")
+        .insert([
+          {
+            name: data.name,
+            email: data.email,
+            category: data.category,
+            priority: data.priority,
+            title: data.title,
+            description: data.description,
+            image_url: imageUrl, // This will be null if no image or upload failed
+            status: "open",
+            created_at: new Date().toISOString(),
+          },
+        ])
+        .select();
 
-      if (insertError) throw insertError;
-
-      // Show success toast
-      if (!toast.isActive(toastId)) {
-        toast.success("Ticket submitted successfully!", {
-          position: "top-center",
-          autoClose: 3000,
-          toastId,
-          hideProgressBar: true,
-        });
+      if (insertError) {
+        console.error("Supabase insertion error:", insertError);
+        throw insertError;
       }
 
-      // Close the modal and navigate to the dashboard
+      console.log("Ticket inserted into Supabase:", ticketData);
+
+      toast.success("Ticket submitted successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+        toastId,
+        hideProgressBar: true,
+      });
+
       setTimeout(() => {
         onClose();
         navigate("/dashboard");
@@ -82,16 +120,19 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         hideProgressBar: true,
       });
     } finally {
-      setIsSubmitting(false); // Re-enable the submit button
+      setIsSubmitting(false);
     }
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImageFile(file); // Store the actual file object
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
+      console.log("Image file selected:", file.name);
     } else {
+      setImageFile(null);
       setImagePreview(null);
     }
   };
@@ -240,7 +281,6 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
               type="file"
               accept="image/*"
               className="form-input-file hidden"
-              {...register("image")}
               onChange={handleImageChange}
             />
           </div>
