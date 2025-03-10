@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { supabase } from "../utils/supabase"; // Import Supabase client
 import "../styles/global.css";
 
 const TicketSubmissionModal = ({ isOpen, onClose }) => {
@@ -11,29 +12,79 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  
+
   const [imagePreview, setImagePreview] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    setIsSubmitting(true); // Disable the submit button to prevent multiple submissions
     const toastId = "ticket-submit-toast";
-  
-    if (!toast.isActive(toastId)) {
-      toast.success("Ticket submitted successfully!", {
+
+    try {
+      // Upload image to Supabase Storage (if provided)
+      let imageUrl = null;
+      if (data.image && data.image[0]) {
+        const file = data.image[0];
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from("ticket-images") // Replace with your Supabase bucket name
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get the public URL of the uploaded image
+        const { data: urlData } = supabase.storage
+          .from("ticket-images")
+          .getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+      }
+
+      // Insert ticket data into Supabase
+      const { error: insertError } = await supabase.from("tickets").insert([
+        {
+          name: data.name,
+          email: data.email,
+          category: data.category,
+          priority: data.priority,
+          title: data.title,
+          description: data.description,
+          image_url: imageUrl, // Store the image URL if available
+          status: "open", // Default status for new tickets
+          created_at: new Date().toISOString(),
+        },
+      ]);
+
+      if (insertError) throw insertError;
+
+      // Show success toast
+      if (!toast.isActive(toastId)) {
+        toast.success("Ticket submitted successfully!", {
+          position: "top-center",
+          autoClose: 3000,
+          toastId,
+          hideProgressBar: true,
+        });
+      }
+
+      // Close the modal and navigate to the dashboard
+      setTimeout(() => {
+        onClose();
+        navigate("/dashboard");
+      }, 1000);
+    } catch (error) {
+      console.error("Error submitting ticket:", error);
+      toast.error("Failed to submit ticket. Please try again.", {
         position: "top-center",
         autoClose: 3000,
         toastId,
-        hideProgressBar:true,
+        hideProgressBar: true,
       });
+    } finally {
+      setIsSubmitting(false); // Re-enable the submit button
     }
-  
-    setTimeout(() => {
-      onClose();  // Close the modal after submission
-      navigate("/dashboard");
-    }, 1000);
   };
-  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -141,11 +192,11 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </select>
             {errors.priority && <p className="error-message">{errors.priority.message}</p>}
           </div>
-          
-          {/* title Textarea */}
+
+          {/* Title Textarea */}
           <div className="form-group full-width">
-            <label className="form-label" htmlFor="description">
-             Title
+            <label className="form-label" htmlFor="title">
+              Title
             </label>
             <textarea
               id="title"
@@ -153,7 +204,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
               className="form-textarea"
               {...register("title", { required: "Title is required" })}
             ></textarea>
-            {errors.description && <p className="error-message">{errors.title.message}</p>}
+            {errors.title && <p className="error-message">{errors.title.message}</p>}
           </div>
 
           {/* Description Textarea */}
@@ -196,8 +247,8 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
 
           {/* Submit Button */}
           <div className="form-group full-width">
-            <button type="submit" className="form-button">
-              Submit Ticket
+            <button type="submit" className="form-button" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Ticket"}
             </button>
           </div>
         </form>
