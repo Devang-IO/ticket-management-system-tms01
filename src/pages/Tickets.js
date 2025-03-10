@@ -53,7 +53,7 @@ const TicketList = ({ isSidebarOpen }) => {
     <div className={`tickets-container transition-all duration-300 ${isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"}`}>
   <div className="tickets-header flex items-center justify-between">
     <h2 className="flex items-center text-3xl font-extrabold">
-      <FaTicketAlt className="mr-2 text-yellow-500 l" /> Support Tickets
+      <FaTicketAlt className="mr-2 text-yellow-500 l" /> My Tickets
     </h2>
     <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
       <FiPlus className="mr-1" /> New Ticket

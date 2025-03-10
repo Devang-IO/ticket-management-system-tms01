@@ -60,7 +60,7 @@ const Navbar = ({ sidebarOpen }) => {
       case "/dashboard":
         return "User Dashboard";
       case "/tickets":
-        return "Support Tickets";
+        return "My Tickets";
       case "/settings":
         return "Settings";
       case "/profile":
