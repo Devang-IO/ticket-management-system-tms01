@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FiPlus, FiChevronDown, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
+import { supabase } from "../utils/supabase"; // Import Supabase client
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
 
 const TicketList = ({ isSidebarOpen }) => {
@@ -15,16 +16,30 @@ const TicketList = ({ isSidebarOpen }) => {
   const [actionDropdown, setActionDropdown] = useState(null);
   const dropdownRef = useRef(null);
 
+  // Fetch tickets from Supabase
   useEffect(() => {
-    const mockTickets = Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      title: `Issue ${i + 1}`,
-      status: ["Open", "Closed", "Pending", "Resolved"][i % 4],
-      priority: ["High", "Medium", "Low"][i % 3],
-      date: `2025-02-${24 - i}`,
-    }));
-    setTickets(mockTickets);
+    const fetchTickets = async () => {
+      const { data, error } = await supabase.from("tickets").select("*");
+      if (error) {
+        console.error("Error fetching tickets:", error);
+      } else {
+        setTickets(data);
+      }
+    };
+
+    fetchTickets();
   }, []);
+
+  // Handle ticket deletion
+  const handleDeleteTicket = async (ticketId) => {
+    const { error } = await supabase.from("tickets").delete().eq("id", ticketId);
+    if (error) {
+      console.error("Error deleting ticket:", error);
+    } else {
+      // Remove the deleted ticket from the state
+      setTickets((prevTickets) => prevTickets.filter((ticket) => ticket.id !== ticketId));
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -51,14 +66,14 @@ const TicketList = ({ isSidebarOpen }) => {
 
   return (
     <div className={`tickets-container transition-all duration-300 ${isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"}`}>
-  <div className="tickets-header flex items-center justify-between">
-    <h2 className="flex items-center text-3xl font-extrabold">
-      <FaTicketAlt className="mr-2 text-yellow-500 l" /> Support Tickets
-    </h2>
-    <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
-      <FiPlus className="mr-1" /> New Ticket
-    </button>
-  </div>
+      <div className="tickets-header flex items-center justify-between">
+        <h2 className="flex items-center text-3xl font-extrabold">
+          <FaTicketAlt className="mr-2 text-yellow-500 l" /> Support Tickets
+        </h2>
+        <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
+          <FiPlus className="mr-1" /> New Ticket
+        </button>
+      </div>
       <div className="tickets-controls">
         <div className="filter-group">
           <label>Show:</label>
@@ -123,35 +138,38 @@ const TicketList = ({ isSidebarOpen }) => {
                     {ticket.priority}
                   </span>
                 </td>
-                <td>{ticket.date}</td>
+                <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
                 <td className="action-cell">
-  <button
-    onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
-    className="action-btn"
-  >
-    Actions <FiChevronDown />
-  </button>
+                  <button
+                    onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
+                    className="action-btn"
+                  >
+                    Actions <FiChevronDown />
+                  </button>
 
-  {actionDropdown === ticket.id && (
-    <div className="dropdown-wrapper" ref={dropdownRef}>
-      <div className="dropdown">
-        <Link
-          to={`/ticket/${ticket.id}`}
-          className="dropdown-item"
-          onClick={() => setActionDropdown(null)}
-        >
-          <FiEye /> View
-        </Link>
-        <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
-          <FiEdit /> Edit
-        </Link>
-        <button className="delete-btn">
-          <FiTrash2 /> Delete
-        </button>
-      </div>
-    </div>
-  )}
-</td>
+                  {actionDropdown === ticket.id && (
+                    <div className="dropdown-wrapper" ref={dropdownRef}>
+                      <div className="dropdown">
+                        <Link
+                          to={`/ticket/${ticket.id}`}
+                          className="dropdown-item"
+                          onClick={() => setActionDropdown(null)}
+                        >
+                          <FiEye /> View
+                        </Link>
+                        <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
+                          <FiEdit /> Edit
+                        </Link>
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDeleteTicket(ticket.id)}
+                        >
+                          <FiTrash2 /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
