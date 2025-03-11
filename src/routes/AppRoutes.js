@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+import AdminDashboard from "../pages/AdminDashboard"
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Tickets from "../pages/Tickets";
@@ -13,6 +14,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
 import AssignTickets from "../pages/AssignTickets"
+
 
 const AppRoutes = () => {
   return (
@@ -57,12 +59,14 @@ const MainLayout = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admindashboard" element={<AdminDashboard />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/home/*" element={<Home />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/ticket/:id" element={<TicketDetails />} />
           <Route path="/tickets/closed" element={<ClosedTickets />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
+          
         </Routes>
 
         {/* Toast Notifications */}

@@ -135,10 +135,10 @@ export default function LoginPage() {
 
         switch (userData?.role || 'user') {
           case 'admin':
-            navigate("/admin-dashboard");
+            navigate("/admindashboard");
             break;
           case 'employee':
-            navigate("/employee-dashboard");
+            navigate("/csrdashboard");
             break;
           default:
             navigate("/dashboard");
