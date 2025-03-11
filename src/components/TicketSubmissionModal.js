@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { supabase } from "../utils/supabase"; // Import Supabase client
 import "../styles/global.css";
 
 const TicketSubmissionModal = ({ isOpen, onClose }) => {
@@ -11,36 +12,147 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  
+
+  const [imageFile, setImageFile] = useState(null); // Store the actual file
   const [imagePreview, setImagePreview] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  // Fetch current user on component mount
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  // Function to upload image to Cloudinary
+  const uploadImageToCloudinary = async (file) => {
+    if (!file) return null;
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      console.log("Uploading to Cloudinary...");
+      console.log("Cloud name:", process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
+      
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Cloudinary error details:", errorData);
+        throw new Error(`Failed to upload image to Cloudinary: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Cloudinary upload successful:", data);
+      return data.secure_url;
+    } catch (error) {
+      console.error("Error uploading image to Cloudinary:", error);
+      toast.error("Image upload failed. Submitting ticket without image.");
+      return null;
+    }
+  };
+
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
     const toastId = "ticket-submit-toast";
-  
-    if (!toast.isActive(toastId)) {
+
+    try {
+      let imageUrl = null;
+
+      // Upload image to Cloudinary if a file was selected
+      if (imageFile) {
+        console.log("Image file detected, uploading to Cloudinary:", imageFile.name);
+        imageUrl = await uploadImageToCloudinary(imageFile);
+        console.log("Image uploaded to Cloudinary. URL:", imageUrl);
+      } else {
+        console.log("No image file to upload");
+      }
+
+      // Check if environment variables are properly set
+      if (!process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || !process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET) {
+        console.warn("Cloudinary environment variables are not properly set");
+      }
+
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Insert ticket data into Supabase
+      const { data: ticketData, error: insertError } = await supabase
+        .from("tickets")
+        .insert([
+          {
+            name: data.name,
+            email: data.email,
+            category: data.category,
+            priority: data.priority,
+            title: data.title,
+            description: data.description,
+            image_url: imageUrl, // This will be null if no image or upload failed
+            status: "open",
+            created_at: new Date().toISOString(),
+            user_id: user.id, // Add the user ID to associate the ticket with the user
+          },
+        ])
+        .select();
+
+      if (insertError) {
+        console.error("Supabase insertion error:", insertError);
+        throw insertError;
+      }
+
+      console.log("Ticket inserted into Supabase:", ticketData);
+
       toast.success("Ticket submitted successfully!", {
         position: "top-center",
         autoClose: 3000,
         toastId,
-        hideProgressBar:true,
+        hideProgressBar: true,
       });
+
+      setTimeout(() => {
+        onClose();
+        navigate("/dashboard");
+      }, 1000);
+    } catch (error) {
+      console.error("Error submitting ticket:", error);
+      toast.error("Failed to submit ticket. Please try again.", {
+        position: "top-center",
+        autoClose: 3000,
+        toastId,
+        hideProgressBar: true,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  
-    setTimeout(() => {
-      onClose();  // Close the modal after submission
-      navigate("/dashboard");
-    }, 1000);
   };
-  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImageFile(file); // Store the actual file object
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
+      console.log("Image file selected:", file.name);
     } else {
+      setImageFile(null);
       setImagePreview(null);
     }
   };
@@ -141,11 +253,11 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </select>
             {errors.priority && <p className="error-message">{errors.priority.message}</p>}
           </div>
-          
-          {/* title Textarea */}
+
+          {/* Title Textarea */}
           <div className="form-group full-width">
-            <label className="form-label" htmlFor="description">
-             Title
+            <label className="form-label" htmlFor="title">
+              Title
             </label>
             <textarea
               id="title"
@@ -153,7 +265,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
               className="form-textarea"
               {...register("title", { required: "Title is required" })}
             ></textarea>
-            {errors.description && <p className="error-message">{errors.title.message}</p>}
+            {errors.title && <p className="error-message">{errors.title.message}</p>}
           </div>
 
           {/* Description Textarea */}
@@ -189,15 +301,14 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
               type="file"
               accept="image/*"
               className="form-input-file hidden"
-              {...register("image")}
               onChange={handleImageChange}
             />
           </div>
 
           {/* Submit Button */}
           <div className="form-group full-width">
-            <button type="submit" className="form-button">
-              Submit Ticket
+            <button type="submit" className="form-button" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Ticket"}
             </button>
           </div>
         </form>

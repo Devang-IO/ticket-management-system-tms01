@@ -1,31 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaComments, FaFileAlt, FaInfoCircle, FaPaperclip, FaEdit, FaSave, FaTimes } from "react-icons/fa";
+import { FaArrowLeft, FaComments, FaFileAlt, FaInfoCircle, FaPaperclip, FaImage } from "react-icons/fa";
+import { supabase } from "../utils/supabase"; // Import Supabase client
 
-const mockTickets = Array.from({ length: 15 }, (_, i) => ({
-  id: i + 1,
-  title: `Issue ${i + 1}`,
-  status: ["Open", "Closed", "Pending", "Resolved"][i % 4],
-  priority: ["High", "Medium", "Low"][i % 3],
-  description: `Description for Issue ${i + 1}: This is a sample issue generated dynamically.`,
-  comments: [
-    { id: 1, user: "User1", text: `Comment 1 for Issue ${i + 1}`, time: "09:00 AM" },
-    { id: 2, user: "User2", text: `Comment 2 for Issue ${i + 1}`, time: "10:30 AM" },
-  ],
-  attachments: [
-    { name: "error_log_1.txt", link: "#" },
-    { name: "screenshot1.png", link: "#" },
-  ],
-}));
-
-const TicketDetails = () => {
+const TicketDetails = ({ currentUser }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const ticket = mockTickets.find((t) => t.id === parseInt(id));
-  const [comments, setComments] = useState(ticket?.comments || []);
+  const [ticket, setTicket] = useState(null);
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const [editMode, setEditMode] = useState(null);
-  const [editedComment, setEditedComment] = useState("");
+  const [loadingComment, setLoadingComment] = useState(false);
+
+  // Fetch ticket details from Supabase
+  useEffect(() => {
+    const fetchTicket = async () => {
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching ticket:", error);
+      } else {
+        setTicket(data);
+      }
+    };
+
+    fetchTicket();
+  }, [id]);
+
+  // Fetch comments from Supabase
+  useEffect(() => {
+    const fetchComments = async () => {
+      const { data, error } = await supabase
+        .from("comments")
+        .select("*")
+        .eq("ticket_id", id)
+        .order("created_at", { ascending: true });
+
+      if (error) console.error("Error fetching comments:", error);
+      else setComments(data);
+    };
+
+    fetchComments();
+  }, [id]);
+
+  // Handle adding a new comment
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+
+    setLoadingComment(true);
+
+    try {
+      // Insert the new comment into Supabase
+      const { data, error } = await supabase
+        .from("comments")
+        .insert([
+          {
+            ticket_id: id,
+            text: newComment,
+            user_id: currentUser.id, // Associate the comment with the logged-in user
+            created_at: new Date().toISOString(),
+          },
+        ])
+        .select();
+
+      if (error) {
+        console.error("Error adding comment:", error);
+      } else {
+        // Update the comments state with the new comment
+        setComments([...comments, ...data]);
+        setNewComment(""); // Clear the input field
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    } finally {
+      setLoadingComment(false);
+    }
+  };
 
   if (!ticket) {
     return <div className="text-center text-red-500">Ticket not found!</div>;
@@ -45,20 +98,20 @@ const TicketDetails = () => {
           <h2 className="text-2xl font-semibold text-[#3B6790]">{ticket.title}</h2>
           {/* Status & Priority Container */}
           <div className="flex items-center gap-x-6 mt-3">
-            {/* {Status section } */}
+            {/* Status section */}
             <div className="flex items-center gap-3">
               <FaInfoCircle className="text-[#3B6790] text-xl" />
               <span className="font-bold text-lg">Status:</span>
-              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg  shadow ${
+              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg shadow ${
                 ticket.status === "Open" ? "bg-[#EFB036]" :
                 ticket.status === "Closed" ? "bg-[#23486A]" :
-                ticket.status === "Pending" ?  "bg-[#3B6790]" : "bg-[#4C7B8B]"
+                ticket.status === "Pending" ? "bg-[#3B6790]" : "bg-[#4C7B8B]"
               }`}>{ticket.status}</span>
             </div>
-            {/* {Priority section } */}
+            {/* Priority section */}
             <div className="flex items-center gap-3">
               <span className="font-bold text-lg">Priority:</span>
-              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg  shadow ${
+              <span className={`px-3 py-1 rounded-lg text-white font-semibold text-lg shadow ${
                 ticket.priority === "High" ? "bg-[#EFB036]" :
                 ticket.priority === "Medium" ? "bg-[#3B6790]" : "bg-[#4C7B8B]"
               }`}>{ticket.priority}</span>
@@ -70,47 +123,39 @@ const TicketDetails = () => {
             <p className="text-lg text-[#23486A]">{ticket.description}</p>
           </div>
         </div>
-                {/* Attachments */}
+
+        {/* Attachments Section */}
         <div className="bg-white p-4 rounded-lg shadow-md mt-4">
           <h3 className="text-xl font-bold flex items-center gap-3">
             <FaPaperclip className="text-[#3B6790] text-2xl" /> Attachments
           </h3>
-          {ticket.attachments.map((file, index) => (
-            <p key={index} className="mt-2">
-              <a href={file.link} className="text-[#3B6790] hover:underline text-lg">
-                {file.name}
-              </a>
-            </p>
-          ))}
+          {ticket.image_url && (
+            <div className="mt-4 flex items-center gap-3">
+              <FaImage className="text-2xl text-[#3B6790]" />
+              <img 
+                src={ticket.image_url} 
+                alt="Ticket attachment" 
+                className="max-w-xs h-auto rounded-lg border p-1"
+              />
+            </div>
+          )}
         </div>
-          {/* Comments Section */}
+
+        {/* Comments Section */}
         <div className="bg-white p-4 rounded-lg shadow-md mt-4">
           <h3 className="text-xl font-bold flex items-center gap-3">
             <FaComments className="text-[#3B6790] text-2xl" /> Live Conversation
           </h3>
           <div className="mt-3">
             {comments.map((comment) => (
-              <div key={comment.id} className="border-t py-3 flex justify-between items-center">
-                <div>
-                  <p className="font-semibold text-lg text-[#23486A]">
-                    {comment.user}: 
-                    {editMode === comment.id ? (
-                      <input
-                        type="text"
-                        className="ml-2 border p-2 rounded-md shadow w-2/3"
-                        value={editedComment}
-                        onChange={(e) => setEditedComment(e.target.value)}
-                      />
-                    ) : (
-                      <span className="text-gray-600"> {comment.text}</span>
-                    )}
-                  </p>
-                  <p className="text-sm text-gray-500">{comment.time}</p>
-                </div>
+              <div key={comment.id} className="border-t py-3">
+                <p className="text-gray-600">{comment.text}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {new Date(comment.created_at).toLocaleString()}
+                </p>
               </div>
             ))}
           </div>
-            {/* New Comment Input */}
           <div className="mt-4 flex">
             <input
               type="text"
@@ -118,30 +163,24 @@ const TicketDetails = () => {
               placeholder="Type a new comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
             />
-            <button 
-              onClick={() => {
-                if (newComment.trim() === "") return;
-                setComments([...comments, {
-                  id: comments.length + 1,
-                  user: "You",
-                  text: newComment,
-                  time: new Date().toLocaleTimeString(),
-                }]);
-                setNewComment("");
-              }} 
-               className="bg-[#3B6790] text-white px-4 py-2 rounded-md ml-2 shadow-md  hover:bg-[#EFB036]"
+            <button
+              onClick={handleAddComment}
+              disabled={loadingComment}
+              className="bg-[#3B6790] text-white px-4 py-2 rounded-md ml-2 shadow-md hover:bg-[#EFB036] disabled:opacity-50"
             >
-              Send
+              {loadingComment ? 'Posting...' : 'Post'}
             </button>
           </div>
         </div>
-               {/* Back Button */}
+
+        {/* Back Button */}
         <div className="mt-6 flex justify-center">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 bg-[#3B6790] hover:bg-[#EFB036] text-white px-4 py-2 rounded-lg shadow-md"
-            >
+          >
             <FaArrowLeft /> Back to Tickets
           </button>
         </div>
