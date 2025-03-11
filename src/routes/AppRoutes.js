@@ -13,6 +13,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
 import AssignTickets from "../pages/AssignTickets";
+import WelcomePage from "../pages/welcomepage";
 
 
 const AppRoutes = () => {
@@ -54,7 +55,7 @@ const MainLayout = () => {
         {showNavbar && <Navbar />}
 
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<WelcomePage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
