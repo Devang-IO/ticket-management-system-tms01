@@ -13,7 +13,10 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
+import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
+
 import AssignTickets from "../pages/AssignTickets"
+
 
 
 const AppRoutes = () => {
@@ -65,6 +68,7 @@ const MainLayout = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/ticket/:id" element={<TicketDetails />} />
           <Route path="/tickets/closed" element={<ClosedTickets />} />
+          <Route path="/employee-dashboard" element={<CSRdashboard />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
           
         </Routes>
