@@ -89,7 +89,7 @@ const Dashboard = () => {
     flexDirection: "column", 
     justifyContent: "center", 
     alignItems: "center",
-    height: "100%"
+    height: "95%"
   }}
 >
   <h2 
