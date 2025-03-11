@@ -14,12 +14,31 @@ const TicketList = ({ isSidebarOpen }) => {
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionDropdown, setActionDropdown] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Fetch tickets from Supabase
+  // Fetch current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  // Fetch tickets from Supabase for the current user only
   useEffect(() => {
     const fetchTickets = async () => {
-      const { data, error } = await supabase.from("tickets").select("*");
+      if (!currentUser) return;
+
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("*")
+        .eq("user_id", currentUser.id); // Filter tickets by the current user's ID
+
       if (error) {
         console.error("Error fetching tickets:", error);
       } else {
@@ -27,8 +46,10 @@ const TicketList = ({ isSidebarOpen }) => {
       }
     };
 
-    fetchTickets();
-  }, []);
+    if (currentUser) {
+      fetchTickets();
+    }
+  }, [currentUser]);
 
   // Handle ticket deletion
   const handleDeleteTicket = async (ticketId) => {
@@ -54,12 +75,12 @@ const TicketList = ({ isSidebarOpen }) => {
   }, []);
 
   // Update the filteredTickets calculation
-const filteredTickets = tickets.filter((ticket) => {
-  const matchesSearch = ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase());
-  const matchesStatus = statusFilter === "All" || ticket.status.toLowerCase() === statusFilter.toLowerCase();
-  const matchesPriority = priorityFilter === "All" || ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
-  return matchesSearch && matchesStatus && matchesPriority;
-});
+  const filteredTickets = tickets.filter((ticket) => {
+    const matchesSearch = ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase());
+    const matchesStatus = statusFilter === "All" || ticket.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesPriority = priorityFilter === "All" || ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
   const indexOfLastTicket = currentPage * entriesPerPage;
   const indexOfFirstTicket = indexOfLastTicket - entriesPerPage;

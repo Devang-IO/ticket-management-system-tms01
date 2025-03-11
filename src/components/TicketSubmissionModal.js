@@ -16,7 +16,20 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
   const [imageFile, setImageFile] = useState(null); // Store the actual file
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
+
+  // Fetch current user on component mount
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   // Function to upload image to Cloudinary
   const uploadImageToCloudinary = async (file) => {
@@ -75,6 +88,12 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         console.warn("Cloudinary environment variables are not properly set");
       }
 
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       // Insert ticket data into Supabase
       const { data: ticketData, error: insertError } = await supabase
         .from("tickets")
@@ -89,6 +108,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             image_url: imageUrl, // This will be null if no image or upload failed
             status: "open",
             created_at: new Date().toISOString(),
+            user_id: user.id, // Add the user ID to associate the ticket with the user
           },
         ])
         .select();
