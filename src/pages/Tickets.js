@@ -97,14 +97,6 @@ const TicketList = ({ isSidebarOpen }) => {
       <FiPlus className="mr-1" /> New Ticket
     </button>
   </div>
-      <div className="tickets-header flex items-center justify-between">
-        <h2 className="flex items-center text-3xl font-extrabold">
-          <FaTicketAlt className="mr-2 text-yellow-500 l" /> Support Tickets
-        </h2>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
-          <FiPlus className="mr-1" /> New Ticket
-        </button>
-      </div>
 
       <div className="tickets-controls">
         <div className="filter-group">

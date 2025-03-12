@@ -16,6 +16,7 @@ import AssignTickets from "../pages/AssignTickets";
 import WelcomePage from "../pages/welcomepage";
 
 
+
 const AppRoutes = () => {
   return (
     <Router>
@@ -65,6 +66,7 @@ const MainLayout = () => {
           <Route path="/ticket/:id" element={<TicketDetails />} />
           <Route path="/tickets/closed" element={<ClosedTickets />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
+         
          
         </Routes>
 

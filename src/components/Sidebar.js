@@ -49,7 +49,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     <>
       <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
         <div className="sidebar-header">
-          {sidebarOpen && <span className="sidebar-title">QuickAssist</span>}
+          {sidebarOpen && <img src="./logo.png" alt="Logo" className="w-8 h-8" /> &&<span className="sidebar-title">QuickAssist</span>}
           <button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <FiArrowRightCircle size={24} /> : <FiArrowLeftCircle size={24} />}
           </button>
