@@ -161,7 +161,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/bg.png')" }}>
       <h1 className="login-title">Login</h1>
       <form onSubmit={handleSubmit} className="login-form">
         <div className="form-group">
