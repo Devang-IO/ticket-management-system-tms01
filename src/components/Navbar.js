@@ -64,7 +64,7 @@ const Navbar = ({ sidebarOpen }) => {
       case "/csrdashboard": // ✅ Added Admin Dashboard
         return "Employee Dashboard";
       case "/tickets":
-        return "Support Tickets";
+        return "My Tickets";
       case "/settings":
         return "Settings";
       case "/profile":

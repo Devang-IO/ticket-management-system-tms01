@@ -264,6 +264,7 @@
     "form-data": "^3.0.3",
     "forwarded": "^0.2.0",
     "fraction.js": "^4.3.7",
+    "framer-motion": "^12.5.0",
     "fresh": "^0.5.2",
     "fs-extra": "^10.1.0",
     "fs-monkey": "^1.0.6",
@@ -861,7 +862,7 @@
     "yocto-queue": "^0.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set NODE_OPTIONS=--max-old-space-size=4096 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
