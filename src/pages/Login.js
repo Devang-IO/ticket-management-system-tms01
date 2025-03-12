@@ -81,8 +81,38 @@ export default function LoginPage() {
 
       console.log("Fetched user data:", userData);
 
-      // Store user profile data in localStorage
-      if (userData) {
+      // If user data does not exist in the `users` table, insert it
+      if (!userData) {
+        console.log("User does not exist in `users` table. Inserting new user...");
+
+        const { data: newUser, error: insertError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.email.split('@')[0], // Default name
+              role: 'user', // Default role
+              profile_picture: null, // Default profile picture
+            },
+          ])
+          .single();
+
+        if (insertError) {
+          console.error("Insert error:", insertError);
+          throw insertError;
+        }
+
+        console.log("New user inserted:", newUser);
+
+        // Store user profile data in localStorage
+        localStorage.setItem("username", newUser.name);
+        localStorage.setItem("role", newUser.role);
+        localStorage.setItem("profilePicture", newUser.profile_picture);
+      } else {
+        console.log("User already exists in `users` table.");
+
+        // Store user profile data in localStorage
         localStorage.setItem("username", userData.name);
         localStorage.setItem("role", userData.role);
         localStorage.setItem("profilePicture", userData.profile_picture);
@@ -93,11 +123,15 @@ export default function LoginPage() {
         position: "top-center",
         autoClose: 1000,
         hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
       });
 
       // Redirect based on role
       setTimeout(() => {
-        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("isAuthenticated", "true"); // Store login state
 
         switch (userData?.role || 'user') {
           case 'admin':
@@ -109,10 +143,10 @@ export default function LoginPage() {
           default:
             navigate("/dashboard");
         }
-      }, 1000);
+      }, 1000); // Delay navigation to allow the toast to be visible
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error.message);
+      toast.error(error.message); // Display error toast
     }
   };
 
@@ -127,61 +161,78 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center"
-      style={{ backgroundImage: "url('/bg.png')" }}
-    >
-      <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center text-gray-800">Login</h1>
-        <form onSubmit={handleSubmit} className="mt-6">
-          <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
+    <div className="login-container min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/bg.png')" }}>
+      <h1 className="login-title">Login</h1>
+      <form onSubmit={handleSubmit} className="login-form">
+        <div className="form-group">
+          <label className="form-label">Email</label>
+          <input
+            type="email"
+            placeholder="name@example.com"
+            value={email}
+            onChange={handleEmailChange}
+            required
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Password</label>
+          <div className="password-container">
             <input
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={handleEmailChange}
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={handlePasswordChange}
+              onFocus={() => setIsPasswordFocused(true)} // Show checkboxes on focus
+              onBlur={() => setIsPasswordFocused(false)} // Hide checkboxes on blur
               required
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="form-input password-input"
             />
+            <span
+              className="password-toggle"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                value={password}
-                onChange={handlePasswordChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-              <span
-                className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
+          {/* Password validation checkboxes */}
+          {isPasswordFocused && (
+            <div className="password-checks space-y-2 mt-2">
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.uppercase ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+                <input type="checkbox" checked={passwordChecks.uppercase} readOnly className="form-checkbox" />
+                <span>Uppercase letter</span>
+              </div>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.lowercase ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+                <input type="checkbox" checked={passwordChecks.lowercase} readOnly className="form-checkbox" />
+                <span>Lowercase letter</span>
+              </div>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.number ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+                <input type="checkbox" checked={passwordChecks.number} readOnly className="form-checkbox" />
+                <span>Number</span>
+              </div>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.specialChar ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+                <input type="checkbox" checked={passwordChecks.specialChar} readOnly className="form-checkbox" />
+                <span>Special character</span>
+              </div>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.minLength ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+                <input type="checkbox" checked={passwordChecks.minLength} readOnly className="form-checkbox" />
+                <span>8 characters or more</span>
+              </div>
             </div>
-            {passwordError && <p className="text-red-600 text-sm mt-1">{passwordError}</p>}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Log in
-          </button>
-        </form>
-        <button
-          onClick={handleForgetPassword}
-          className="block text-blue-500 text-sm mt-4 hover:underline text-center"
-        >
-          Forget Password?
+          )}
+          {passwordError && <p className="error-text">{passwordError}</p>}
+        </div>
+        <button type="submit" className="submit-btn">
+          Log in
         </button>
-        <p className="text-center text-gray-600 mt-4">
-          Don't have an account? <Link to="/register" className="text-blue-600">Sign-Up</Link>
-        </p>
-      </div>
+      </form>
+      <button onClick={handleForgetPassword} className="forgot-password-btn">
+        Forget Password
+      </button>
+      <p className="signup-link">
+        Don't have an account? <Link to="/register">Sign-Up</Link>
+      </p>
+      {/* ToastContainer renders toast notifications */}
       <ToastContainer />
     </div>
   );
