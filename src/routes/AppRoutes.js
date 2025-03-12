@@ -15,6 +15,9 @@ import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
 import AssignTickets from "../pages/AssignTickets";
 import WelcomePage from "../pages/welcomepage";
+import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
+
+
 
 const AppRoutes = () => {
   return (
@@ -65,6 +68,7 @@ const MainLayout = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/ticket/:id" element={<TicketDetails />} />
           <Route path="/tickets/closed" element={<ClosedTickets />} />
+          <Route path="/csrdashboard" element={<CSRdashboard />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
         </Routes>
 

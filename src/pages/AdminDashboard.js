@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
+import { createClient } from '@supabase/supabase-js';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,24 +14,84 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const Dashboard = () => {
-  const stats = [
-    { label: "Total Tickets", value: 24, icon: "💼", bgColor: "#EFB036" },
-    { label: "New Tickets", value: 18, icon: "✉️", bgColor: "#3B6790" },
-    { label: "Open Tickets", value: 23, icon: "🔓", bgColor: "#23486A" },
-    { label: "Closed Tickets", value: 1, icon: "🔒", bgColor: "#4C7B8B" },
-    { label: "Un-Answered Tickets", value: 20, icon: "⬅️", bgColor: "#EFB036" },
-    { label: "Answered Tickets", value: 1, icon: "✅", bgColor: "#3B6790" },
-    { label: "Solved Tickets", value: 3, icon: "👍", bgColor: "#23486A" },
-    { label: "Urgent Tickets", value: 5, icon: "⚠️", bgColor: "#4C7B8B" },
-  ];
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
-  const tickets = [
-    { title: "Final Redirection", updated: "2025-03-09 13:18:19", action: "Solved", status: "Opened", statusColor: "#3B6790" },
-    { title: "Redirection Test", updated: "2025-03-08 11:21:56", action: "Answered", status: "Opened", statusColor: "#3B6790" },
-    { title: "Electricity Issue", updated: "2025-03-07 11:03:28", action: "Solved", status: "Opened", statusColor: "#3B6790" },
-    { title: "Network Problem", updated: "2025-03-06 09:05:55", action: "Un-Answered", status: "Closed", statusColor: "#EFB036" },
-  ];
+const Dashboard = () => {
+  const [stats, setStats] = useState([]);
+  const [recentTickets, setRecentTickets] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch ticket statistics
+        const [
+          totalTicketsResult,
+          newTicketsResult,
+          openTicketsResult,
+          closedTicketsResult,
+          urgentTicketsResult
+        ] = await Promise.all([
+          supabase.from('tickets').select('count'),
+          supabase.from('tickets')
+            .select('count')
+            .gt('created_at', new Date(Date.now() - 86400000).toISOString()),
+          supabase.from('tickets')
+            .select('count')
+            .eq('status', 'open'),
+          supabase.from('tickets')
+            .select('count')
+            .eq('status', 'closed'),
+          supabase.from('tickets')
+            .select('count')
+            .eq('priority', 'High')
+        ]);
+
+        setStats([
+          { label: "Total Tickets", value: totalTicketsResult.data?.[0]?.count || 0, icon: "💼", bgColor: "#EFB036" },
+          { label: "New Tickets", value: newTicketsResult.data?.[0]?.count || 0, icon: "✉️", bgColor: "#3B6790" },
+          { label: "Open Tickets", value: openTicketsResult.data?.[0]?.count || 0, icon: "🔓", bgColor: "#23486A" },
+          { label: "Closed Tickets", value: closedTicketsResult.data?.[0]?.count || 0, icon: "🔒", bgColor: "#4C7B8B" },
+          { label: "Urgent Tickets", value: urgentTicketsResult.data?.[0]?.count || 0, icon: "⚠️", bgColor: "#4C7B8B" },
+          { label: "Un-Answered Tickets(null)", value: 20, icon: "⬅️", bgColor: "#EFB036" },
+          { label: "Answered Tickets(null)", value: 1, icon: "✅", bgColor: "#3B6790" },
+          { label: "Solved Tickets(null)", value: 3, icon: "👍", bgColor: "#23486A" },
+        ]);
+
+        // Fetch recent tickets
+        const { data: ticketsData, error } = await supabase
+          .from('tickets')
+          .select('id, title, created_at, status, priority')
+          .order('created_at', { ascending: false })
+          .limit(4);
+
+        if (error) {
+          console.error("Error fetching tickets:", error);
+          return;
+        }
+
+        setRecentTickets(ticketsData?.map(ticket => ({
+          title: ticket.title,
+          updated: new Date(ticket.created_at).toLocaleString(),
+          action: ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1),
+          status: ticket.status === 'open' ? 'Opened' : 'Closed',
+          statusColor: ticket.status === 'open' ? "#3B6790" : "#EFB036",
+          priority: ticket.priority
+        })) || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const chartData = {
     labels: stats.map((stat) => stat.label),
@@ -73,7 +134,7 @@ const Dashboard = () => {
         {stats.map((stat, index) => (
           <div key={index} className="p-4 rounded-lg text-white" style={{ backgroundColor: stat.bgColor }}> 
             <div className="text-xl">{stat.icon}</div>
-            <p className="text-lg font-semibold">{stat.value}</p>
+            <p className="text-lg font-semibold">{isLoading ? "..." : stat.value}</p>
             <p className="text-sm">{stat.label}</p>
           </div>
         ))}
@@ -95,28 +156,42 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((ticket, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-2">{index + 1}</td>
-                  <td className="p-2 text-blue-600 cursor-pointer">{ticket.title}</td>
-                  <td className="p-2">{ticket.updated}</td>
-                  <td className="p-2">
-                    <span className="px-2 py-1 rounded bg-gray-300">{ticket.action}</span>
-                  </td>
-                  <td className="p-2">
-                    <span className="px-2 py-1 rounded text-white" style={{ backgroundColor: ticket.statusColor }}>
-                      {ticket.status}
-                    </span>
-                  </td>
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="p-4 text-center">Loading tickets...</td>
                 </tr>
-              ))}
+              ) : recentTickets.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="p-4 text-center">No tickets found</td>
+                </tr>
+              ) : (
+                recentTickets.map((ticket, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="p-2">{index + 1}</td>
+                    <td className="p-2 text-blue-600 cursor-pointer">{ticket.title}</td>
+                    <td className="p-2">{ticket.updated}</td>
+                    <td className="p-2">
+                      <span className="px-2 py-1 rounded bg-gray-300">{ticket.action}</span>
+                    </td>
+                    <td className="p-2">
+                      <span className="px-2 py-1 rounded text-white" style={{ backgroundColor: ticket.statusColor }}>
+                        {ticket.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
         
         {/* Bar Chart */}
         <div className="bg-white p-6 rounded-lg shadow flex justify-center items-center">
-          <Bar data={chartData} options={chartOptions} />
+          {isLoading ? (
+            <div>Loading chart data...</div>
+          ) : (
+            <Bar data={chartData} options={chartOptions} />
+          )}
         </div>
       </div>
 
