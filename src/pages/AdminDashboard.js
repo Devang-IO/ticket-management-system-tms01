@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "../utils/supabase"; // Import Supabase client
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,11 +13,6 @@ import {
 } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
-);
 
 const Dashboard = () => {
   const [stats, setStats] = useState([]);

@@ -11,18 +11,16 @@ import SettingsModal from "./SettingsModel";
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [userRole, setUserRole] = useState(localStorage.getItem("role")); // Track role state
+  const [userRole, setUserRole] = useState(localStorage.getItem("role"));
 
   const location = useLocation();
   const settingsModalRef = useRef(null);
   const settingsButtonRef = useRef(null);
 
   useEffect(() => {
-    // Update role if localStorage changes
     const handleStorageChange = () => {
       setUserRole(localStorage.getItem("role"));
     };
-
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
@@ -30,7 +28,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const handleOpenTicketModal = () => setIsTicketModalOpen(true);
   const handleCloseTicketModal = () => setIsTicketModalOpen(false);
 
-  // Close settings modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -48,8 +45,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <>
       <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+        {/* Sidebar Header - Logo and Title */}
         <div className="sidebar-header">
-          {sidebarOpen && <img src="./logo.png" alt="Logo" className="w-8 h-8" /> &&<span className="sidebar-title">QuickAssist</span>}
+          <img src="./logo_white.png" alt="Logo" className="logo" />
+          {sidebarOpen && <span className="sidebar-title">QuickAssist</span>}
           <button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <FiArrowRightCircle size={24} /> : <FiArrowLeftCircle size={24} />}
           </button>
@@ -86,7 +85,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             </>
           )}
 
-          {/* EMPLOYEE ROLE  */}
+          {/* EMPLOYEE ROLE */}
           {userRole === "employee" && (
             <li>
               <Link to="/csrdashboard" className={`sidebar-item ${location.pathname === "/csrdashboard" ? "sidebar-item-active" : ""}`}>
@@ -115,13 +114,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           )}
         </ul>
 
-        {/* SETTINGS BUTTON */}
-        <div className={`sidebar-footer ${sidebarOpen ? "" : "sidebar-footer-closed"}`}>
-          <button 
-            ref={settingsButtonRef}
-            onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)} 
-            className="sidebar-item settings-btn relative"
-          >
+        {/* Settings Button */}
+        <div className="sidebar-footer">
+          <button ref={settingsButtonRef} onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)} className="sidebar-item settings-btn">
             <FiSettings size={20} />
             {sidebarOpen && <span className="sidebar-item-text">Settings</span>}
           </button>

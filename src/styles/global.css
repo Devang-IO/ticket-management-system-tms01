@@ -318,33 +318,37 @@ body {
 }
 
 /*-------------------------------------- Sidebar container------------------------------------------------ */
+/* Sidebar */
 .sidebar {
-  @apply h-screen bg-[#23486A] text-white fixed top-0 left-0 transition-all 
- flex flex-col justify-between z-50;
+  @apply h-screen bg-[#23486A] text-white fixed top-0 left-0 transition-all flex flex-col justify-between z-50;
 }
 
-/* Sidebar */
 .sidebar-open {
-  @apply w-52 ;
+  @apply w-52;
 }
 
 .sidebar-closed {
-  @apply w-14 ;
+  @apply w-14;
 }
 
 /* Sidebar Header */
 .sidebar-header {
-  @apply flex items-center justify-between px-4 py-4 relative ml-[20px];
+  @apply flex items-center justify-between px-4 py-3;
+}
+
+/* Logo */
+.logo {
+  @apply w-9 h-9 object-contain;
 }
 
 /* Sidebar Title */
 .sidebar-title {
-  @apply text-xl font-bold text-white mt-2;
+  @apply text-lg font-semibold text-white ml-2;
 }
 
-/* Collapse button */
+/* Collapse Button */
 .collapse-btn {
-  @apply absolute right-4 p-1 text-[#EFB036] rounded-full bg-transparent border-none 
+  @apply p-1 text-[#EFB036] rounded-full bg-transparent border-none 
          hover:text-[#4C7B8B] transition duration-300;
 }
 
@@ -356,7 +360,7 @@ body {
 /* Sidebar Items */
 .sidebar-item {
   @apply flex items-center p-3 text-[#EFB036] font-bold no-underline rounded-lg
-         transition duration-300 hover:bg-[#EFB036]  hover:text-[#23486A] hover:rounded-2xl hover:shadow-xl;
+         transition duration-300 hover:bg-[#EFB036] hover:text-[#23486A] hover:rounded-2xl hover:shadow-xl;
 }
 
 /* Active Sidebar Item */
@@ -370,35 +374,20 @@ body {
 }
 
 /* Hide Text When Sidebar is Collapsed */
-.sidebar-closed .sidebar-item-text  {
-  @apply hidden ;
+.sidebar-closed .sidebar-item-text {
+  @apply hidden;
 }
-.sidebar-closed .collapse-btn {
-  @apply mt-10
-}
-.sidebar-closed .sidebar-list {
-  @apply mt-10
-}
-/* Footer (Settings & Logout) */
+
+/* Sidebar Footer */
 .sidebar-footer {
   @apply flex flex-col py-3 px-2 mt-auto border-t border-[#4C7B8B] space-y-2 w-full;
 }
 
-/* Footer Buttons */
+/* Settings Button */
 .sidebar-footer .sidebar-item {
   @apply flex items-center justify-center p-3 w-full rounded-xl transition-all 
          hover:bg-[#EFB036] hover:text-[#23486A];
 }
-
-/* Ensure correct alignment when sidebar is closed */
-.sidebar-footer-closed {
-  @apply items-center text-center;
-}
-
-.sidebar-footer-closed .sidebar-item {
-  @apply flex flex-col-reverse justify-center ml-0 w-full;
-}
-
 
 /* ----------------------------------------Login & Register-------------------------------------- */
 

@@ -18,14 +18,23 @@ const Navbar = ({ sidebarOpen }) => {
   const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
 
   // Fetch profile data from localStorage on component mount
-  useEffect(() => {
+  const fetchProfileData = () => {
     const storedUsername = localStorage.getItem("username");
     const storedRole = localStorage.getItem("role");
     const storedProfilePicture = localStorage.getItem("profilePicture");
     if (storedUsername) setUsername(storedUsername);
     if (storedRole) setRole(storedRole);
     if (storedProfilePicture) setProfilePicture(storedProfilePicture);
+  };
+
+  useEffect(() => {
+    fetchProfileData(); // Fetch profile data on mount
   }, []);
+
+  // Callback function to update Navbar after profile edit
+  const handleProfileUpdate = () => {
+    fetchProfileData(); // Re-fetch profile data
+  };
 
   const notifications = [
     { id: 1, text: "Your ticket has been resolved.", time: "2 hours ago" },
@@ -58,7 +67,7 @@ const Navbar = ({ sidebarOpen }) => {
 
   const getPageName = (path) => {
     if (path.startsWith("/ticket/")) return "Ticket Details";
-  
+
     switch (path) {
       case "/dashboard":
         return "User Dashboard";
@@ -82,7 +91,7 @@ const Navbar = ({ sidebarOpen }) => {
         return "Page Not Found";
     }
   };
-  
+
   const pageName = getPageName(location.pathname);
 
   return (
@@ -211,7 +220,12 @@ const Navbar = ({ sidebarOpen }) => {
 
       {/* Toast Container */}
       <ToastContainer position="top-center" autoClose={3000} />
-      {profileModalOpen && <ProfileModal onClose={() => setProfileModalOpen(false)} />}
+      {profileModalOpen && (
+        <ProfileModal
+          onClose={() => setProfileModalOpen(false)}
+          onProfileUpdate={handleProfileUpdate} // Pass callback to ProfileModal
+        />
+      )}
     </>
   );
 };

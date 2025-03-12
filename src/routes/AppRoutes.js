@@ -14,7 +14,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
 import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
-
+import WelcomePage from "../pages/welcomepage"
 import AssignTickets from "../pages/AssignTickets"
 
 
@@ -70,6 +70,7 @@ const MainLayout = () => {
           <Route path="/tickets/closed" element={<ClosedTickets />} />
           <Route path="/csrdashboard" element={<CSRdashboard />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
+         
           
         </Routes>
 
