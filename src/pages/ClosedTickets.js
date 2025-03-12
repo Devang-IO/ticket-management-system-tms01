@@ -38,13 +38,13 @@ const ClosedTickets = () => {
     });
 
   return (
-    <div className="w-full min-h-screen bg-[#EEF3F7] p-6">
+    <div className="w-full min-h-screen bg-[#EEF3F7] p-6 pl-20">
       {/* Header Section */}
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full mt-16">
+      <div className="bg-white shadow-lg rounded-xl p-6 w-full mt-16">
         <h1 className="text-3xl font-bold text-[#23486A] text-left w-full md:w-auto"> 📁 Closed Tickets</h1>
        
         {/* Sorting & Filtering Options */}
-        <div className="flex items-center gap-4 p-4 mt-4 shadow-lg rounded-lg ">
+        <div className="flex items-center gap-4 p-4 mt-4 shadow-lg rounded-xl ">
            {/* Sort By Dropdown */}
         <label className="text-gray-700 font-semibold">Sort by:</label>
         <select
@@ -73,9 +73,9 @@ const ClosedTickets = () => {
 
       {/* Tickets List */}
    {/* Tickets Table */}
-   <div className="bg-white p-6 rounded-lg shadow-lg mt-4">
+   <div className="w-full border-collapse rounded-xl overflow-hidden shadow-lg">
         {sortedFilteredTickets.length > 0 ? (
-            <table className="w-full border-collapse shadow-md rounded-lg">
+            <table className="w-full border-collapse shadow-md ">
                 <thead className="bg-[#3B6790] text-white">
                     <tr>
                         <th className="p-3 text-left">ID</th>

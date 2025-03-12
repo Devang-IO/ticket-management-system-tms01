@@ -58,10 +58,14 @@ const Navbar = ({ sidebarOpen }) => {
 
   const getPageName = (path) => {
     if (path.startsWith("/ticket/")) return "Ticket Details";
-
+  
     switch (path) {
       case "/dashboard":
         return "User Dashboard";
+      case "/admindashboard": // ✅ Added Admin Dashboard
+        return "Admin Dashboard";
+      case "/csrdashboard": // ✅ Added Admin Dashboard
+        return "Employee Dashboard";
       case "/tickets":
         return "My Tickets";
       case "/settings":
@@ -78,7 +82,7 @@ const Navbar = ({ sidebarOpen }) => {
         return "Page Not Found";
     }
   };
-
+  
   const pageName = getPageName(location.pathname);
 
   return (
