@@ -68,7 +68,7 @@ const MainLayout = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/ticket/:id" element={<TicketDetails />} />
           <Route path="/tickets/closed" element={<ClosedTickets />} />
-          <Route path="/employee-dashboard" element={<CSRdashboard />} />
+          <Route path="/csrdashboard" element={<CSRdashboard />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
           
         </Routes>
