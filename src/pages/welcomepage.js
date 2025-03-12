@@ -42,7 +42,7 @@ const WelcomePage = () => {
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.1 }}
         className="mt-16 px-6 md:px-10 lg:px-20 py-10 bg-[#4C7B8B] text-white rounded-xl shadow-lg max-w-4xl text-center"
       >
         <h2 className="text-4xl font-bold mb-4 text-[#EFB036]">
