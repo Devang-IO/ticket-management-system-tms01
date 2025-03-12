@@ -388,6 +388,11 @@ body {
   @apply flex items-center justify-center p-3 w-full rounded-xl transition-all 
          hover:bg-[#EFB036] hover:text-[#23486A];
 }
+/* Hide Logo When Sidebar is Collapsed */
+.sidebar-closed .logo {
+  @apply hidden;
+}
+
 
 /* ----------------------------------------Login & Register-------------------------------------- */
 

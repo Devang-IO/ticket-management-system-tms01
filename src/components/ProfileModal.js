@@ -7,7 +7,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [ticketStats, setTicketStats] = useState({ open: 0, closed: 0, assigned: 0, recent: [] });
-  const [formData, setFormData] = useState({ name: "", email: "", role: "", profile_picture: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", role: "", profile_picture: "", phone: "" });
   const [newProfilePic, setNewProfilePic] = useState(null); // For file upload
   const [uploadLoading, setUploadLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -135,9 +135,6 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
     }
   };
 
-  // ... (keep the rest of the code unchanged)
-
-
   // Loading state
   if (loading) {
     return (
@@ -188,7 +185,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
               />
               {editing && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-full border-4 border-white">
-                  <span className="text-white text-sm font-medium">Change</span>
+                  <span className="text-black text-sm font-medium">Change</span>
                 </div>
               )}
             </label>
@@ -220,7 +217,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                   name="name"
                   value={formData.name || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               <div>
@@ -233,7 +230,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                   name="email"
                   value={formData.email || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               <div>
@@ -246,7 +243,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                   name="phone"
                   value={formData.phone || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               <div className="flex space-x-2 pt-3">
@@ -331,8 +328,3 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
     </div>
   );
 }
-
-
-
-
-

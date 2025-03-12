@@ -15,7 +15,7 @@ import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
 import AssignTickets from "../pages/AssignTickets";
 import WelcomePage from "../pages/welcomepage";
-import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
+import CSRdashboard from "../pages/CSR-dashboard"; 
 
 
 
