@@ -615,16 +615,20 @@ body {
   @apply px-3 py-1 text-white text-xs font-semibold rounded-md w-full;
 }
 
+.priority-critical {
+  @apply bg-[#23486A] rounded-2xl; /* Darkest */
+}
+
 .priority-high {
-  @apply bg-[#EFB036] rounded-2xl;
+  @apply bg-[#3B6790] rounded-2xl; /* Second darkest */
 }
 
 .priority-medium {
-  @apply bg-[#3B6790] rounded-2xl;
+  @apply bg-[#4C7B8B] rounded-2xl; /* Second lightest */
 }
 
 .priority-low {
-  @apply bg-[#23486A] rounded-2xl;
+  @apply bg-[#EFB036] rounded-2xl; /* Lightest */
 }
 
 /* Actions */

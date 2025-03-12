@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
-import AdminDashboard from "../pages/AdminDashboard"
+import AdminDashboard from "../pages/AdminDashboard";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Tickets from "../pages/Tickets";
@@ -13,9 +13,9 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
+import AssignTickets from "../pages/AssignTickets";
+import WelcomePage from "../pages/welcomepage";
 import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
-
-import AssignTickets from "../pages/AssignTickets"
 
 
 
@@ -58,7 +58,7 @@ const MainLayout = () => {
         {showNavbar && <Navbar />}
 
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<WelcomePage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -70,7 +70,6 @@ const MainLayout = () => {
           <Route path="/tickets/closed" element={<ClosedTickets />} />
           <Route path="/csrdashboard" element={<CSRdashboard />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
-          
         </Routes>
 
         {/* Toast Notifications */}

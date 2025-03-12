@@ -142,7 +142,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="register-container">
+    <div className="register-container min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/bg.png')" }}>
       <h1 className="register-title">Register</h1>
       <form onSubmit={handleSubmit} className="register-form">
         <div className="form-group">
