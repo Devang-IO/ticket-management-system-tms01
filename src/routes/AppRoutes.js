@@ -15,7 +15,8 @@ import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
 import AssignTickets from "../pages/AssignTickets";
 import WelcomePage from "../pages/welcomepage";
-import CSRdashboard from "../pages/CSR-dashboard"; 
+import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
+import UserRequest from "../pages/UserRequest"; // Import User Request Page
 
 
 
@@ -70,6 +71,7 @@ const MainLayout = () => {
           <Route path="/tickets/closed" element={<ClosedTickets />} />
           <Route path="/csrdashboard" element={<CSRdashboard />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
+          <Route path="/userrequest" element={<UserRequest />} />
         </Routes>
 
         {/* Toast Notifications */}
