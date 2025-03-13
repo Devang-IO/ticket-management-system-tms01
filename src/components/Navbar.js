@@ -87,6 +87,8 @@ const Navbar = ({ sidebarOpen }) => {
         return "Assign Tickets";
       case "/tickets/closed":
         return "Closed Tickets";
+        case "/UserRequest":
+        return "User Requests ";
       default:
         return "Page Not Found";
     }

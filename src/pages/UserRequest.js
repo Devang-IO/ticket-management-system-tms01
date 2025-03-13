@@ -40,7 +40,7 @@ const UserRequest = () => {
     <div className="w-full min-h-screen bg-[#F8F9FC] flex justify-center items-center p-6 mt-16">
       <div className="w-full bg-white shadow-lg rounded-xl p-6 ">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold text-[#3B6790]">User Requests</h2>
+          <h2 className="text-2xl font-bold text-[#3B6790]">User Requests</h2>
           <span className="bg-[#EFB036] text-white px-3 py-1 rounded-full text-sm">
             {filteredRequests.filter((req) => req.status === "Pending").length} Pending
           </span>

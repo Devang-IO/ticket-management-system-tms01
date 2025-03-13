@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { 
   FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
-  FiSettings, FiArrowLeftCircle, FiArrowRightCircle 
+  FiSettings, FiArrowLeftCircle, FiArrowRightCircle,FiUsers
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import TicketSubmissionModal from "./TicketSubmissionModal";
@@ -47,7 +47,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
         {/* Sidebar Header - Logo and Title */}
         <div className="sidebar-header">
-          <img src="./logo_white.png" alt="Logo" className="logo" />
+          <img src="/logo_white.png" alt="Logo" className="logo" />
           {sidebarOpen && <span className="sidebar-title">QuickAssist</span>}
           <button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <FiArrowRightCircle size={24} /> : <FiArrowLeftCircle size={24} />}
@@ -86,13 +86,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           )}
 
           {/* EMPLOYEE ROLE */}
-          {userRole === "employee" && (
+          {userRole === "employee" && (<>
             <li>
               <Link to="/csrdashboard" className={`sidebar-item ${location.pathname === "/csrdashboard" ? "sidebar-item-active" : ""}`}>
                 <FiHome size={20} />
                 {sidebarOpen && <span className="sidebar-item-text">Dashboard</span>}
               </Link>
             </li>
+            <li>
+              <Link to="/UserRequest" className={`sidebar-item ${location.pathname === "/UserRequest" ? "sidebar-item-active" : ""}`}>
+              <FiUsers size={20} />
+                {sidebarOpen && <span className="sidebar-item-text">User Requests</span>}
+              </Link>
+            </li>
+
+            </>
           )}
 
           {/* ADMIN ROLE */}

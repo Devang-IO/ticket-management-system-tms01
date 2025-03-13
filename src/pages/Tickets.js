@@ -5,7 +5,7 @@ import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
 import { supabase } from "../utils/supabase"; // Import Supabase client
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
 
-const TicketList = ({ isSidebarOpen }) => {
+const TicketList = ({ isSidebarOpen,searchTerm }) => {
   const [tickets, setTickets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,11 +76,17 @@ const TicketList = ({ isSidebarOpen }) => {
 
   // Update the filteredTickets calculation
   const filteredTickets = tickets.filter((ticket) => {
-    const matchesSearch = ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase());
+    const matchesSearch =
+      ticket.title.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+      ticket.id.toString().includes(searchTerm) ||
+      ticket.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.employee_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "All" || ticket.status.toLowerCase() === statusFilter.toLowerCase();
     const matchesPriority = priorityFilter === "All" || ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
     return matchesSearch && matchesStatus && matchesPriority;
   });
+
+  
 
   const indexOfLastTicket = currentPage * entriesPerPage;
   const indexOfFirstTicket = indexOfLastTicket - entriesPerPage;
@@ -206,3 +212,5 @@ const TicketList = ({ isSidebarOpen }) => {
 };
 
 export default TicketList;
+
+
