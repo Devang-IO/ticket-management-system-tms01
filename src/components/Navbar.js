@@ -3,8 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FiBell, FiMenu, FiUser, FiLogOut } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
+import ProfileModal from "./ProfileModal";
 
 const Navbar = ({ sidebarOpen }) => {
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -15,14 +18,23 @@ const Navbar = ({ sidebarOpen }) => {
   const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
 
   // Fetch profile data from localStorage on component mount
-  useEffect(() => {
+  const fetchProfileData = () => {
     const storedUsername = localStorage.getItem("username");
     const storedRole = localStorage.getItem("role");
     const storedProfilePicture = localStorage.getItem("profilePicture");
     if (storedUsername) setUsername(storedUsername);
     if (storedRole) setRole(storedRole);
     if (storedProfilePicture) setProfilePicture(storedProfilePicture);
+  };
+
+  useEffect(() => {
+    fetchProfileData(); // Fetch profile data on mount
   }, []);
+
+  // Callback function to update Navbar after profile edit
+  const handleProfileUpdate = () => {
+    fetchProfileData(); // Re-fetch profile data
+  };
 
   const notifications = [
     { id: 1, text: "Your ticket has been resolved.", time: "2 hours ago" },
@@ -49,13 +61,13 @@ const Navbar = ({ sidebarOpen }) => {
     });
 
     setTimeout(() => {
-      navigate("/login");
+      navigate("/");
     }, 1000);
   };
 
   const getPageName = (path) => {
     if (path.startsWith("/ticket/")) return "Ticket Details";
-  
+
     switch (path) {
       case "/dashboard":
         return "User Dashboard";
@@ -75,11 +87,13 @@ const Navbar = ({ sidebarOpen }) => {
         return "Assign Tickets";
       case "/tickets/closed":
         return "Closed Tickets";
+        case "/UserRequest":
+        return "User Requests ";
       default:
         return "Page Not Found";
     }
   };
-  
+
   const pageName = getPageName(location.pathname);
 
   return (
@@ -142,10 +156,10 @@ const Navbar = ({ sidebarOpen }) => {
           <div className="relative">
             <div className="flex items-center justify-between w-full profile-section">
               {/* Username and Role (Left) */}
-<div className="user-info text-white" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-  <p className="username font-bold" style={{ whiteSpace: "nowrap" }}>{username}</p>
-  <p className="user-role text-sm text-gray-300" style={{ whiteSpace: "nowrap" }}>{role}</p>
-</div>
+              <div className="user-info text-white" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                <p className="username font-bold" style={{ whiteSpace: "nowrap" }}>{username}</p>
+                <p className="user-role text-sm text-gray-300" style={{ whiteSpace: "nowrap" }}>{role}</p>
+              </div>
 
               {/* Profile Picture (Right) - Clickable */}
               <button
@@ -156,38 +170,42 @@ const Navbar = ({ sidebarOpen }) => {
                 className="focus:outline-none"
               >
                 {profilePicture && (
-  <div
-    style={{
-      width: "40px",
-      height: "40px",
-      borderRadius: "50%",
-      marginLeft: "10px",
-      overflow: "hidden", // Ensures the image is clipped to the circle
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <img
-      src={profilePicture}
-      alt="Profile"
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover", // Ensures the image covers the area without distortion
-      }}
-    />
-  </div>
-)}
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      marginLeft: "10px",
+                      overflow: "hidden", // Ensures the image is clipped to the circle
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      src={profilePicture}
+                      alt="Profile"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover", // Ensures the image covers the area without distortion
+                      }}
+                    />
+                  </div>
+                )}
               </button>
             </div>
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out">
                 <ul className="py-2">
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                  <li
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                    onClick={() => setProfileModalOpen(true)} // Open modal instead of navigating
+                  >
                     <FiUser className="text-gray-700" />
                     <span className="text-sm text-gray-700">View Profile</span>
                   </li>
+
                   <li
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
                     onClick={handleLogout}
@@ -204,6 +222,12 @@ const Navbar = ({ sidebarOpen }) => {
 
       {/* Toast Container */}
       <ToastContainer position="top-center" autoClose={3000} />
+      {profileModalOpen && (
+        <ProfileModal
+          onClose={() => setProfileModalOpen(false)}
+          onProfileUpdate={handleProfileUpdate} // Pass callback to ProfileModal
+        />
+      )}
     </>
   );
 };
