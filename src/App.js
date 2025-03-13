@@ -1,3 +1,4 @@
+//this is app.js
 import React from "react";
 import AppRoutes from "./routes/AppRoutes";
 import { ToastContainer } from "react-toastify"; // Import ToastContainer
