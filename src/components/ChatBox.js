@@ -1,6 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../utils/supabase";
-import { FaTimes, FaPaperPlane, FaImage, FaSpinner } from "react-icons/fa";
+import { 
+  FaTimes, 
+  FaPaperPlane, 
+  FaImage, 
+  FaSpinner, 
+  FaSmile, 
+  FaArrowDown, 
+  FaCheck 
+} from "react-icons/fa";
+
+const emojiOptions = ["👍", "😂", "😮", "😢", "❤️"];
+
+const formatTime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+};
 
 const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onChatClosed }) => {
   const [messages, setMessages] = useState([]);
@@ -8,24 +28,32 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [otherPartyInfo, setOtherPartyInfo] = useState(null);
+  const [typingUsers, setTypingUsers] = useState([]);
+  const [reactionPickerMessageId, setReactionPickerMessageId] = useState(null);
   const [showCloseModal, setShowCloseModal] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
-  // Cloudinary credentials from .env
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+
+  // Cloudinary credentials
   const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET;
 
-  // Compute the other party ID based on current user's perspective.
-  // If currentUser.id === assignedUserId, then current user is employee so other party is ticket creator.
-  // Otherwise, current user is the ticket creator so other party is the assigned employee.
+  // Determine perspective:
+  // If currentUser.id === assignedUserId then current user is employee so other party is ticket creator;
+  // otherwise, other party is assigned employee.
+  const otherPartyId = currentUser.id === assignedUserId ? ticketCreatorId : assignedUserId;
+
+  // Fetch other party info from users table
   useEffect(() => {
-    if (!currentUser || !assignedUserId || !ticketCreatorId) return;
-    const computedOtherPartyId = currentUser.id === assignedUserId ? ticketCreatorId : assignedUserId;
     const fetchOtherPartyInfo = async () => {
+      if (!otherPartyId) return;
       const { data, error } = await supabase
         .from("users")
         .select("id, name, role, profile_picture")
-        .eq("id", computedOtherPartyId)
+        .eq("id", otherPartyId)
         .single();
       if (error) {
         console.error("Error fetching other party info:", error);
@@ -34,9 +62,45 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
       }
     };
     fetchOtherPartyInfo();
-  }, [currentUser, assignedUserId, ticketCreatorId]);
+  }, [otherPartyId]);
 
-  // Helper: Upload image to Cloudinary with loading indication
+  // --- TYPING INDICATORS ---
+  const typingChannel = useRef(null);
+  useEffect(() => {
+    typingChannel.current = supabase.channel(`typing:${ticketId}`);
+    typingChannel.current.on("broadcast", { event: "typing" }, (payload) => {
+      const { userId, isTyping } = payload.payload;
+      if (userId === currentUser.id) return;
+      setTypingUsers((prev) => {
+        if (isTyping) {
+          return prev.includes(userId) ? prev : [...prev, userId];
+        } else {
+          return prev.filter((id) => id !== userId);
+        }
+      });
+    }).subscribe();
+    return () => {
+      supabase.removeChannel(typingChannel.current);
+    };
+  }, [ticketId, currentUser.id]);
+
+  const handleTyping = () => {
+    typingChannel.current.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId: currentUser.id, isTyping: true },
+    });
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      typingChannel.current.send({
+        type: "broadcast",
+        event: "typing",
+        payload: { userId: currentUser.id, isTyping: false },
+      });
+    }, 3000);
+  };
+
+  // Helper: Upload image to Cloudinary
   async function uploadToCloudinary(file) {
     setUploadingImage(true);
     const formData = new FormData();
@@ -55,7 +119,7 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
     }
   }
 
-  // Fetch existing messages & subscribe for realtime updates
+  // Fetch messages and subscribe to realtime updates
   useEffect(() => {
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -69,38 +133,63 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
         setMessages(data);
       }
     };
-
     fetchMessages();
-
     const channel = supabase
       .channel("realtime:messages")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `ticket_id=eq.${ticketId}`,
-        },
-        (payload) => {
-          setMessages((current) => [...current, payload.new]);
-        }
-      )
-      .subscribe();
-
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `ticket_id=eq.${ticketId}`,
+      }, (payload) => {
+        setMessages((current) => [...current, payload.new]);
+      }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [ticketId]);
 
-  // Auto-scroll to bottom whenever messages update (including image messages)
+  // Auto-scroll to bottom on messages update
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // Send a new message (with optional image)
+  // Show "scroll down" arrow when not at bottom
+  const handleScroll = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 20;
+    setShowScrollDown(!isAtBottom);
+  };
+
+  // Read receipts: mark messages as read for messages not from current user
+  useEffect(() => {
+    const markMessagesAsRead = async () => {
+      const unreadMessages = messages.filter(
+        (msg) => msg.sender_id !== currentUser.id && !msg.read_at
+      );
+      if (unreadMessages.length > 0) {
+        for (const msg of unreadMessages) {
+          await supabase
+            .from("messages")
+            .update({ read_at: new Date().toISOString() })
+            .eq("id", msg.id);
+        }
+        setMessages((msgs) =>
+          msgs.map((msg) =>
+            msg.sender_id !== currentUser.id && !msg.read_at
+              ? { ...msg, read_at: new Date().toISOString() }
+              : msg
+          )
+        );
+      }
+    };
+    markMessagesAsRead();
+  }, [messages, currentUser.id]);
+
+  // Send new message (with optional image)
   const handleSend = async () => {
     if (!currentUser || !currentUser.id) {
       console.error("Current user is undefined. Cannot send message.");
@@ -128,11 +217,32 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
     } else {
       setNewMessage("");
       setSelectedFile(null);
-      // Auto-scroll is handled by the useEffect on messages.
+      typingChannel.current.send({
+        type: "broadcast",
+        event: "typing",
+        payload: { userId: currentUser.id, isTyping: false },
+      });
     }
   };
 
-  // Modal: Confirm close chat
+  // Reaction handling: toggles the reaction picker when clicked
+  const handleReactionToggle = (msgId) => {
+    setReactionPickerMessageId(prev => (prev === msgId ? null : msgId));
+  };
+
+  const handleReactionSelect = async (msgId, emoji) => {
+    const { error } = await supabase
+      .from("messages")
+      .update({ reaction: emoji })
+      .eq("id", msgId);
+    if (error) console.error("Error updating reaction:", error);
+    setReactionPickerMessageId(null);
+    setMessages((msgs) =>
+      msgs.map((msg) => (msg.id === msgId ? { ...msg, reaction: emoji } : msg))
+    );
+  };
+
+  // Close Chat: show confirmation modal and update immediately
   const confirmCloseChat = async () => {
     const { error } = await supabase
       .from("tickets")
@@ -141,19 +251,58 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
     if (error) {
       console.error("Error closing chat:", error);
     } else {
-      // Immediately update parent state so chat is hidden without refresh.
       onChatClosed();
     }
     setShowCloseModal(false);
   };
 
-  // Helper: Format timestamp
-  const formatTimestamp = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
+  // Render messages with date separators and custom footer layout
+  const renderMessages = () => {
+    let lastDate = "";
+    const elements = [];
+    messages.forEach((msg, index) => {
+      const msgDate = formatDate(msg.created_at);
+      if (msgDate !== lastDate) {
+        elements.push(
+          <div key={`date-${index}`} className="flex justify-center my-2">
+            <div className="bg-gray-300 text-gray-800 text-xs px-2 py-1 rounded-full">
+              {msgDate}
+            </div>
+          </div>
+        );
+        lastDate = msgDate;
+      }
+      const isCurrentUser = msg.sender_id === currentUser.id;
+      elements.push(
+        <div key={msg.id} className={`flex ${isCurrentUser ? "justify-start" : "justify-end"}`}>
+          <div className={`max-w-xs p-3 rounded-lg shadow relative ${isCurrentUser ? "bg-gray-200" : "bg-blue-100"}`}>
+            {msg.image_url && (
+              <img src={msg.image_url} alt="Uploaded" className="mb-2 max-w-full h-auto rounded" />
+            )}
+            {msg.content && <p className="text-sm text-gray-800">{msg.content}</p>}
+            <div className="flex justify-between items-center mt-1">
+              <div className="flex items-center space-x-1">
+                {isCurrentUser && msg.read_at && <FaCheck className="text-xs text-green-600" />}
+                <p className="text-xs text-gray-500">{formatTime(msg.created_at)}</p>
+              </div>
+              <button className="p-1" onClick={() => handleReactionToggle(msg.id)}>
+                {msg.reaction ? msg.reaction : <FaSmile className="opacity-50" />}
+              </button>
+            </div>
+            {reactionPickerMessageId === msg.id && (
+              <div className="absolute bottom-full right-0 mb-1 flex space-x-1 bg-white p-1 rounded shadow">
+                {emojiOptions.map((emoji) => (
+                  <button key={emoji} onClick={() => handleReactionSelect(msg.id, emoji)}>
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
     });
+    return elements;
   };
 
   return (
@@ -161,73 +310,56 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
       {/* Chat Header with Other Party Info */}
       <div className="flex items-center justify-end mb-2 border-b pb-2">
         <div className="text-right mr-2">
-          <p className="font-semibold text-gray-800">
-            {otherPartyInfo?.name || "Other Party"}
-          </p>
-          <p className="text-sm text-gray-500">
-            {otherPartyInfo?.role || ""}
-          </p>
+          <p className="font-semibold text-gray-800">{otherPartyInfo?.name || "Other Party"}</p>
+          <p className="text-sm text-gray-500">{otherPartyInfo?.role || ""}</p>
         </div>
         {otherPartyInfo?.profile_picture ? (
-          <img
-            src={otherPartyInfo.profile_picture}
-            alt="Profile"
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <img src={otherPartyInfo.profile_picture} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
         ) : (
           <div className="w-10 h-10 rounded-full bg-gray-300" />
         )}
       </div>
 
-      {/* Messages List */}
+      {/* Typing Indicator */}
+      {typingUsers.length > 0 && (
+        <div className="mb-2 text-right text-sm text-gray-500">
+          {otherPartyInfo?.name || "The other party"} is typing...
+        </div>
+      )}
+
+      {/* Messages List with Date Separators */}
       <div
-        className="flex-1 p-4 space-y-3 overflow-y-auto"
+        ref={messagesContainerRef}
+        className="flex-1 p-4 space-y-3 overflow-y-auto relative"
+        onScroll={handleScroll}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {messages.map((msg) => {
-          // Determine bubble alignment:
-          // For current user, bubble is on left.
-          // For the other party, bubble is on right.
-          const isCurrentUser = msg.sender_id === currentUser.id;
-          return (
-            <div
-              key={msg.id}
-              className={`flex ${isCurrentUser ? "justify-start" : "justify-end"}`}
-            >
-              <div className={`max-w-xs p-3 rounded-lg shadow ${isCurrentUser ? "bg-gray-200" : "bg-blue-100"}`}>
-                {msg.image_url && (
-                  <img
-                    src={msg.image_url}
-                    alt="Uploaded"
-                    className="mb-2 max-w-full h-auto rounded"
-                  />
-                )}
-                {msg.content && <p className="text-sm text-gray-800">{msg.content}</p>}
-                <p className="text-xs text-gray-500 mt-1 text-right">
-                  {formatTimestamp(msg.created_at)}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+        {renderMessages()}
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Scroll Down Arrow centered above input */}
+      {showScrollDown && (
+        <button
+          className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white p-2 rounded-full shadow"
+          onClick={() => {
+            messagesContainerRef.current.scrollTo({ top: messagesContainerRef.current.scrollHeight, behavior: "smooth" });
+          }}
+        >
+          <FaArrowDown />
+        </button>
+      )}
+
       {/* Input Section */}
       <div className="border-t p-2">
-        {/* Image Preview */}
         {selectedFile && (
           <div className="mb-2 flex items-center">
-            <img
-              src={URL.createObjectURL(selectedFile)}
-              alt="Preview"
-              className="w-12 h-12 rounded mr-2 object-cover"
-            />
+            <img src={URL.createObjectURL(selectedFile)} alt="Preview" className="w-12 h-12 rounded mr-2 object-cover" />
             <p className="text-sm text-gray-600">Image selected</p>
           </div>
         )}
         <div className="flex items-center mb-2">
-          <label className="cursor-pointer mr-2 flex items-center">
+          <label className="cursor-pointer mr-2 flex items-center" onChange={handleTyping}>
             <FaImage className="text-gray-600 hover:text-blue-600" />
             <input
               type="file"
@@ -239,16 +371,17 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
                 }
               }}
             />
-            {uploadingImage && (
-              <FaSpinner className="ml-2 animate-spin text-blue-600" />
-            )}
+            {uploadingImage && <FaSpinner className="ml-2 animate-spin text-blue-600" />}
           </label>
           <input
             type="text"
             className="flex-1 border rounded-md p-2 mr-2"
             placeholder="Type your message..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              handleTyping();
+            }}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
           />
           <button

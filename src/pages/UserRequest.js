@@ -84,12 +84,7 @@ const UserRequest = () => {
                   >
                     Connect
                   </button>
-                  <button
-                    onClick={() => navigate(`/ticket/${ticket.id}`)}
-                    className="bg-[#4C7B8B] text-black px-4 py-2 rounded-full"
-                  >
-                    View
-                  </button>
+                  
                 </td>
               </tr>
             ))}
