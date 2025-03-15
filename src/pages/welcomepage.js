@@ -19,7 +19,7 @@ const WelcomePage = () => {
       {/* Navbar */}
       <nav className="w-full flex justify-between items-center px-10 py-4 bg-[#EFB036] shadow-md">
   <div className="flex items-center gap-3">
-    <img src="/logo4.png" alt="QuickAssist Logo" className="h-10 w-10 object-contain" />
+    <img src="/logo.png" alt="QuickAssist Logo" className="h-10 w-10 object-contain" />
     <h1 className="text-2xl font-extrabold tracking-wide text-[#23486A]">
       QuickAssist
     </h1>

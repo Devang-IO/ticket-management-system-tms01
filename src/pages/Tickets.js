@@ -5,10 +5,10 @@ import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
 import { supabase } from "../utils/supabase"; // Import Supabase client
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
 
-const TicketList = ({ isSidebarOpen,searchTerm }) => {
+const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
   const [tickets, setTickets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // Use searchQuery for search functionality
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
@@ -62,6 +62,7 @@ const TicketList = ({ isSidebarOpen,searchTerm }) => {
     }
   };
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".dropdown-wrapper")) {
@@ -74,35 +75,33 @@ const TicketList = ({ isSidebarOpen,searchTerm }) => {
     };
   }, []);
 
-  // Update the filteredTickets calculation
+  // Update the filteredTickets calculation to use searchQuery
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch =
-      ticket.title.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
-      ticket.id.toString().includes(searchTerm) ||
-      ticket.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.employee_name?.toLowerCase().includes(searchTerm.toLowerCase());
+      ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase()) || // Use searchQuery
+      ticket.id.toString().includes(searchQuery) || // Use searchQuery
+      ticket.status.toLowerCase().includes(searchQuery.toLowerCase()) || // Use searchQuery
+      ticket.employee_name?.toLowerCase().includes(searchQuery.toLowerCase()); // Use searchQuery
     const matchesStatus = statusFilter === "All" || ticket.status.toLowerCase() === statusFilter.toLowerCase();
     const matchesPriority = priorityFilter === "All" || ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  
-
+  // Pagination logic
   const indexOfLastTicket = currentPage * entriesPerPage;
   const indexOfFirstTicket = indexOfLastTicket - entriesPerPage;
   const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
 
   return (
     <div className={`tickets-container transition-all duration-300 ${isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"}`}>
-
-  <div className="tickets-header flex items-center justify-between">
-    <h2 className="flex items-center text-3xl font-extrabold">
-      <FaTicketAlt className="mr-2 text-yellow-500 l" /> My Tickets
-    </h2>
-    <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
-      <FiPlus className="mr-1" /> New Ticket
-    </button>
-  </div>
+      <div className="tickets-header flex items-center justify-between">
+        <h2 className="flex items-center text-3xl font-extrabold">
+          <FaTicketAlt className="mr-2 text-yellow-500" /> My Tickets
+        </h2>
+        <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
+          <FiPlus className="mr-1" /> New Ticket
+        </button>
+      </div>
 
       <div className="tickets-controls">
         <div className="filter-group">
@@ -136,7 +135,7 @@ const TicketList = ({ isSidebarOpen,searchTerm }) => {
           type="text"
           placeholder="Search by title..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery state
           className="search-input"
         />
       </div>
@@ -212,5 +211,3 @@ const TicketList = ({ isSidebarOpen,searchTerm }) => {
 };
 
 export default TicketList;
-
-
