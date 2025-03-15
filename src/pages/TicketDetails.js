@@ -1,39 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabase";
+import { FaArrowLeft, FaInfoCircle, FaFileAlt, FaPaperclip, FaImage } from "react-icons/fa";
 import ChatBox from "../components/ChatBox";
-import {
-  FaArrowLeft,
-  FaInfoCircle,
-  FaFileAlt,
-  FaPaperclip,
-  FaImage,
-} from "react-icons/fa";
 
 const TicketDetails = ({ currentUser: propUser }) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [ticket, setTicket] = useState(null);
-  // Use prop if available, otherwise fetch current user from Supabase.
   const [currentUser, setCurrentUser] = useState(propUser);
 
-  // Fetch current user if not passed down as a prop.
+  // Fetch current user if not provided as prop
   useEffect(() => {
     if (!currentUser) {
       const fetchUser = async () => {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          setCurrentUser(user);
-        }
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) setCurrentUser(user);
       };
       fetchUser();
     }
   }, [currentUser]);
 
-  // Fetch ticket details
+  // Fetch ticket details (should include assigned_user_id, user_id, and chat_initiated)
   useEffect(() => {
     const fetchTicket = async () => {
       const { data, error } = await supabase
@@ -62,6 +51,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
 
   return (
     <div className="w-full min-h-screen bg-[#EEF3F7] p-6 pl-20">
+      {/* Page Title */}
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-[#23486A]">Ticket Details</h1>
         <hr className="my-4 border-t-2 border-[#3B6790]" />
@@ -71,11 +61,8 @@ const TicketDetails = ({ currentUser: propUser }) => {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Left Column: Ticket Info */}
         <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-semibold text-[#3B6790]">
-            {ticket.title}
-          </h2>
+          <h2 className="text-2xl font-semibold text-[#3B6790]">{ticket.title}</h2>
 
-          {/* Status & Priority */}
           <div className="flex items-center gap-x-6 mt-3">
             <div className="flex items-center gap-2">
               <FaInfoCircle className="text-[#3B6790] text-xl" />
@@ -110,13 +97,11 @@ const TicketDetails = ({ currentUser: propUser }) => {
             </div>
           </div>
 
-          {/* Description */}
           <div className="mt-4 flex items-center gap-2">
             <FaFileAlt className="text-[#3B6790] text-xl" />
             <p className="text-lg text-[#23486A]">{ticket.description}</p>
           </div>
 
-          {/* Attachments */}
           <div className="mt-6">
             <h3 className="text-xl font-bold flex items-center gap-3">
               <FaPaperclip className="text-[#3B6790] text-2xl" /> Attachments
@@ -135,7 +120,6 @@ const TicketDetails = ({ currentUser: propUser }) => {
             )}
           </div>
 
-          {/* Back Button */}
           <div className="mt-6 flex justify-center">
             <button
               onClick={() => navigate(-1)}
@@ -150,7 +134,13 @@ const TicketDetails = ({ currentUser: propUser }) => {
         <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 flex flex-col h-[600px]">
           {ticket.chat_initiated ? (
             currentUser ? (
-              <ChatBox ticketId={ticket.id} currentUser={currentUser} />
+              <ChatBox
+                ticketId={ticket.id}
+                currentUser={currentUser}
+                assignedUserId={ticket.assigned_user_id}
+                ticketCreatorId={ticket.user_id}
+                onChatClosed={() => setTicket({ ...ticket, chat_initiated: false })}
+              />
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-500">
                 Loading user...
