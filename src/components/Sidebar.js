@@ -4,6 +4,7 @@ import {
   FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
   FiSettings, FiArrowLeftCircle, FiArrowRightCircle,FiUsers
 } from "react-icons/fi";
+import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
 import { Link } from "react-router-dom";
 import TicketSubmissionModal from "./TicketSubmissionModal";
 import SettingsModal from "./SettingsModel";
@@ -97,6 +98,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <Link to="/UserRequest" className={`sidebar-item ${location.pathname === "/UserRequest" ? "sidebar-item-active" : ""}`}>
               <FiUsers size={20} />
                 {sidebarOpen && <span className="sidebar-item-text">User Requests</span>}
+              </Link>
+            </li>
+            <li>
+              <Link to="/employeeticketlist" className={`sidebar-item ${location.pathname === "/employeeticketlist" ? "sidebar-item-active" : ""}`}>
+              <FaTicketAlt size={20} />
+                {sidebarOpen && <span className="sidebar-item-text">Assigned Tickets</span>}
               </Link>
             </li>
 
