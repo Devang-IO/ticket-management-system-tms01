@@ -1,144 +1,247 @@
 // QuixkyBot.jsx
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import axios from 'axios';
+import React, { useState } from "react";
+import ReactDOM from "react-dom";
+import axios from "axios";
+
+const sampleQuestions = [
+  "How to create a ticket?",
+  "How to update my ticket?",
+  "What is the response time?",
+];
 
 const QuixkyBot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [conversation, setConversation] = useState([]);
+  // Initialize conversation with a welcome message and sample questions as part of the conversation history.
+  const [conversation, setConversation] = useState([
+    { sender: "bot", text: "Hi, welcome to QuickAssist, I am Quixky, how can I help you?" },
+    { sender: "bot", type: "sample", questions: sampleQuestions }
+  ]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const toggleModal = () => setIsOpen(!isOpen);
 
-  const handleSend = async () => {
-    if (!query.trim()) return;
+  // Send a query to the Mistral API using proper payload parameters
+  const sendQuery = async (userQuery) => {
     // Append user's query to conversation
-    setConversation((prev) => [...prev, { sender: 'user', text: query }]);
-    setQuery('');
-
+    setConversation((prev) => [...prev, { sender: "user", text: userQuery }]);
+    setLoading(true);
+    setQuery("");
     try {
       const response = await axios.post(
-        process.env.REACT_APP_MISTRAL_API_URL,
-        { prompt: query, context: "Your project context details here" },
+        process.env.REACT_APP_MISTRAL_API_URL, // "https://api.mistral.ai/v1/chat/completions"
+        {
+          model: "mistral-small-latest", // You can adjust this to a model available for free, e.g., "mistral-small-latest"
+          messages: [
+            { role: "user", content: userQuery }
+          ],
+          max_tokens: 150,
+          temperature: 0.7,
+          top_p: 1,
+        },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.REACT_APP_MISTRAL_API_KEY}`,
-            'Content-Type': 'application/json'
+            "Authorization": `Bearer ${process.env.REACT_APP_MISTRAL_API_KEY}`,
+            "Content-Type": "application/json"
           }
         }
       );
-      // Append bot's answer to conversation
-      setConversation((prev) => [
-        ...prev,
-        { sender: 'bot', text: response.data.answer }
-      ]);
+      // Adjust extraction based on actual API response structure.
+      const botResponse = response.data.choices[0]?.message?.content || "I don't have an answer right now.";
+      setConversation((prev) => [...prev, { sender: "bot", text: botResponse }]);
     } catch (error) {
+      console.error("API error:", error);
       setConversation((prev) => [
         ...prev,
-        { sender: 'bot', text: "Sorry, something went wrong." }
+        { sender: "bot", text: "Sorry, something went wrong." }
       ]);
+    }
+    setLoading(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      sendQuery(query.trim());
     }
   };
 
-  // Modal UI using React Portal
-  if (!isOpen) {
-    return (
-      <button 
-        onClick={toggleModal} 
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          padding: '10px 20px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px'
-        }}
-      >
-        Chat with Quixky
-      </button>
-    );
-  }
-
-  return ReactDOM.createPortal(
-    <div style={{
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      width: '320px',
-      height: '450px',
-      backgroundColor: 'white',
-      border: '1px solid #ccc',
-      borderRadius: '8px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-      display: 'flex',
-      flexDirection: 'column',
-      zIndex: 1000
-    }}>
-      <div style={{
-        padding: '10px',
-        borderBottom: '1px solid #eee',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <strong>Quixky Bot</strong>
-        <button onClick={toggleModal} style={{
-          background: 'none',
-          border: 'none',
-          fontSize: '16px',
-          cursor: 'pointer'
-        }}>×</button>
-      </div>
-      <div style={{
-        flex: 1,
-        padding: '10px',
-        overflowY: 'auto'
-      }}>
-        {conversation.map((msg, index) => (
-          <div key={index} style={{
-            textAlign: msg.sender === 'user' ? 'right' : 'left',
-            marginBottom: '10px'
-          }}>
-            <div style={{
-              display: 'inline-block',
-              padding: '8px 12px',
-              background: msg.sender === 'user' ? '#d1e7dd' : '#f8d7da',
-              borderRadius: '15px'
-            }}>
-              {msg.text}
-            </div>
+  // Render conversation: For messages with type "sample", render the question bubbles.
+  const renderConversation = () => {
+    return conversation.map((msg, index) => {
+      if (msg.type === "sample") {
+        return (
+          <div key={index} style={{ marginBottom: "10px" }}>
+            {msg.questions.map((q, idx) => (
+              <button
+                key={idx}
+                onClick={() => sendQuery(q)}
+                style={{
+                  background: "#e9ecef",
+                  border: "none",
+                  padding: "5px 10px",
+                  borderRadius: "15px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  marginRight: "5px",
+                  marginBottom: "5px"
+                }}
+              >
+                {q}
+              </button>
+            ))}
           </div>
-        ))}
-      </div>
-      <div style={{
-        padding: '10px',
-        borderTop: '1px solid #eee'
-      }}>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask a project-related question..."
-          style={{ width: '100%', padding: '8px', marginBottom: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
-        />
-        <button
-          onClick={handleSend}
+        );
+      }
+      return (
+        <div
+          key={index}
           style={{
-            width: '100%',
-            padding: '8px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px'
+            textAlign: msg.sender === "user" ? "right" : "left",
+            marginBottom: "10px",
           }}
         >
-          Send
+          <div
+            style={{
+              display: "inline-block",
+              padding: "8px 12px",
+              background: msg.sender === "user" ? "#d1e7dd" : "#f8d7da",
+              borderRadius: "15px",
+            }}
+          >
+            {msg.text}
+          </div>
+        </div>
+      );
+    });
+  };
+
+  return (
+    <>
+      {/* Collapsed button with logo */}
+      {!isOpen && (
+        <button 
+          onClick={toggleModal} 
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            width: "60px",
+            height: "60px",
+            borderRadius: "50%",
+            backgroundColor: "#007bff",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+          }}
+        >
+          <img 
+            src="/logo.png" 
+            alt="QuickAssist Logo" 
+            style={{ width: "100%", height: "100%", borderRadius: "50%" }} 
+          />
         </button>
-      </div>
-    </div>,
-    document.getElementById('modal-root')
+      )}
+
+      {/* Chat Modal */}
+      {isOpen &&
+        ReactDOM.createPortal(
+          <div 
+            style={{
+              position: "fixed",
+              bottom: "20px",
+              right: "20px",
+              width: "320px",
+              height: "450px",
+              backgroundColor: "white",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+              zIndex: 1000,
+            }}
+          >
+            {/* Header */}
+            <div 
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "10px",
+                borderBottom: "1px solid #eee",
+              }}
+            >
+              <img 
+                src="/logo.png" 
+                alt="QuickAssist Logo" 
+                style={{ width: "40px", height: "40px" }} 
+              />
+              <strong>Quixky Bot</strong>
+              <button 
+                onClick={toggleModal} 
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "20px",
+                  cursor: "pointer"
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Conversation Area */}
+            <div 
+              style={{
+                flex: 1,
+                padding: "10px",
+                overflowY: "auto"
+              }}
+            >
+              {renderConversation()}
+            </div>
+
+            {/* Input Area */}
+            <div 
+              style={{
+                padding: "10px",
+                borderTop: "1px solid #eee",
+              }}
+            >
+              <form onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Ask a project-related question..."
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    marginBottom: "5px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+                <button 
+                  type="submit" 
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    backgroundColor: "#007bff",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                  }}
+                >
+                  {loading ? "Loading..." : "Send"}
+                </button>
+              </form>
+            </div>
+          </div>,
+          document.getElementById("modal-root")
+        )}
+    </>
   );
 };
 
