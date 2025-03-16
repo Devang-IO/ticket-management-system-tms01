@@ -10,13 +10,21 @@ const RatingModal = ({ show, onClose, employeeId, ticketId }) => {
   if (!show) return null;
 
   const handleSubmit = async () => {
-    // Insert rating into employee_ratings table
+    // Fetch current customer (user) to set as customer_id
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("User not authenticated");
+      return;
+    }
+
+    // Insert rating into employee_ratings table with customer_id included
     const { error } = await supabase.from("employee_ratings").insert([
       {
         employee_id: employeeId,
         ticket_id: ticketId,
         rating,
         experience_text: experience,
+        customer_id: user.id, // Save current user's id as customer_id
       },
     ]);
 
@@ -25,7 +33,6 @@ const RatingModal = ({ show, onClose, employeeId, ticketId }) => {
       alert("There was an error submitting your rating.");
     } else {
       alert("Thank you for your feedback!");
-      // Clear state and close modal
       setRating(0);
       setExperience("");
       onClose();

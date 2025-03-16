@@ -8,39 +8,29 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Label
+  Label,
 } from "recharts";
 import Navbar from "../components/Navbar";
-import {
-  FaThumbsUp,
-  FaMedal,
-  FaClock,
-  FaTasks,
-  FaCheckCircle,
-  FaUserCheck
-} from "react-icons/fa";
+import { FaClock, FaTasks, FaCheckCircle } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
 
 const CSRdashboard = () => {
   const [ticketSummary, setTicketSummary] = useState([]);
   const [ticketChartData, setTicketChartData] = useState([]);
-  const [topSolvers, setTopSolvers] = useState([]);
-  const [employees, setEmployees] = useState([]);
+  const [feedback, setFeedback] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch dashboard data including tickets summary, chart data, top solvers and employees status
+  // Fetch dashboard data (tickets summary, chart data, etc.)
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // Calculate timestamps for today and 24 hours ago
-        const twentyFourHoursAgo = new Date(Date.now() - 86400000).toISOString();
+        // Calculate timestamp for the start of today
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         const todayStartISO = todayStart.toISOString();
 
         // --- LIVE TICKETS DATA ---
-        // Fetch open tickets with assignments to determine unassigned count.
         const { data: openTicketsData, error: openError } = await supabase
           .from("tickets")
           .select("id, assignments(*)")
@@ -50,12 +40,15 @@ const CSRdashboard = () => {
         }
         const openTicketsCount = openTicketsData ? openTicketsData.length : 0;
         const assignedCount = openTicketsData
-          ? openTicketsData.filter(ticket => ticket.assignments && ticket.assignments.length > 0).length
+          ? openTicketsData.filter(
+              (ticket) =>
+                ticket.assignments && ticket.assignments.length > 0
+            ).length
           : 0;
         const unassignedCount = openTicketsCount - assignedCount;
 
         // --- RESPONSE TIME TODAY DATA ---
-        // Fetch tickets answered today (assumes a "first_response_at" column exists)
+        // Ensure the column "first_response_at" exists in your tickets table.
         const { data: answeredData, error: answeredError } = await supabase
           .from("tickets")
           .select("created_at, first_response_at")
@@ -72,8 +65,7 @@ const CSRdashboard = () => {
             }
             return acc;
           }, 0);
-          avgResponseTime = totalResponseTime / answeredData.length / 60000; // convert ms to minutes
-          avgResponseTime = Math.round(avgResponseTime);
+          avgResponseTime = Math.round(totalResponseTime / answeredData.length / 60000);
         }
 
         // --- EMPLOYEE WORKLOAD (Tickets Assigned) ---
@@ -113,14 +105,13 @@ const CSRdashboard = () => {
           {
             section: "Employee Workload",
             items: [
-              { label: "Tickets Assigned", value: assignmentsCount, color: "bg-[#23486A]", icon: <FaUserCheck /> },
+              { label: "Tickets Assigned", value: assignmentsCount, color: "bg-[#23486A]", icon: <FaCheckCircle /> },
             ],
           },
         ];
         setTicketSummary(summary);
 
         // --- TICKET CHART DATA ---
-        // Fetch today's tickets and group by hour for chart data.
         const { data: todaysTickets, error: todaysError } = await supabase
           .from("tickets")
           .select("created_at, status")
@@ -142,96 +133,6 @@ const CSRdashboard = () => {
           return { time: label, new: newCount, closed: closedCount };
         });
         setTicketChartData(chartDataFromBackend);
-
-        // --- TOP TICKET SOLVERS ---
-        // Fetch closed tickets and group by the "created_by" field.
-        const { data: closedTicketsData, error: closedTicketsError } = await supabase
-          .from("tickets")
-          .select("created_by")
-          .eq("status", "closed");
-        if (closedTicketsError) {
-          console.error("Error fetching closed tickets:", closedTicketsError);
-        }
-        const solversMap = {};
-        if (closedTicketsData) {
-          closedTicketsData.forEach(ticket => {
-            if (ticket.created_by) {
-              solversMap[ticket.created_by] = (solversMap[ticket.created_by] || 0) + 1;
-            }
-          });
-        }
-        let solversArray = Object.keys(solversMap).map(userId => ({
-          userId,
-          tickets: solversMap[userId]
-        }));
-        solversArray.sort((a, b) => b.tickets - a.tickets);
-        solversArray = solversArray.slice(0, 5);
-        // Fetch user details for each top solver
-        const enrichedSolvers = await Promise.all(
-          solversArray.map(async solver => {
-            const { data: userData } = await supabase
-              .from("users")
-              .select("username, role, profile_pic")
-              .eq("id", solver.userId)
-              .single();
-            return {
-              name: userData?.username || solver.userId,
-              role: userData?.role || "",
-              tickets: solver.tickets,
-              profile_pic: userData?.profile_pic || "https://via.placeholder.com/50"
-            };
-          })
-        );
-        setTopSolvers(enrichedSolvers);
-
-        // --- EMPLOYEE STATUS ---
-        // Fetch all employees from the users table (assuming role = "employee")
-        const { data: employeesData, error: employeesError } = await supabase
-          .from("users")
-          .select("id, username, last_activity_at, is_on_live_chat, is_online")
-          .eq("role", "employee");
-        if (employeesError) {
-          console.error("Error fetching employees:", employeesError);
-        }
-        // Compute status for each employee
-        const computedEmployees = (employeesData || []).map(emp => {
-          const now = new Date();
-          let status = "Offline";
-          if (emp.is_on_live_chat) {
-            status = "On Live Chat";
-          } else if (emp.is_online) {
-            const lastActivity = emp.last_activity_at ? new Date(emp.last_activity_at) : 0;
-            // If no activity for over 30 minutes, mark as Away.
-            if (now - lastActivity > 30 * 60 * 1000) {
-              status = "Away";
-            } else {
-              status = "Online";
-            }
-          }
-          return { ...emp, status };
-        });
-        // We'll store computedEmployees in a state if needed for display in the Employee Status section.
-        // For simplicity, we'll attach it to ticketSummary's last section.
-        setTicketSummary(prev => [
-          ...prev,
-          {
-            section: "Employee Status",
-            items: computedEmployees.map(emp => ({
-              label: emp.username,
-              value: emp.status,
-              // You can use different colors for different statuses if you like.
-              color:
-                emp.status === "On Live Chat"
-                  ? "bg-green-600"
-                  : emp.status === "Online"
-                  ? "bg-blue-600"
-                  : emp.status === "Away"
-                  ? "bg-orange-600"
-                  : "bg-gray-600",
-              icon: <FaUserCheck />
-            }))
-          }
-        ]);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -240,6 +141,25 @@ const CSRdashboard = () => {
     };
 
     fetchDashboardData();
+  }, []);
+
+  // Fetch customer feedback from employee_ratings.
+  // This query assumes you have added a 'customer_id' column in employee_ratings
+  // and defined a foreign key relationship to your users table, which has 'email' and 'profile_picture'.
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      const { data, error } = await supabase
+        .from("employee_ratings")
+        .select("experience_text, created_at, customer:customer_id(email, profile_picture)")
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.error("Error fetching feedback:", error.message);
+      } else {
+        setFeedback(data);
+      }
+    };
+
+    fetchFeedback();
   }, []);
 
   // Prepare chart configuration using our ticketChartData from backend
@@ -295,7 +215,7 @@ const CSRdashboard = () => {
       <Navbar />
       <div className="pt-20 px-4 lg:px-8 mx-auto w-full max-w-[100vw] overflow-hidden">
         {/* Ticket Summary Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn ">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
           {ticketSummary.map((section, index) => (
             <div key={index} className="p-4 rounded-xl shadow-md text-center bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 text-white">
               <h2 className="text-lg font-semibold text-gray-300 mb-2">{section.section}</h2>
@@ -314,10 +234,10 @@ const CSRdashboard = () => {
           ))}
         </div>
 
-        {/* Charts & Top Solvers */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 w-full animate-fadeIn">
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 w-full animate-fadeIn">
           {/* Ticket Chart */}
-          <div className="col-span-2 bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full h-[500px] relative overflow-hidden">
+          <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full h-[500px] relative overflow-hidden">
             <h3 className="text-xl font-semibold mb-4">New Tickets vs Closed</h3>
             <div className="p-4 rounded-lg">
               <ResponsiveContainer width="100%" height={350}>
@@ -337,24 +257,23 @@ const CSRdashboard = () => {
             </div>
           </div>
 
-          {/* Top Ticket Solvers */}
-          <div className="col-span-1 h-[500px] bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full">
-            <h3 className="text-xl font-semibold mb-4">Top Ticket Solvers</h3>
+          {/* Customer Feedback */}
+          <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full">
+            <h3 className="text-xl font-semibold mb-4">Customer Feedback</h3>
             <div className="space-y-3">
-              {isLoading ? (
-                <p>Loading top solvers...</p>
-              ) : topSolvers.length === 0 ? (
-                <p>No data available</p>
+              {feedback.length === 0 ? (
+                <p>No feedback available</p>
               ) : (
-                topSolvers.map((solver, index) => (
+                feedback.map((fb, index) => (
                   <div key={index} className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg shadow">
-                    <div className="bg-yellow-500 p-2 rounded-full">
-                      <FaMedal className="text-white text-lg" />
-                    </div>
+                    <img
+                      src={fb.customer?.profile_picture || "https://via.placeholder.com/50"}
+                      alt={fb.customer?.email || "User"}
+                      className="w-10 h-10 rounded-full"
+                    />
                     <div>
-                      <h4 className="text-white">{solver.name}</h4>
-                      <p className="text-gray-400 text-sm">{solver.role}</p>
-                      <p className="text-blue-400">{solver.tickets} tickets solved</p>
+                      <p className="text-white">{fb.experience_text}</p>
+                      <p className="text-gray-400 text-sm">{new Date(fb.created_at).toLocaleString()}</p>
                     </div>
                   </div>
                 ))
@@ -362,99 +281,9 @@ const CSRdashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Customer Feedback & Employee Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 w-full animate-fadeIn">
-          {/* Customer Feedback */}
-          <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full">
-            <h3 className="text-xl font-semibold mb-4">Customer Feedback</h3>
-            <div className="space-y-3">
-              {[
-                { message: "Thanks for exchanging my item so promptly", time: "an hour ago" },
-                { message: "Super fast resolution, thank you!", time: "an hour ago" },
-                { message: "Great service as always", time: "3 hours ago" },
-                { message: "Helpful and efficient. Great service!", time: "4 hours ago" },
-                { message: "Fast and efficient, thanks.", time: "2 days ago" },
-              ].map((feedback, index) => (
-                <div key={index} className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg shadow">
-                  <div className="bg-blue-500 p-2 rounded-full">
-                    <FaThumbsUp className="text-white text-lg" />
-                  </div>
-                  <div>
-                    <p className="text-white">{feedback.message}</p>
-                    <p className="text-gray-400 text-sm">{feedback.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Employee Status */}
-          <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-4 rounded-xl shadow-lg">
-            <h2 className="text-white text-xl font-semibold mb-4">Employee Status</h2>
-            <div className="flex justify-between text-gray-300 px-4 py-2 border-b border-gray-600">
-              <span className="font-semibold">Employee</span>
-              <span className="font-semibold">Status</span>
-            </div>
-            <div className="space-y-2 mt-2">
-              {isLoading ? (
-                <p>Loading employees...</p>
-              ) : (
-                // Assuming the fetched employees with computed status are appended to the summary,
-                // you can alternatively store them in a dedicated state. Here we assume they are stored in summary.
-                // For clarity, we'll fetch employees in this section.
-                <EmployeeStatus />
-              )}
-            </div>
-          </div>
-        </div>
       </div>
+      {/* Ticket Submission Modal and Rating Modal would be here if used */}
     </div>
-  );
-};
-
-// Component to fetch and render employee status
-const EmployeeStatus = () => {
-  const [employees, setEmployees] = useState([]);
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      const { data, error } = await supabase
-        .from("users")
-        .select("id, username, last_activity_at, is_on_live_chat, is_online")
-        .eq("role", "employee");
-      if (error) {
-        console.error("Error fetching employees:", error);
-      } else {
-        const now = new Date();
-        const computed = (data || []).map(emp => {
-          let status = "Offline";
-          if (emp.is_on_live_chat) {
-            status = "On Live Chat";
-          } else if (emp.is_online) {
-            const lastActivity = emp.last_activity_at ? new Date(emp.last_activity_at) : 0;
-            status = now - lastActivity > 30 * 60 * 1000 ? "Away" : "Online";
-          }
-          return { ...emp, status };
-        });
-        setEmployees(computed);
-      }
-    };
-    fetchEmployees();
-  }, []);
-
-  return (
-    <>
-      {employees.length === 0 ? (
-        <p>No employees found</p>
-      ) : (
-        employees.map((emp) => (
-          <div key={emp.id} className="flex justify-between items-center bg-[#2D3E50] text-white px-4 py-3 rounded-lg">
-            <span className="font-medium">{emp.username}</span>
-            <span className="text-gray-300">{emp.status}</span>
-          </div>
-        ))
-      )}
-    </>
   );
 };
 
