@@ -1,13 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEye, FaSearch } from "react-icons/fa";
-
-const tickets = [
-  { id: "T-101", title: "Login Issue", assignedBy: "Admin", createdDate: "2025-03-10", priority: "High", status: "Open" },
-  { id: "T-102", title: "Payment Failure", assignedBy: "Admin", createdDate: "2025-03-11", priority: "Critical", status: "In Progress" },
-  { id: "T-103", title: "UI Bug in Dashboard", assignedBy: "Admin", createdDate: "2025-03-12", priority: "Medium", status: "Open" },
-  { id: "T-101", title: "Login Issue", assignedBy: "Admin", createdDate: "2025-03-10", priority: "High", status: "Open" },
-  { id: "T-102", title: "Payment Failure", assignedBy: "Admin", createdDate: "2025-03-11", priority: "Critical", status: "In Progress" },
-];
+import { supabase } from "../utils/supabase"; // Import your initialized Supabase client
+import { useNavigate } from "react-router-dom";
 
 const priorityStyles = {
   High: "bg-[#EFB036]",
@@ -17,7 +11,36 @@ const priorityStyles = {
 };
 
 const EmployeeTicketList = () => {
+  const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchAssignedTickets = async () => {
+      // Use Supabase v2 auth API to get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch assignments joined with the related ticket data using an alias.
+      // Ensure that assignments.ticket_id has a foreign key relationship to tickets.id.
+      const { data, error } = await supabase
+        .from("assignments")
+        .select("ticket: tickets(id, title, created_at, priority, status)")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error fetching assigned tickets:", error);
+      } else if (data) {
+        // Each row in data will have a "ticket" property containing the joined ticket data.
+        const assignedTickets = data.map((assignment) => assignment.ticket);
+        setTickets(assignedTickets);
+      }
+    };
+
+    fetchAssignedTickets();
+  }, []);
+
+  // Filter tickets based on the search query (by title)
   const filteredTickets = tickets.filter((ticket) =>
     ticket.title.toLowerCase().includes(search.toLowerCase())
   );
@@ -38,14 +61,13 @@ const EmployeeTicketList = () => {
         />
       </div>
 
-      {/* Full-Screen Table */}
+      {/* Tickets Table */}
       <div className="w-full overflow-x-auto">
         <table className="w-full text-left border-collapse shadow-md rounded-xl overflow-hidden">
           <thead className="bg-[#23486A] text-white">
             <tr>
               <th className="p-4">Ticket ID</th>
               <th className="p-4">Title</th>
-              <th className="p-4">Assigned By</th>
               <th className="p-4">Created Date</th>
               <th className="p-4">Priority</th>
               <th className="p-4">Status</th>
@@ -60,28 +82,24 @@ const EmployeeTicketList = () => {
               >
                 <td className="p-4">{ticket.id}</td>
                 <td className="p-4">{ticket.title}</td>
-                <td className="p-4">{ticket.assignedBy}</td>
-                <td className="p-4">{ticket.createdDate}</td>
-
-                {/* Priority Badge (Simplified) */}
+                <td className="p-4">{new Date(ticket.created_at).toLocaleDateString()}</td>
                 <td className="p-4">
                   <span
-                    className={`px-3 py-1 rounded-full text-white ${priorityStyles[ticket.priority]}`}
+                    className={`px-3 py-1 rounded-full text-black ${priorityStyles[ticket.priority]}`}
                   >
                     {ticket.priority}
                   </span>
                 </td>
-
-                {/* Status Badge */}
                 <td className="p-4">
                   <span className="px-3 py-1 bg-gray-300 text-black rounded-full">
                     {ticket.status}
                   </span>
                 </td>
-
-                {/* View Button */}
                 <td className="p-4">
-                  <button className="bg-[#EFB036] text-black hover:bg-[#D9A02B] px-4 py-2 rounded-full flex items-center gap-2 shadow-md transition duration-200">
+                  <button
+                    onClick={() => navigate(`/ticket/${ticket.id}`)}
+                    className="bg-[#EFB036] text-black hover:bg-[#D9A02B] px-4 py-2 rounded-full flex items-center gap-2 shadow-md transition duration-200"
+                  >
                     <FaEye /> View
                   </button>
                 </td>

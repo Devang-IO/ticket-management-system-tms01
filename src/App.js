@@ -1,24 +1,25 @@
-//this is app.js
 import React from "react";
 import AppRoutes from "./routes/AppRoutes";
-import { ToastContainer } from "react-toastify"; // Import ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import QuixkyBot from "./components/QuixkyBot"; // import your bot component
 
 function App() {
   return (
     <>
       <AppRoutes />
       <ToastContainer
-        position="top-center" // Position of the toast notifications
-        autoClose={1500} // Auto-close after 1.5 seconds
-        hideProgressBar={true} // Hide the progress bar
-        newestOnTop={false} // New toasts appear below older ones
-        closeOnClick // Close toast on click
-        rtl={false} // Left-to-right layout
-        pauseOnFocusLoss // Pause toast timer when window loses focus
-        draggable // Allow dragging to dismiss
-        pauseOnHover // Pause toast timer on hover
+        position="top-center"
+        autoClose={1500}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
+      <QuixkyBot />
     </>
   );
 }
