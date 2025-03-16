@@ -24,70 +24,85 @@ const Dashboard = () => {
       try {
         setIsLoading(true);
 
-        // Fetch ticket statistics
+        // Calculate timestamp for 24 hours ago
+        const twentyFourHoursAgo = new Date(Date.now() - 86400000).toISOString();
+
+        // Fetch ticket statistics with Promise.all
         const [
           totalTicketsResult,
           newTicketsResult,
           openTicketsResult,
           closedTicketsResult,
           urgentTicketsResult,
+          unansweredTicketsResult,
+          answeredTicketsResult,
         ] = await Promise.all([
-          supabase.from("tickets").select("count"),
+          // Total tickets count
+          supabase.from("tickets").select("count", { head: true, count: "exact" }),
+          // New tickets count (created in last 24 hours)
+          supabase.from("tickets").select("count", { head: true, count: "exact" }).gt("created_at", twentyFourHoursAgo),
+          // Open tickets count
+          supabase.from("tickets").select("count", { head: true, count: "exact" }).eq("status", "open"),
+          // Closed tickets count
+          supabase.from("tickets").select("count", { head: true, count: "exact" }).eq("status", "closed"),
+          // Urgent tickets count (priority High) - case insensitive
+          supabase.from("tickets").select("count", { head: true, count: "exact" }).ilike("priority", "high"),
+          // Unanswered tickets: open tickets older than 24 hours
           supabase
             .from("tickets")
-            .select("count")
-            .gt("created_at", new Date(Date.now() - 86400000).toISOString()),
-          supabase.from("tickets").select("count").eq("status", "open"),
-          supabase.from("tickets").select("count").eq("status", "closed"),
-          supabase.from("tickets").select("count").eq("priority", "High"),
+            .select("count", { head: true, count: "exact" })
+            .eq("status", "open")
+            .lt("created_at", twentyFourHoursAgo),
+          // Answered tickets: status answered
+          supabase.from("tickets").select("count", { head: true, count: "exact" }).eq("status", "answered"),
         ]);
 
         setStats([
           {
             label: "Total Tickets",
-            value: totalTicketsResult.data?.[0]?.count || 0,
+            value: totalTicketsResult.count || 0,
             icon: "💼",
             bgColor: "#EFB036",
           },
           {
             label: "New Tickets",
-            value: newTicketsResult.data?.[0]?.count || 0,
+            value: newTicketsResult.count || 0,
             icon: "✉️",
             bgColor: "#3B6790",
           },
           {
             label: "Open Tickets",
-            value: openTicketsResult.data?.[0]?.count || 0,
+            value: openTicketsResult.count || 0,
             icon: "🔓",
             bgColor: "#23486A",
           },
           {
             label: "Closed Tickets",
-            value: closedTicketsResult.data?.[0]?.count || 0,
+            value: closedTicketsResult.count || 0,
             icon: "🔒",
             bgColor: "#4C7B8B",
           },
           {
             label: "Urgent Tickets",
-            value: urgentTicketsResult.data?.[0]?.count || 0,
+            value: urgentTicketsResult.count || 0,
             icon: "⚠️",
             bgColor: "#4C7B8B",
           },
           {
-            label: "Un-Answered Tickets(null)",
-            value: 20,
+            label: "Un-Answered Tickets",
+            value: unansweredTicketsResult.count || 0,
             icon: "⬅️",
             bgColor: "#EFB036",
           },
           {
-            label: "Answered Tickets(null)",
-            value: 1,
+            label: "Answered Tickets",
+            value: answeredTicketsResult.count || 0,
             icon: "✅",
             bgColor: "#3B6790",
           },
           {
-            label: "Solved Tickets(null)",
-            value: 3,
+            label: "Solved Tickets",
+            value: closedTicketsResult.count || 0,
             icon: "👍",
             bgColor: "#23486A",
           },
@@ -107,6 +122,7 @@ const Dashboard = () => {
 
         setRecentTickets(
           ticketsData?.map((ticket) => ({
+            id: ticket.id,
             title: ticket.title,
             updated: new Date(ticket.created_at).toLocaleString(),
             action:
@@ -166,8 +182,8 @@ const Dashboard = () => {
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false,  // Allows manual control of height
-    aspectRatio: 2,  // Adjust this value to reduce height (higher = flatter chart)
+    maintainAspectRatio: false,
+    aspectRatio: 2,
     plugins: {
       legend: { display: false },
       title: {
@@ -188,7 +204,7 @@ const Dashboard = () => {
       },
     },
   };
-  
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex flex-col">
       <h1 className="text-2xl font-bold mb-4 text-[#23486A]">Admin Dashboard</h1>
@@ -244,8 +260,13 @@ const Dashboard = () => {
                 recentTickets.map((ticket, index) => (
                   <tr key={index} className="border-b">
                     <td className="p-2">{index + 1}</td>
-                    <td className="p-2 text-blue-600 cursor-pointer">
-                      {ticket.title}
+                    <td className="p-2">
+                      <Link
+                        to={`/managetickets?ticketId=${ticket.id}`}
+                        className="text-blue-600 cursor-pointer"
+                      >
+                        {ticket.title}
+                      </Link>
                     </td>
                     <td className="p-2">{ticket.updated}</td>
                     <td className="p-2">
@@ -277,7 +298,7 @@ const Dashboard = () => {
             <p>Loading top performers...</p>
           ) : (
             <ul>
-              {topPerformers.map((user, index) => (
+              {topPerformers.map((user) => (
                 <li
                   key={user.id}
                   className="flex items-center gap-4 p-2 border-b"
@@ -302,15 +323,14 @@ const Dashboard = () => {
         </div>
       </div>
 
-     {/* Bar Chart */}
-<div className="bg-white p-4 rounded-lg shadow flex justify-center items-center mt-4" style={{ height: "250px" }}>
-  {isLoading ? (
-    <div>Loading chart data...</div>
-  ) : (
-    <Bar data={chartData} options={chartOptions} />
-  )}
-</div>
-
+      {/* Bar Chart */}
+      <div className="bg-white p-4 rounded-lg shadow flex justify-center items-center mt-4" style={{ height: "250px" }}>
+        {isLoading ? (
+          <div>Loading chart data...</div>
+        ) : (
+          <Bar data={chartData} options={chartOptions} />
+        )}
+      </div>
 
       {/* Footer with Buttons */}
       <div className="flex justify-between items-center mt-6 p-4 bg-[#EFB036] text-white rounded-lg shadow">

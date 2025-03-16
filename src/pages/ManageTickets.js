@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { FiChevronDown, FiEye, FiTrash2, FiUserMinus } from "react-icons/fi";
 import { FaTicketAlt, FaFilter } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
@@ -12,6 +12,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [actionDropdown, setActionDropdown] = useState(null);
   const dropdownRef = useRef(null);
+
+  // Read the query parameter to get a highlighted ticket id.
+  const [searchParams] = useSearchParams();
+  const highlightedTicketId = searchParams.get("ticketId");
 
   // Fetch all tickets for Admin
   useEffect(() => {
@@ -197,10 +201,15 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
           </thead>
           <tbody>
             {currentTickets.map((ticket) => (
-              <tr key={ticket.id}>
+              <tr
+                key={ticket.id}
+                className={ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""}
+              >
                 <td>{ticket.id}</td>
                 <td className="text-left">
-                  <Link to={`/ticket/${ticket.id}`} className="ticket-link">{ticket.title}</Link>
+                  <Link to={`/managetickets?ticketId=${ticket.id}`} className="ticket-link">
+                    {ticket.title}
+                  </Link>
                 </td>
                 <td>{ticket.status}</td>
                 <td>
@@ -227,8 +236,8 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                       ref={dropdownRef}
                       style={{
                         position: "absolute",
-                        top: "70%",
-                        right: 50,
+                        top: "100%",
+                        right: 0,
                         zIndex: 1000,
                         backgroundColor: "#fff",
                         boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
@@ -240,9 +249,9 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                         <Link to={`/ticket/${ticket.id}`} className="dropdown-item">
                           <FiEye className="mr-1" /> View
                         </Link>
-                        {/* <button className="dropdown-item" onClick={() => handleUnassignTicket(ticket.id)}>
+                        <button className="dropdown-item" onClick={() => handleUnassignTicket(ticket.id)}>
                           <FiUserMinus className="mr-1" /> Unassign
-                        </button> */}
+                        </button>
                         <button className="dropdown-item text-red-600" onClick={() => handleDeleteTicket(ticket.id)}>
                           <FiTrash2 className="mr-1 text-red-600" /> Delete
                         </button>
