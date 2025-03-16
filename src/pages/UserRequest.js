@@ -24,9 +24,10 @@ const UserRequest = () => {
       if (error) {
         console.error("Error fetching assigned tickets:", error);
       } else if (data) {
-        // Extract the tickets
+        // Extract tickets and filter out closed ones
         const assignedTickets = data.map((assignment) => assignment.ticket);
-        setTickets(assignedTickets);
+        const activeTickets = assignedTickets.filter(ticket => ticket.status !== "closed");
+        setTickets(activeTickets);
       }
     };
 
@@ -38,29 +39,43 @@ const UserRequest = () => {
     ticket.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Enable chat in DB and navigate
+  // Update ticket status to "answered", enable chat, and navigate
   const handleConnect = async (ticketId) => {
     const { error } = await supabase
       .from("tickets")
-      .update({ chat_initiated: true })
+      .update({ status: "answered", chat_initiated: true })
       .eq("id", ticketId);
 
     if (error) {
-      console.error("Error enabling chat:", error);
+      console.error("Error updating ticket:", error);
       return;
     }
+    // Optionally update local state if needed
+    setTickets((prevTickets) =>
+      prevTickets.map(ticket =>
+        ticket.id === ticketId
+          ? { ...ticket, status: "answered", chat_initiated: true }
+          : ticket
+      )
+    );
     navigate(`/ticket/${ticketId}`);
   };
 
   return (
     <div className="pt-20 px-6 min-h-screen flex flex-col text-white">
       <h1 className="text-3xl font-bold text-[#23486A] mb-4">User Requests</h1>
-      {/* Search Bar, Table, etc. */}
+      {/* Search Bar */}
       <div className="flex items-center w-full max-w-lg bg-[#4C7B8B] text-white rounded-full px-4 py-2 mb-6 shadow-md">
-        {/* Search input here */}
-        ...
+        <input
+          type="text"
+          placeholder="Search tickets..."
+          className="ml-2 flex-1 outline-none bg-transparent text-white placeholder-white"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
+      {/* Tickets Table */}
       <div className="w-full overflow-x-auto">
         <table className="w-full text-left border-collapse shadow-md rounded-xl overflow-hidden">
           <thead className="bg-[#23486A] text-white">
@@ -76,7 +91,9 @@ const UserRequest = () => {
               <tr key={ticket.id} className="bg-gray-100 text-black">
                 <td className="p-4">{ticket.id}</td>
                 <td className="p-4">{ticket.title}</td>
-                <td className="p-4">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                <td className="p-4">
+                  {new Date(ticket.created_at).toLocaleDateString()}
+                </td>
                 <td className="p-4 space-x-2">
                   <button
                     onClick={() => handleConnect(ticket.id)}
@@ -84,7 +101,6 @@ const UserRequest = () => {
                   >
                     Connect
                   </button>
-                  
                 </td>
               </tr>
             ))}

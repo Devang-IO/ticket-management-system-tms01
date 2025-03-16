@@ -40,6 +40,29 @@ const EmployeeTicketList = () => {
     fetchAssignedTickets();
   }, []);
 
+  // Function to handle closing a ticket
+  const handleCloseTicket = async (ticket) => {
+    const confirmed = window.confirm("Are you sure you want to close this ticket?");
+    if (!confirmed) return;
+
+    const { data, error } = await supabase
+      .from("tickets")
+      .update({ status: "closed" })
+      .eq("id", ticket.id);
+
+    if (error) {
+      console.error("Error closing ticket:", error);
+      alert("Error closing ticket");
+    } else {
+      setTickets((prevTickets) =>
+        prevTickets.map((t) =>
+          t.id === ticket.id ? { ...t, status: "closed" } : t
+        )
+      );
+      alert("Ticket closed successfully");
+    }
+  };
+
   // Filter tickets based on the search query (by title)
   const filteredTickets = tickets.filter((ticket) =>
     ticket.title.toLowerCase().includes(search.toLowerCase())
@@ -95,13 +118,21 @@ const EmployeeTicketList = () => {
                     {ticket.status}
                   </span>
                 </td>
-                <td className="p-4">
+                <td className="p-4 flex gap-2">
                   <button
                     onClick={() => navigate(`/ticket/${ticket.id}`)}
                     className="bg-[#EFB036] text-black hover:bg-[#D9A02B] px-4 py-2 rounded-full flex items-center gap-2 shadow-md transition duration-200"
                   >
                     <FaEye /> View
                   </button>
+                  {ticket.status === "open" && (
+                    <button
+                      onClick={() => handleCloseTicket(ticket)}
+                      className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-full flex items-center gap-2 shadow-md transition duration-200"
+                    >
+                      Close Ticket
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
