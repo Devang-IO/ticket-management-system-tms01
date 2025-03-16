@@ -10,9 +10,7 @@ const UserRequest = () => {
   useEffect(() => {
     const fetchAssignedTickets = async () => {
       // Get the current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       // Fetch assignments with joined ticket data
@@ -50,9 +48,10 @@ const UserRequest = () => {
       console.error("Error updating ticket:", error);
       return;
     }
-    // Optionally update local state if needed
+
+    // Optionally update local state to reflect the change
     setTickets((prevTickets) =>
-      prevTickets.map(ticket =>
+      prevTickets.map((ticket) =>
         ticket.id === ticketId
           ? { ...ticket, status: "answered", chat_initiated: true }
           : ticket
@@ -94,7 +93,7 @@ const UserRequest = () => {
                 <td className="p-4">
                   {new Date(ticket.created_at).toLocaleDateString()}
                 </td>
-                <td className="p-4 space-x-2">
+                <td className="p-4">
                   <button
                     onClick={() => handleConnect(ticket.id)}
                     className="bg-[#EFB036] text-black px-4 py-2 rounded-full"

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
+import RatingModal from "../components/RatingModal"; // Import the rating modal
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,6 +12,7 @@ import { supabase } from "../utils/supabase";
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tickets, setTickets] = useState([]);
+  const [ratingTicket, setRatingTicket] = useState(null); // Store the closed ticket that needs a rating
   const navigate = useNavigate();
 
   // Theme Colors
@@ -44,6 +46,46 @@ const Dashboard = () => {
     fetchTickets();
   }, []);
 
+  // Check for any closed ticket that has not been rated
+  useEffect(() => {
+    const checkForUnratedTickets = async () => {
+      // Filter for closed tickets
+      const closedTickets = tickets.filter(ticket => ticket.status === "closed");
+      if (closedTickets.length === 0) {
+        setRatingTicket(null);
+        return;
+      }
+      // Get the ids of all closed tickets
+      const closedTicketIds = closedTickets.map(ticket => ticket.id);
+
+      // Query the employee_ratings table for any ratings for these ticket ids
+      const { data: ratingsData, error } = await supabase
+        .from("employee_ratings")
+        .select("ticket_id")
+        .in("ticket_id", closedTicketIds);
+
+      if (error) {
+        console.error("Error fetching ratings:", error);
+        return;
+      }
+      // Create an array of ticket ids that have been rated
+      const ratedTicketIds = ratingsData.map(r => r.ticket_id);
+      // Find closed tickets that haven't been rated
+      const unratedTickets = closedTickets.filter(ticket => !ratedTicketIds.includes(ticket.id));
+
+      if (unratedTickets.length > 0) {
+        // Show the modal for the first unrated closed ticket
+        setRatingTicket(unratedTickets[0]);
+      } else {
+        setRatingTicket(null);
+      }
+    };
+
+    if (tickets.length > 0) {
+      checkForUnratedTickets();
+    }
+  }, [tickets]);
+
   // Compute counts for each ticket category based on status and priority
   const pendingCount = tickets.filter((ticket) => ticket.status === "open").length;
   const resolvedCount = tickets.filter((ticket) => ticket.status === "closed").length;
@@ -71,6 +113,11 @@ const Dashboard = () => {
       setIsModalOpen(false);
       navigate("/dashboard");
     }, 2000);
+  };
+
+  // Callback when the rating modal is closed (after successful rating submission)
+  const handleRatingModalClose = () => {
+    setRatingTicket(null);
   };
 
   return (
@@ -253,6 +300,15 @@ const Dashboard = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleTicketSubmit}
+        />
+      )}
+      {/* Rating Modal - shows if there is a closed, unrated ticket */}
+      {ratingTicket && (
+        <RatingModal
+          show={true}
+          onClose={handleRatingModalClose}
+          employeeId={ratingTicket.closed_by} // The employee who closed the ticket
+          ticketId={ratingTicket.id}
         />
       )}
     </div>
