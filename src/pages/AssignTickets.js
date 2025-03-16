@@ -4,6 +4,9 @@ import { FaTicketAlt } from "react-icons/fa";
 import Modal from "react-modal";
 import { supabase } from "../utils/supabase"; // Import Supabase client
 
+// Optional: configure Modal's app element (for accessibility)
+Modal.setAppElement("#root");
+
 const AdminTicketList = ({ isSidebarOpen }) => {
   const [tickets, setTickets] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -12,12 +15,12 @@ const AdminTicketList = ({ isSidebarOpen }) => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Fetch tickets from Supabase
+  // Fetch tickets from Supabase (including assignments)
   useEffect(() => {
     const fetchTickets = async () => {
       const { data, error } = await supabase
         .from("tickets")
-        .select("*")
+        .select("*, assignments(*)")
         .order("created_at", { ascending: false });
       if (error) {
         console.error("Error fetching tickets:", error);
@@ -51,19 +54,62 @@ const AdminTicketList = ({ isSidebarOpen }) => {
     employee.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle ticket assignment and show inline notification
+  // Split tickets into unassigned and assigned arrays
+  const unassignedTickets = tickets.filter(
+    (ticket) => !ticket.assignments || ticket.assignments.length === 0
+  );
+  const assignedTickets = tickets.filter(
+    (ticket) => ticket.assignments && ticket.assignments.length > 0
+  );
+
+  // Handle ticket assignment (or reassignment)
   const handleAssign = async (employee) => {
     if (!selectedTicket) return;
 
-    const { error } = await supabase.from("assignments").insert({
-      ticket_id: selectedTicket.id,
-      user_id: employee.id,
-    });
+    // Check if the ticket is already assigned to the same employee
+    if (
+      selectedTicket.assignments &&
+      selectedTicket.assignments.some(
+        (assignment) => assignment.user_id === employee.id
+      )
+    ) {
+      setSuccessMessage(`Ticket already assigned to ${employee.name}`);
+      setIsModalOpen(false);
+      setTimeout(() => setSuccessMessage(""), 3000);
+      return;
+    }
+
+    // Insert assignment and return the inserted row
+    const { data: newAssignmentData, error } = await supabase
+      .from("assignments")
+      .insert({
+        ticket_id: selectedTicket.id,
+        user_id: employee.id,
+      })
+      .select();
+
     if (error) {
       console.error("Error assigning ticket:", error);
       setSuccessMessage("Error assigning ticket");
     } else {
+      // Attach employee's name to the assignment so we can show it later
+      const newAssignment = {
+        ...newAssignmentData[0],
+        employee_name: employee.name,
+      };
+
       setSuccessMessage(`Ticket assigned to ${employee.name} successfully!`);
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) => {
+          if (ticket.id === selectedTicket.id) {
+            const updatedAssignments = ticket.assignments
+              ? [...ticket.assignments, newAssignment]
+              : [newAssignment];
+            return { ...ticket, assignments: updatedAssignments };
+          }
+          return ticket;
+        })
+      );
       setTimeout(() => setSuccessMessage(""), 3000);
       setIsModalOpen(false);
     }
@@ -77,7 +123,9 @@ const AdminTicketList = ({ isSidebarOpen }) => {
     >
       <div className="flex items-center gap-2 mb-4">
         <FaTicketAlt className="text-[#23486A]" size={28} />
-        <h2 className="text-2xl font-semibold text-[#23486A]">Assign Tickets</h2>
+        <h2 className="text-2xl font-semibold text-[#23486A]">
+          Assign Tickets
+        </h2>
       </div>
 
       {/* Notification displayed outside the modal */}
@@ -87,7 +135,11 @@ const AdminTicketList = ({ isSidebarOpen }) => {
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-2xl overflow-hidden">
+      {/* Unassigned Tickets Section */}
+      <div className="bg-white shadow-md rounded-2xl overflow-hidden mb-6">
+        <h3 className="p-4 text-xl font-semibold text-[#23486A] border-b">
+          Unassigned Tickets
+        </h3>
         <table className="w-full border-collapse text-left">
           <thead className="bg-[#23486A] text-white">
             <tr>
@@ -100,7 +152,7 @@ const AdminTicketList = ({ isSidebarOpen }) => {
             </tr>
           </thead>
           <tbody>
-            {tickets.map((ticket) => (
+            {unassignedTickets.map((ticket) => (
               <tr key={ticket.id} className="border-b hover:bg-gray-50">
                 <td className="p-4">{ticket.id}</td>
                 <td className="p-4">{ticket.title}</td>
@@ -138,6 +190,68 @@ const AdminTicketList = ({ isSidebarOpen }) => {
         </table>
       </div>
 
+      {/* Assigned Tickets Section */}
+      <div className="bg-white shadow-md rounded-2xl overflow-hidden">
+        <h3 className="p-4 text-xl font-semibold text-[#23486A] border-b">
+          Assigned Tickets
+        </h3>
+        <table className="w-full border-collapse text-left">
+          <thead className="bg-[#23486A] text-white">
+            <tr>
+              <th className="p-4">ID</th>
+              <th className="p-4">Title</th>
+              <th className="p-4">Assigned To</th>
+              <th className="p-4">Priority</th>
+              <th className="p-4">Created At</th>
+              <th className="p-4 text-center w-32">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assignedTickets.map((ticket) => (
+              <tr key={ticket.id} className="border-b hover:bg-gray-50">
+                <td className="p-4">{ticket.id}</td>
+                <td className="p-4">{ticket.title}</td>
+                <td className="p-4">
+                  {ticket.assignments && ticket.assignments.length > 0
+                    ? ticket.assignments[
+                        ticket.assignments.length - 1
+                      ].employee_name
+                    : "Unassigned"}
+                </td>
+                <td className="p-4">
+                  <span
+                    className={`px-3 py-1 text-white text-sm rounded-xl ${
+                      ticket.priority === "High"
+                        ? "bg-[#EFB036]"
+                        : ticket.priority === "Medium"
+                        ? "bg-[#3B6790]"
+                        : "bg-[#23486A]"
+                    }`}
+                  >
+                    {ticket.priority}
+                  </span>
+                </td>
+                <td className="p-4">
+                  {new Date(ticket.created_at).toLocaleDateString()}
+                </td>
+                <td className="p-4 text-center">
+                  <button
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setIsModalOpen(true);
+                    }}
+                    className="px-4 py-2 text-white rounded-xl flex items-center gap-2 shadow-md bg-gradient-to-r from-[#3B6790] to-[#23486A] hover:from-[#23486A] hover:to-[#3B6790]"
+                  >
+                    Reassign <FiUserPlus />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Assignment Modal */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
@@ -178,7 +292,9 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                     </span>
                     <p className="text-sm text-gray-500">
                       {employee.role}
-                      {employee.department ? ` - ${employee.department}` : ""}
+                      {employee.department
+                        ? ` - ${employee.department}`
+                        : ""}
                     </p>
                   </div>
                   <button
