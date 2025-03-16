@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaSearch } from "react-icons/fa";
-import { supabase } from "../utils/supabase"; // Import your initialized Supabase client
+import { supabase } from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
 
 const priorityStyles = {
@@ -13,6 +13,8 @@ const priorityStyles = {
 const EmployeeTicketList = () => {
   const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [ticketToClose, setTicketToClose] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +32,7 @@ const EmployeeTicketList = () => {
       if (error) {
         console.error("Error fetching assigned tickets:", error);
       } else if (data) {
-        const assignedTickets = data.map(assignment => assignment.ticket);
+        const assignedTickets = data.map((assignment) => assignment.ticket);
         setTickets(assignedTickets);
       }
     };
@@ -38,11 +40,8 @@ const EmployeeTicketList = () => {
     fetchAssignedTickets();
   }, []);
 
-  // Function to handle closing a ticket (updates status and closed_by)
+  // Function to update the ticket in Supabase and update local state
   const handleCloseTicket = async (ticket) => {
-    const confirmed = window.confirm("Are you sure you want to close this ticket?");
-    if (!confirmed) return;
-
     // Retrieve current employee details
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -50,22 +49,34 @@ const EmployeeTicketList = () => {
       return;
     }
 
-    // Update the ticket to set status as "closed" and record who closed it
-    const { data, error } = await supabase
+    // Use user.id because the 'closed_by' column expects a UUID.
+    const userId = user.id;
+
+    // Update the ticket to set status as "closed" and record the user.id in closed_by
+    const { error } = await supabase
       .from("tickets")
-      .update({ status: "closed", closed_by: user.id })
+      .update({ status: "closed", closed_by: userId })
       .eq("id", ticket.id);
 
     if (error) {
-      console.error("Error closing ticket:", error);
-      alert("Error closing ticket");
+      console.error("Error closing ticket:", error.message);
+      alert("Error closing ticket: " + error.message);
     } else {
       setTickets((prevTickets) =>
-        prevTickets.map(t =>
-          t.id === ticket.id ? { ...t, status: "closed", closed_by: user.id } : t
+        prevTickets.map((t) =>
+          t.id === ticket.id ? { ...t, status: "closed", closed_by: userId } : t
         )
       );
       alert("Ticket closed successfully");
+    }
+  };
+
+  // Called when user confirms closing the ticket in the modal
+  const handleConfirmClose = async () => {
+    if (ticketToClose) {
+      await handleCloseTicket(ticketToClose);
+      setShowModal(false);
+      setTicketToClose(null);
     }
   };
 
@@ -106,7 +117,10 @@ const EmployeeTicketList = () => {
           </thead>
           <tbody>
             {filteredTickets.map((ticket, index) => (
-              <tr key={ticket.id} className={`${index % 2 === 0 ? "bg-gray-100" : "bg-gray-200"} text-black`}>
+              <tr
+                key={ticket.id}
+                className={`${index % 2 === 0 ? "bg-gray-100" : "bg-gray-200"} text-black`}
+              >
                 <td className="p-4">{ticket.id}</td>
                 <td className="p-4">{ticket.title}</td>
                 <td className="p-4">{new Date(ticket.created_at).toLocaleDateString()}</td>
@@ -121,7 +135,9 @@ const EmployeeTicketList = () => {
                   </span>
                 </td>
                 <td className="p-4">
-                  {ticket.status === "closed" && ticket.closed_by ? ticket.closed_by : "-"}
+                  {ticket.status.toLowerCase() === "closed" && ticket.closed_by
+                    ? ticket.closed_by
+                    : "-"}
                 </td>
                 <td className="p-4 flex gap-2">
                   <button
@@ -130,9 +146,12 @@ const EmployeeTicketList = () => {
                   >
                     <FaEye /> View
                   </button>
-                  {ticket.status === "open" && (
+                  {ticket.status.trim().toLowerCase() !== "closed" && (
                     <button
-                      onClick={() => handleCloseTicket(ticket)}
+                      onClick={() => {
+                        setTicketToClose(ticket);
+                        setShowModal(true);
+                      }}
                       className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-full flex items-center gap-2 shadow-md transition duration-200"
                     >
                       Close Ticket
@@ -144,6 +163,32 @@ const EmployeeTicketList = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-md shadow-lg">
+            <h2 className="text-lg font-bold mb-4 text-black">Are you sure?</h2>
+            <div className="flex justify-end mt-4 gap-2">
+              <button
+                onClick={handleConfirmClose}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setTicketToClose(null);
+                }}
+                className="bg-gray-300 text-black px-4 py-2 rounded"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

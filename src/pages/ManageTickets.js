@@ -236,8 +236,8 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                       ref={dropdownRef}
                       style={{
                         position: "absolute",
-                        top: "100%",
-                        right: 0,
+                        top: "70%",
+                        right: 50,
                         zIndex: 1000,
                         backgroundColor: "#fff",
                         boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
@@ -249,9 +249,9 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                         <Link to={`/ticket/${ticket.id}`} className="dropdown-item">
                           <FiEye className="mr-1" /> View
                         </Link>
-                        <button className="dropdown-item" onClick={() => handleUnassignTicket(ticket.id)}>
+                        {/* <button className="dropdown-item" onClick={() => handleUnassignTicket(ticket.id)}>
                           <FiUserMinus className="mr-1" /> Unassign
-                        </button>
+                        </button> */}
                         <button className="dropdown-item text-red-600" onClick={() => handleDeleteTicket(ticket.id)}>
                           <FiTrash2 className="mr-1 text-red-600" /> Delete
                         </button>
