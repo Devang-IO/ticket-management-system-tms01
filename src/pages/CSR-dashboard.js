@@ -11,7 +11,7 @@ import {
   Label,
 } from "recharts";
 import Navbar from "../components/Navbar";
-import { FaClock, FaTasks, FaCheckCircle } from "react-icons/fa";
+import { FaClock, FaTasks, FaCheckCircle, FaStar } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
 
 const CSRdashboard = () => {
@@ -144,13 +144,12 @@ const CSRdashboard = () => {
   }, []);
 
   // Fetch customer feedback from employee_ratings.
-  // This query assumes you have added a 'customer_id' column in employee_ratings
-  // and defined a foreign key relationship to your users table, which has 'email' and 'profile_picture'.
+  // Modified to include the rating value along with other feedback data
   useEffect(() => {
     const fetchFeedback = async () => {
       const { data, error } = await supabase
         .from("employee_ratings")
-        .select("experience_text, created_at, customer:customer_id(email, profile_picture)")
+        .select("experience_text, rating, created_at, customer:customer_id(email, profile_picture)")
         .order("created_at", { ascending: false });
       if (error) {
         console.error("Error fetching feedback:", error.message);
@@ -161,6 +160,21 @@ const CSRdashboard = () => {
 
     fetchFeedback();
   }, []);
+
+  // Render the star rating based on the rating value
+  const renderStars = (rating) => {
+    return (
+      <div className="flex">
+        {[...Array(5)].map((_, index) => (
+          <FaStar 
+            key={index} 
+            className={index < rating ? "text-yellow-400" : "text-gray-400"} 
+            size={16}
+          />
+        ))}
+      </div>
+    );
+  };
 
   // Prepare chart configuration using our ticketChartData from backend
   const chartData = {
@@ -257,7 +271,7 @@ const CSRdashboard = () => {
             </div>
           </div>
 
-          {/* Customer Feedback */}
+          {/* Customer Feedback with Star Ratings */}
           <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full">
             <h3 className="text-xl font-semibold mb-4">Customer Feedback</h3>
             <div className="space-y-3">
@@ -265,13 +279,16 @@ const CSRdashboard = () => {
                 <p>No feedback available</p>
               ) : (
                 feedback.map((fb, index) => (
-                  <div key={index} className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg shadow">
+                  <div key={index} className="flex items-start gap-3 bg-gray-800 p-3 rounded-lg shadow">
                     <img
                       src={fb.customer?.profile_picture || "https://via.placeholder.com/50"}
                       alt={fb.customer?.email || "User"}
                       className="w-10 h-10 rounded-full"
                     />
-                    <div>
+                    <div className="flex-1">
+                      <div className="mb-1">
+                        {renderStars(fb.rating)}
+                      </div>
                       <p className="text-white">{fb.experience_text}</p>
                       <p className="text-gray-400 text-sm">{new Date(fb.created_at).toLocaleString()}</p>
                     </div>
