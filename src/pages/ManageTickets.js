@@ -40,14 +40,15 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
       console.error("Error deleting ticket:", error);
     } else {
       setTickets((prevTickets) => prevTickets.filter(ticket => ticket.id !== ticketId));
+      setActionDropdown(null);
     }
   };
 
-  // Handle unassigning ticket (move to assigned page)
+  // Handle unassigning ticket: update ticket status to "open"
   const handleUnassignTicket = async (ticketId) => {
     const { error } = await supabase
       .from("tickets")
-      .update({ assigned: false })
+      .update({ status: "open" })
       .eq("id", ticketId);
 
     if (error) {
@@ -55,9 +56,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     } else {
       setTickets((prevTickets) =>
         prevTickets.map(ticket =>
-          ticket.id === ticketId ? { ...ticket, assigned: false } : ticket
+          ticket.id === ticketId ? { ...ticket, status: "open" } : ticket
         )
       );
+      setActionDropdown(null);
     }
   };
 
@@ -104,19 +106,18 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
       {/* Filters Section Container */}
       <div
         style={{
-          backgroundColor: "#f9fafb", // Light gray background
-          padding: "16px", // Padding inside the container
-          borderRadius: "8px", // Rounded corners
-          border: "1px solid #e5e7eb", // Light border
-          marginBottom: "16px", // Space below the container
+          backgroundColor: "#f9fafb",
+          padding: "16px",
+          borderRadius: "8px",
+          border: "1px solid #e5e7eb",
+          marginBottom: "16px",
         }}
       >
-        {/* Filters Section for Manage Tickets (Aligned Left) */}
         <div
           style={{
             display: "flex",
             justifyContent: "flex-start",
-            gap: "16px", // Space between filter groups
+            gap: "16px",
           }}
         >
           {/* Show Entries Filter */}
@@ -182,7 +183,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
       </div>
 
       {/* Table */}
-      <div className="table-container">
+      <div className="table-container" style={{ overflow: "visible" }}>
         <table>
           <thead>
             <tr>
@@ -203,7 +204,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                 </td>
                 <td>{ticket.status}</td>
                 <td>
-                <span className={`px-3 py-1 text-white text-sm rounded-xl ${
+                  <span className={`px-3 py-1 text-white text-sm rounded-xl ${
                     ticket.priority === "High" ? "bg-[#EFB036]" :
                     ticket.priority === "Medium" ? "bg-[#3B6790]" :
                     "bg-[#23486A]"
@@ -212,7 +213,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                   </span>
                 </td>
                 <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
-                <td className="action-cell">
+                <td className="action-cell" style={{ position: "relative" }}>
                   <button
                     onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
                     className="action-btn"
@@ -221,14 +222,27 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                   </button>
 
                   {actionDropdown === ticket.id && (
-                    <div className="dropdown-wrapper" ref={dropdownRef}>
+                    <div 
+                      className="dropdown-wrapper" 
+                      ref={dropdownRef}
+                      style={{
+                        position: "absolute",
+                        top: "70%",
+                        right: 50,
+                        zIndex: 1000,
+                        backgroundColor: "#fff",
+                        boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
+                        borderRadius: "4px",
+                        marginTop: "4px",
+                      }}
+                    >
                       <div className="dropdown">
                         <Link to={`/ticket/${ticket.id}`} className="dropdown-item">
                           <FiEye className="mr-1" /> View
                         </Link>
-                        <button className="dropdown-item" onClick={() => handleUnassignTicket(ticket.id)}>
+                        {/* <button className="dropdown-item" onClick={() => handleUnassignTicket(ticket.id)}>
                           <FiUserMinus className="mr-1" /> Unassign
-                        </button>
+                        </button> */}
                         <button className="dropdown-item text-red-600" onClick={() => handleDeleteTicket(ticket.id)}>
                           <FiTrash2 className="mr-1 text-red-600" /> Delete
                         </button>
