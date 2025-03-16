@@ -85,6 +85,10 @@ const Navbar = ({ sidebarOpen }) => {
         return "Home";
       case "/assigntickets":
         return "Assign Tickets";
+        case "/managetickets":
+          return "Manage Tickets";
+          case "/manageemployee":
+            return "Manage Employee";
       case "/tickets/closed":
         return "Closed Tickets";
         case "/UserRequest":
