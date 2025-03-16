@@ -3,9 +3,8 @@ import { useLocation } from "react-router-dom";
 import { 
   FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
   FiSettings, FiArrowLeftCircle, FiArrowRightCircle,FiUsers,
-  FiUserMinus
+ 
 } from "react-icons/fi";
-import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
 import { Link } from "react-router-dom";
 import TicketSubmissionModal from "./TicketSubmissionModal";
 import SettingsModal from "./SettingsModel";
