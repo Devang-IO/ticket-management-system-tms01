@@ -14,10 +14,12 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ClosedTickets from "../pages/ClosedTickets";
 import AssignTickets from "../pages/AssignTickets";
+import ManageTickets from "../pages/ManageTickets";
 import WelcomePage from "../pages/welcomepage";
 import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
 import UserRequest from "../pages/UserRequest"; // Import User Request Page
 import EmployeeTicketList from "../pages/EmployeeTicketList";
+import ManageEmployee from "../pages/ManageEmployee"
 
 
 
@@ -72,8 +74,11 @@ const MainLayout = () => {
           <Route path="/tickets/closed" element={<ClosedTickets />} />
           <Route path="/csrdashboard" element={<CSRdashboard />} />
           <Route path="/assigntickets" element={<AssignTickets />} />
+          <Route path="/managetickets" element={<ManageTickets/>} />
           <Route path="/userrequest" element={<UserRequest />} />
-          <Route path="/employeeticketlist" element={<EmployeeTicketList />} />
+          <Route path="/manageemployee" element={<ManageEmployee/>}/>
+          <Route path="/employeeticketlist" element={<EmployeeTicketList/>}/>
+
         </Routes>
 
         {/* Toast Notifications */}

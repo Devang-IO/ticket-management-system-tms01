@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { 
   FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
-  FiSettings, FiArrowLeftCircle, FiArrowRightCircle,FiUsers
+  FiSettings, FiArrowLeftCircle, FiArrowRightCircle,FiUsers,
+  FiUserMinus
 } from "react-icons/fi";
 import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
 import { Link } from "react-router-dom";
 import TicketSubmissionModal from "./TicketSubmissionModal";
 import SettingsModal from "./SettingsModel";
+import { FaTicketAlt, FaUserCog } from "react-icons/fa";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
@@ -123,6 +125,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <Link to="/assigntickets" className={`sidebar-item ${location.pathname === "/assigntickets" ? "sidebar-item-active" : ""}`}>
                   <FiCheckCircle size={20} />
                   {sidebarOpen && <span className="sidebar-item-text">Assign Tickets</span>}
+                </Link>
+              </li>
+              <li>
+                <Link to="/managetickets" className={`sidebar-item ${location.pathname === "/managetickets" ? "sidebar-item-active" : ""}`}>
+                  <FaTicketAlt size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Manage Tickets</span>}
+                </Link>
+              </li>
+              <li>
+                <Link to="/manageemployee" className={`sidebar-item ${location.pathname === "/manageemployee" ? "sidebar-item-active" : ""}`}>
+                  <FaUserCog size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Manage Employee</span>}
                 </Link>
               </li>
             </>
