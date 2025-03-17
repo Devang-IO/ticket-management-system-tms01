@@ -109,7 +109,7 @@ const SearchModal = ({ isOpen, onClose }) => {
                 <li
                   key={ticket.id}
                   onClick={() => handleTicketClick(ticket.id)}
-                  className="p-3 cursor-pointer border-b flex justify-between items-center hover:bg-[#23486A] hover:text-white"
+                  className="p-3 cursor-pointer border-b flex justify-between text-black items-center hover:bg-[#23486A] hover:text-white"
                 >
                   <div>
                     <p className="font-medium">{ticket.title}</p>
