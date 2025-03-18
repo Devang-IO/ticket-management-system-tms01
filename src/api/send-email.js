@@ -1,35 +1,33 @@
-// api/send-email.js
-const sgMail = require("@sendgrid/mail");
+// /api/send-email.js
+import sgMail from "@sendgrid/mail";
 
-// Set the SendGrid API key from your environment variables
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(process.env.REACT_APP_SENDGRID_API_KEY);
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
-
-  const { ticket } = req.body;
-  if (!ticket) {
-    return res.status(400).json({ error: "Ticket data is required" });
-  }
-
-  const msg = {
-    to: ticket.email, // Recipient email (ticket submitter)
-    from:"quickassist2025@gmail.com", // Replace with your verified sender email in SendGrid
-    subject: `Ticket Received: ${ticket.title}`,
-    text: `Hi ${ticket.name},\n\nWe have received your ticket regarding: ${ticket.title}. Our support team will get back to you shortly.\n\nThank you,\nSupport Team`,
-    html: `<p>Hi ${ticket.name},</p>
-           <p>We have received your ticket regarding: <strong>${ticket.title}</strong>. Our support team will get back to you shortly.</p>
-           <p>Thank you,<br/>Support Team</p>`,
-  };
 
   try {
+    const { ticket } = req.body; // ticket includes { name, email, title }
+    
+    // Build the email content
+    const msg = {
+      to: ticket.email, // recipient's email
+      from: process.env.REACT_APP_SENDGRID_FROM_EMAIL, // sender email from env
+      subject: `Ticket Submission: ${ticket.title}`,
+      text: `Hi ${ticket.name},\n\nThank you for submitting your ticket titled "${ticket.title}". We will get back to you shortly.\n\nBest regards,\nSupport Team`,
+      html: `<p>Hi ${ticket.name},</p>
+             <p>Thank you for submitting your ticket titled "<strong>${ticket.title}</strong>". We will get back to you shortly.</p>
+             <p>Best regards,<br/>Support Team</p>`,
+    };
+
+    // Send the email
     await sgMail.send(msg);
-    res.status(200).json({ success: true });
+    console.log("Email sent successfully");
+    return res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
-    console.error("SendGrid error:", error);
-    res.status(500).json({ error: "Failed to send email" });
+    console.error("Error sending email:", error);
+    return res.status(500).json({ error: "Failed to send email" });
   }
-};
+}

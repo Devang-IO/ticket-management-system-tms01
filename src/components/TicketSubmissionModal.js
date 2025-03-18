@@ -22,7 +22,9 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
   // Fetch current user on component mount
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) setCurrentUser(user);
     };
     fetchCurrentUser();
@@ -56,6 +58,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Handle ticket form submission
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     const toastId = "ticket-submit-toast";
@@ -70,7 +73,9 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
       }
 
       // Get current user ID
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       // Insert ticket data into Supabase
@@ -112,7 +117,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         title: data.title,
       };
 
-      // Call the serverless function to send an email
+      // Call the local API endpoint to send an email
       try {
         const response = await fetch("/api/send-email", {
           method: "POST",
@@ -123,7 +128,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         if (!response.ok) {
           console.error("Email sending failed:", result.error);
         } else {
-          console.log("Email sent successfully:", result);
+          console.log("Email sent successfully:", result.message);
         }
       } catch (emailError) {
         console.error("Error calling email endpoint:", emailError);
@@ -147,6 +152,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Handle image file selection and preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -172,28 +178,49 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal">
-        <button className="close-btn" onClick={onClose}>×</button>
+        <button className="close-btn" onClick={onClose}>
+          ×
+        </button>
         <h2 className="modal-title">Submit a Ticket</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
           {/* Name Input */}
           <div className="form-group">
             <label htmlFor="name">Name</label>
-            <input id="name" placeholder="Enter your name" type="text" {...register("name", { required: "Name is required" })} className="form-input" />
+            <input
+              id="name"
+              placeholder="Enter your name"
+              type="text"
+              {...register("name", { required: "Name is required" })}
+              className="form-input"
+            />
             {errors.name && <p className="error-message">{errors.name.message}</p>}
           </div>
           {/* Email Input */}
           <div className="form-group">
             <label htmlFor="email">Email</label>
-            <input id="email" placeholder="Enter your email" type="email" {...register("email", {
-              required: "Email is required",
-              pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/, message: "Invalid email" }
-            })} className="form-input" />
+            <input
+              id="email"
+              placeholder="Enter your email"
+              type="email"
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                  message: "Invalid email",
+                },
+              })}
+              className="form-input"
+            />
             {errors.email && <p className="error-message">{errors.email.message}</p>}
           </div>
           {/* Category Select */}
           <div className="form-group">
             <label htmlFor="category">Issue Category</label>
-            <select id="category" {...register("category", { required: "Issue category is required" })} className="form-select">
+            <select
+              id="category"
+              {...register("category", { required: "Issue category is required" })}
+              className="form-select"
+            >
               <option value="">Select a category</option>
               <option value="technical">Technical</option>
               <option value="system_crash">System Crash</option>
@@ -209,7 +236,11 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
           {/* Priority Select */}
           <div className="form-group">
             <label htmlFor="priority">Priority</label>
-            <select id="priority" {...register("priority", { required: "Priority is required" })} className="form-select">
+            <select
+              id="priority"
+              {...register("priority", { required: "Priority is required" })}
+              className="form-select"
+            >
               <option value="">Select priority</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -221,13 +252,23 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
           {/* Title Textarea */}
           <div className="form-group full-width">
             <label htmlFor="title">Title</label>
-            <textarea id="title" placeholder="Enter a brief title for the issue" {...register("title", { required: "Title is required" })} className="form-textarea"></textarea>
+            <textarea
+              id="title"
+              placeholder="Enter a brief title for the issue"
+              {...register("title", { required: "Title is required" })}
+              className="form-textarea"
+            ></textarea>
             {errors.title && <p className="error-message">{errors.title.message}</p>}
           </div>
           {/* Description Textarea */}
           <div className="form-group full-width">
             <label htmlFor="description">Description</label>
-            <textarea id="description" placeholder="Describe your issue in detail..." {...register("description", { required: "Description is required" })} className="form-textarea"></textarea>
+            <textarea
+              id="description"
+              placeholder="Describe your issue in detail..."
+              {...register("description", { required: "Description is required" })}
+              className="form-textarea"
+            ></textarea>
             {errors.description && <p className="error-message">{errors.description.message}</p>}
           </div>
           {/* Image Upload */}
@@ -242,7 +283,13 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
                 <p className="dropzone-text">Drag & drop an image here, or click to select one.</p>
               )}
             </label>
-            <input id="image" type="file" accept="image/*" onChange={handleImageChange} className="form-input-file hidden" />
+            <input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="form-input-file hidden"
+            />
           </div>
           {/* Submit Button */}
           <div className="form-group full-width">
