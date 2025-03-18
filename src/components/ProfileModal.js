@@ -49,29 +49,73 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
     fetchUserProfile();
   }, []);
 
-  // Fetch ticket statistics based on user role
+  // Fetch ticket statistics based on role:
   async function fetchTicketStats(userInfo) {
-    if (userInfo.role.toLowerCase() === "employee") {
-      // Fetch all open tickets (with assignments)
-      const { data: openTicketsData, error: openError } = await supabase
+    const role = userInfo.role.toLowerCase();
+    if (role === "employee") {
+      // For employees:
+      // Total open tickets
+      const { data: openData, error: openError } = await supabase
         .from("tickets")
-        .select("id, assignments(*)")
+        .select("id")
         .eq("status", "open");
       if (openError) {
         console.error("Error fetching open tickets:", openError);
         return;
       }
-      const totalOpen = openTicketsData ? openTicketsData.length : 0;
-      // Tickets with at least one assignment (to any user)
-      const assigned = openTicketsData
-        ? openTicketsData.filter(
-            (ticket) => ticket.assignments && ticket.assignments.length > 0
-          ).length
-        : 0;
-      // Unassigned tickets = total open tickets - assigned tickets
-      const unassigned = totalOpen - assigned;
-      setTicketStats({ open: totalOpen, assigned, unassigned });
+      const totalOpen = openData ? openData.length : 0;
+
+      // Assigned tickets for this employee
+      const { data: assignedData, error: assignError } = await supabase
+        .from("assignments")
+        .select("ticket_id")
+        .eq("user_id", userInfo.id);
+      if (assignError) {
+        console.error("Error fetching assigned tickets:", assignError);
+        return;
+      }
+      const assignedCount = assignedData ? assignedData.length : 0;
+
+      // Closed tickets by this employee (assuming closed_by stores employee id)
+      const { data: closedData, error: closedError } = await supabase
+        .from("tickets")
+        .select("id")
+        .eq("status", "closed")
+        .eq("closed_by", userInfo.id);
+      if (closedError) {
+        console.error("Error fetching closed tickets:", closedError);
+        return;
+      }
+      const closedCount = closedData ? closedData.length : 0;
+
+      setTicketStats({ open: totalOpen, assigned: assignedCount, closed: closedCount });
+    } else if (role === "admin") {
+      // For admin:
+      const { count: totalTickets, error: ticketErr } = await supabase
+        .from("tickets")
+        .select("id", { head: true, count: "exact" });
+      if (ticketErr) {
+        console.error("Error fetching total tickets:", ticketErr);
+        return;
+      }
+      const { count: totalUsers, error: userErr } = await supabase
+        .from("users")
+        .select("id", { head: true, count: "exact" });
+      if (userErr) {
+        console.error("Error fetching total users:", userErr);
+        return;
+      }
+      const { count: totalEmployees, error: empErr } = await supabase
+        .from("users")
+        .select("id", { head: true, count: "exact" })
+        .eq("role", "employee");
+      if (empErr) {
+        console.error("Error fetching total employees:", empErr);
+        return;
+      }
+      setTicketStats({ totalTickets, totalUsers, totalEmployees });
     } else {
+      // For regular users:
       const { data: ticketsData, error } = await supabase
         .from("tickets")
         .select("id, status")
@@ -386,8 +430,23 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                 <p className="text-sm text-gray-600">Assigned Tickets</p>
               </div>
               <div className="bg-yellow-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-600">{ticketStats.unassigned}</p>
-                <p className="text-sm text-gray-600">Unassigned Tickets</p>
+                <p className="text-2xl font-bold text-yellow-600">{ticketStats.closed}</p>
+                <p className="text-sm text-gray-600">Closed Tickets</p>
+              </div>
+            </div>
+          ) : user.role.toLowerCase() === "admin" ? (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">{ticketStats.totalTickets}</p>
+                <p className="text-sm text-gray-600">Total Tickets</p>
+              </div>
+              <div className="bg-green-50 p-3 rounded-lg">
+                <p className="text-2xl font-bold text-green-600">{ticketStats.totalUsers}</p>
+                <p className="text-sm text-gray-600">Total Users</p>
+              </div>
+              <div className="bg-yellow-50 p-3 rounded-lg">
+                <p className="text-2xl font-bold text-yellow-600">{ticketStats.totalEmployees}</p>
+                <p className="text-sm text-gray-600">Total Employees</p>
               </div>
             </div>
           ) : (
