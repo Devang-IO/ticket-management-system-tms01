@@ -17,8 +17,10 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const Dashboard = () => {
   const [stats, setStats] = useState([]);
   const [recentTickets, setRecentTickets] = useState([]);
+  const [topPerformers, setTopPerformers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch ticket statistics and recent tickets
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -125,8 +127,7 @@ const Dashboard = () => {
             id: ticket.id,
             title: ticket.title,
             updated: new Date(ticket.created_at).toLocaleString(),
-            action:
-              ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1),
+            action: ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1),
             status: ticket.status === "open" ? "Opened" : "Closed",
             statusColor: ticket.status === "open" ? "#3B6790" : "#EFB036",
             priority: ticket.priority,
@@ -142,29 +143,66 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const [topPerformers, setTopPerformers] = useState([
-    {
-      id: 1,
-      username: "John Doe",
-      role: "Employee",
-      solved_tickets: 45,
-      profile_pic: "https://via.placeholder.com/50",
-    },
-    {
-      id: 2,
-      username: "Jane Smith",
-      role: "Employee",
-      solved_tickets: 38,
-      profile_pic: "https://via.placeholder.com/50",
-    },
-    {
-      id: 3,
-      username: "Alice Johnson",
-      role: "Employee",
-      solved_tickets: 32,
-      profile_pic: "https://via.placeholder.com/50",
-    },
-  ]);
+  // Fetch top performers based on closed tickets and fetch their profile info from the users table
+  useEffect(() => {
+    const fetchTopPerformers = async () => {
+      try {
+        // Fetch all closed tickets with closed_by information
+        const { data: closedTicketsData, error } = await supabase
+          .from("tickets")
+          .select("closed_by")
+          .eq("status", "closed");
+
+        if (error) {
+          console.error("Error fetching closed tickets:", error);
+          return;
+        }
+
+        // Group tickets by closed_by field
+        const performersMap = {};
+        closedTicketsData.forEach((ticket) => {
+          if (ticket.closed_by) {
+            performersMap[ticket.closed_by] = (performersMap[ticket.closed_by] || 0) + 1;
+          }
+        });
+
+        // Get unique user IDs from performersMap
+        const userIds = Object.keys(performersMap);
+
+        // Fetch user details for these IDs from the users table
+        const { data: usersData, error: usersError } = await supabase
+          .from("users")
+          .select("id, name, profile_picture, role")
+          .in("id", userIds);
+
+        if (usersError) {
+          console.error("Error fetching users:", usersError);
+          return;
+        }
+
+        // Merge user details with solved ticket counts
+        const performersArray = userIds.map((userId) => {
+          const user = usersData.find((u) => u.id === userId);
+          return {
+            userId,
+            name: user?.name || "Unknown",
+            profile_picture: user?.profile_picture || "default-avatar.png",
+            role: user?.role || "",
+            solved_tickets: performersMap[userId],
+          };
+        });
+
+        // Sort descending by solved tickets count
+        performersArray.sort((a, b) => b.solved_tickets - a.solved_tickets);
+
+        setTopPerformers(performersArray);
+      } catch (err) {
+        console.error("Error fetching top performers:", err);
+      }
+    };
+
+    fetchTopPerformers();
+  }, []);
 
   const chartData = {
     labels: stats.map((stat) => stat.label),
@@ -226,110 +264,107 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Tickets Table & Top Performers Side by Side */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Recent Tickets */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">
-            Recent Tickets
-          </h2>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-200 text-[#23486A]">
-                <th className="p-2 text-left">#</th>
-                <th className="p-2 text-left">Title</th>
-                <th className="p-2 text-left">Updated</th>
-                <th className="p-2 text-left">Action</th>
-                <th className="p-2 text-left">Status</th>
+      {/* Recent Tickets Section */}
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">
+          Recent Tickets
+        </h2>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-200 text-[#23486A]">
+              <th className="p-2 text-left">#</th>
+              <th className="p-2 text-left">Title</th>
+              <th className="p-2 text-left">Updated</th>
+              <th className="p-2 text-left">Action</th>
+              <th className="p-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading ? (
+              <tr>
+                <td colSpan="5" className="p-4 text-center">
+                  Loading tickets...
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan="5" className="p-4 text-center">
-                    Loading tickets...
+            ) : recentTickets.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="p-4 text-center">
+                  No tickets found
+                </td>
+              </tr>
+            ) : (
+              recentTickets.map((ticket, index) => (
+                <tr key={index} className="border-b">
+                  <td className="p-2">{index + 1}</td>
+                  <td className="p-2">
+                    <Link
+                      to={`/managetickets?ticketId=${ticket.id}`}
+                      className="text-blue-600 cursor-pointer"
+                    >
+                      {ticket.title}
+                    </Link>
+                  </td>
+                  <td className="p-2">{ticket.updated}</td>
+                  <td className="p-2">
+                    <span className="px-2 py-1 rounded bg-gray-300">
+                      {ticket.action}
+                    </span>
+                  </td>
+                  <td className="p-2">
+                    <span
+                      className="px-2 py-1 rounded text-white"
+                      style={{ backgroundColor: ticket.statusColor }}
+                    >
+                      {ticket.status}
+                    </span>
                   </td>
                 </tr>
-              ) : recentTickets.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-4 text-center">
-                    No tickets found
-                  </td>
-                </tr>
-              ) : (
-                recentTickets.map((ticket, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-2">{index + 1}</td>
-                    <td className="p-2">
-                      <Link
-                        to={`/managetickets?ticketId=${ticket.id}`}
-                        className="text-blue-600 cursor-pointer"
-                      >
-                        {ticket.title}
-                      </Link>
-                    </td>
-                    <td className="p-2">{ticket.updated}</td>
-                    <td className="p-2">
-                      <span className="px-2 py-1 rounded bg-gray-300">
-                        {ticket.action}
-                      </span>
-                    </td>
-                    <td className="p-2">
-                      <span
-                        className="px-2 py-1 rounded text-white"
-                        style={{ backgroundColor: ticket.statusColor }}
-                      >
-                        {ticket.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Chart and Top Performers Section */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        {/* Bar Chart */}
+        <div className="bg-white p-4 rounded-lg shadow flex justify-center items-center" style={{ height: "250px" }}>
+          {isLoading ? (
+            <div>Loading chart data...</div>
+          ) : (
+            <Bar data={chartData} options={chartOptions} />
+          )}
         </div>
 
-        {/* Top Performers Section */}
+        {/* Top Performers */}
         <div className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">
             Top Performers
           </h2>
           {isLoading ? (
             <p>Loading top performers...</p>
+          ) : topPerformers.length === 0 ? (
+            <p>No performer data found.</p>
           ) : (
-            <ul>
-              {topPerformers.map((user) => (
-                <li
-                  key={user.id}
-                  className="flex items-center gap-4 p-2 border-b"
-                >
+            <ol className="list-decimal pl-5">
+              {topPerformers.map((user, index) => (
+                <li key={index} className="mb-4 flex items-center gap-3">
                   <img
-                    src={user.profile_pic || "default-avatar.png"}
-                    alt={user.username}
+                    src={user.profile_picture}
+                    alt={user.name}
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
-                    <p className="font-semibold">
-                      {user.username} ({user.role})
-                    </p>
+                    <p className="font-semibold">{user.name}</p>
                     <p className="text-sm text-gray-600">
-                      Solved Tickets: {user.solved_tickets}
+                      {user.solved_tickets} ticket{user.solved_tickets > 1 ? "s" : ""} solved
                     </p>
                   </div>
                 </li>
               ))}
-            </ul>
+            </ol>
           )}
         </div>
-      </div>
-
-      {/* Bar Chart */}
-      <div className="bg-white p-4 rounded-lg shadow flex justify-center items-center mt-4" style={{ height: "250px" }}>
-        {isLoading ? (
-          <div>Loading chart data...</div>
-        ) : (
-          <Bar data={chartData} options={chartOptions} />
-        )}
       </div>
 
       {/* Footer with Buttons */}
