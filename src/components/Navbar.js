@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiBell, FiMenu, FiUser, FiLogOut } from "react-icons/fi";
+import { FiBell, FiMenu, FiUser, FiLogOut, FiSearch } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import ProfileModal from "./ProfileModal";
+import SearchModal from "./SearchModal"; // Import the new SearchModal component
 
 const Navbar = ({ sidebarOpen }) => {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false); // New state for search modal
   const navigate = useNavigate();
   const location = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -102,6 +104,11 @@ const Navbar = ({ sidebarOpen }) => {
 
   const pageName = getPageName(location.pathname);
 
+  // Handle search input click to open the modal
+  const handleSearchInputClick = () => {
+    setSearchModalOpen(true);
+  };
+
   return (
     <>
       <nav className="navbar flex items-center justify-between px-4 py-2 bg-gray-800">
@@ -151,12 +158,17 @@ const Navbar = ({ sidebarOpen }) => {
             )}
           </div>
 
-          {/* Search input */}
-          <input
-            type="text"
-            placeholder="Search Tickets"
-            className="search-input bg-gray-700 text-white px-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          {/* Search input - Now clickable to open modal */}
+          <div className="relative flex items-center">
+           
+            <input
+              type="text"
+              placeholder="Search Tickets"
+              onClick={handleSearchInputClick}
+              className="search-input bg-gray-700 text-white pl-9 pr-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              readOnly // Make it read-only since we're using it to open the modal
+            />
+          </div>
 
           {/* Profile dropdown */}
           <div className="relative">
@@ -228,12 +240,20 @@ const Navbar = ({ sidebarOpen }) => {
 
       {/* Toast Container */}
       <ToastContainer position="top-center" autoClose={3000} />
+      
+      {/* Profile Modal */}
       {profileModalOpen && (
         <ProfileModal
           onClose={() => setProfileModalOpen(false)}
           onProfileUpdate={handleProfileUpdate} // Pass callback to ProfileModal
         />
       )}
+      
+      {/* Search Modal */}
+      <SearchModal 
+        isOpen={searchModalOpen} 
+        onClose={() => setSearchModalOpen(false)} 
+      />
     </>
   );
 };
