@@ -6,7 +6,8 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [ticketStats, setTicketStats] = useState({ open: 0, closed: 0, assigned: 0, recent: [] });
+  // Update ticketStats state to hold open, closed, and answered counts
+  const [ticketStats, setTicketStats] = useState({ open: 0, closed: 0, answered: 0 });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -53,9 +54,20 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
     fetchUserProfile();
   }, []);
 
-  // Fetch ticket statistics
+  // Fetch ticket statistics for the current user
   async function fetchTicketStats(userInfo) {
-    // ... (keep existing ticket stats logic unchanged)
+    const { data: ticketsData, error } = await supabase
+      .from("tickets")
+      .select("id, status")
+      .eq("user_id", userInfo.id);
+    if (error) {
+      console.error("Error fetching ticket stats:", error);
+      return;
+    }
+    const open = ticketsData.filter((ticket) => ticket.status === "open").length;
+    const closed = ticketsData.filter((ticket) => ticket.status === "closed").length;
+    const answered = ticketsData.filter((ticket) => ticket.status === "answered").length;
+    setTicketStats({ open, closed, answered });
   }
 
   // Handle input changes
@@ -133,7 +145,6 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
       } else {
         // Update password if a new password is provided
         if (updatedData.newPassword) {
-          // Validate old password
           if (!updatedData.oldPassword) {
             setErrorMessage("Please enter your old password.");
             return;
@@ -245,7 +256,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
           {/* Error messages */}
           {errorMessage && <div className="mt-2 text-red-500 text-sm">{errorMessage}</div>}
 
-          {/* User information */}
+          {/* User information or edit form */}
           {editing ? (
             <div className="w-full mt-4 space-y-3">
               <div>
@@ -377,35 +388,17 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
         <div className="mt-8 border-t pt-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Ticket Statistics</h3>
           <div className="grid grid-cols-3 gap-4">
-            {user.role.toLowerCase() === "admin" || user.role.toLowerCase() === "user" ? (
-              <>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{ticketStats.open}</p>
-                  <p className="text-sm text-gray-600">Open Tickets</p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{ticketStats.closed}</p>
-                  <p className="text-sm text-gray-600">Closed Tickets</p>
-                </div>
-              </>
-            ) : null}
-
-            {user.role.toLowerCase() === "employee" && (
-              <>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{ticketStats.assigned}</p>
-                  <p className="text-sm text-gray-600">Assigned Tickets</p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{ticketStats.closed}</p>
-                  <p className="text-sm text-gray-600">Closed Tickets</p>
-                </div>
-              </>
-            )}
-
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-2xl font-bold text-blue-600">{ticketStats.open}</p>
+              <p className="text-sm text-gray-600">Open Tickets</p>
+            </div>
+            <div className="bg-green-50 p-3 rounded-lg">
+              <p className="text-2xl font-bold text-green-600">{ticketStats.closed}</p>
+              <p className="text-sm text-gray-600">Closed Tickets</p>
+            </div>
             <div className="bg-yellow-50 p-3 rounded-lg">
-              <p className="text-2xl font-bold text-yellow-600">{ticketStats.recent.length}</p>
-              <p className="text-sm text-gray-600">Recent Activity</p>
+              <p className="text-2xl font-bold text-yellow-600">{ticketStats.answered}</p>
+              <p className="text-sm text-gray-600">Answered Tickets</p>
             </div>
           </div>
         </div>
