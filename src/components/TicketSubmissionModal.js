@@ -13,7 +13,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     formState: { errors },
   } = useForm();
 
-  const [imageFile, setImageFile] = useState(null); // Store the actual file
+  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -23,45 +23,34 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUser(user);
-      }
+      if (user) setCurrentUser(user);
     };
-
     fetchCurrentUser();
   }, []);
 
   // Function to upload image to Cloudinary
   const uploadImageToCloudinary = async (file) => {
     if (!file) return null;
-    
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
 
     try {
       console.log("Uploading to Cloudinary...");
-      console.log("Cloud name:", process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
-      
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
+        { method: "POST", body: formData }
       );
-
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Cloudinary error details:", errorData);
-        throw new Error(`Failed to upload image to Cloudinary: ${response.statusText}`);
+        throw new Error(`Failed to upload image: ${response.statusText}`);
       }
-
       const data = await response.json();
       console.log("Cloudinary upload successful:", data);
       return data.secure_url;
     } catch (error) {
-      console.error("Error uploading image to Cloudinary:", error);
+      console.error("Error uploading image:", error);
       toast.error("Image upload failed. Submitting ticket without image.");
       return null;
     }
@@ -73,26 +62,16 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
 
     try {
       let imageUrl = null;
-
-      // Upload image to Cloudinary if a file was selected
       if (imageFile) {
-        console.log("Image file detected, uploading to Cloudinary:", imageFile.name);
+        console.log("Uploading image:", imageFile.name);
         imageUrl = await uploadImageToCloudinary(imageFile);
-        console.log("Image uploaded to Cloudinary. URL:", imageUrl);
       } else {
-        console.log("No image file to upload");
-      }
-
-      // Check if environment variables are properly set
-      if (!process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || !process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET) {
-        console.warn("Cloudinary environment variables are not properly set");
+        console.log("No image file provided.");
       }
 
       // Get current user ID
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
+      if (!user) throw new Error("User not authenticated");
 
       // Insert ticket data into Supabase
       const { data: ticketData, error: insertError } = await supabase
@@ -105,10 +84,10 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             priority: data.priority,
             title: data.title,
             description: data.description,
-            image_url: imageUrl, // This will be null if no image or upload failed
+            image_url: imageUrl,
             status: "open",
             created_at: new Date().toISOString(),
-            user_id: user.id, // Add the user ID to associate the ticket with the user
+            user_id: user.id,
           },
         ])
         .select();
@@ -117,8 +96,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         console.error("Supabase insertion error:", insertError);
         throw insertError;
       }
-
-      console.log("Ticket inserted into Supabase:", ticketData);
+      console.log("Ticket created:", ticketData);
 
       toast.success("Ticket submitted successfully!", {
         position: "top-center",
@@ -127,6 +105,31 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         hideProgressBar: true,
       });
 
+      // Prepare ticket data for the email notification
+      const ticket = {
+        name: data.name,
+        email: data.email,
+        title: data.title,
+      };
+
+      // Call the serverless function to send an email
+      try {
+        const response = await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticket }),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          console.error("Email sending failed:", result.error);
+        } else {
+          console.log("Email sent successfully:", result);
+        }
+      } catch (emailError) {
+        console.error("Error calling email endpoint:", emailError);
+      }
+
+      // Close modal and navigate after a delay
       setTimeout(() => {
         onClose();
         navigate("/dashboard");
@@ -147,22 +150,20 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file); // Store the actual file object
+      setImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
-      console.log("Image file selected:", file.name);
+      console.log("Image selected:", file.name);
     } else {
       setImageFile(null);
       setImagePreview(null);
     }
   };
 
-  // Cleanup object URL to prevent memory leaks
+  // Cleanup image preview URL
   useEffect(() => {
     return () => {
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
-      }
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
     };
   }, [imagePreview]);
 
@@ -171,57 +172,28 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal">
-        <button className="close-btn" onClick={onClose ? onClose : () => {}}>
-          ×
-        </button>
+        <button className="close-btn" onClick={onClose}>×</button>
         <h2 className="modal-title">Submit a Ticket</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
           {/* Name Input */}
           <div className="form-group">
-            <label className="form-label" htmlFor="name">
-              Name
-            </label>
-            <input
-              id="name"
-              placeholder="Enter your name"
-              type="text"
-              className="form-input"
-              {...register("name", { required: "Name is required" })}
-            />
+            <label htmlFor="name">Name</label>
+            <input id="name" placeholder="Enter your name" type="text" {...register("name", { required: "Name is required" })} className="form-input" />
             {errors.name && <p className="error-message">{errors.name.message}</p>}
           </div>
-
           {/* Email Input */}
           <div className="form-group">
-            <label className="form-label" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              placeholder="Enter your email"
-              type="email"
-              className="form-input"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                  message: "Invalid email",
-                },
-              })}
-            />
+            <label htmlFor="email">Email</label>
+            <input id="email" placeholder="Enter your email" type="email" {...register("email", {
+              required: "Email is required",
+              pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/, message: "Invalid email" }
+            })} className="form-input" />
             {errors.email && <p className="error-message">{errors.email.message}</p>}
           </div>
-
           {/* Category Select */}
           <div className="form-group">
-            <label className="form-label" htmlFor="category">
-              Issue Category
-            </label>
-            <select
-              id="category"
-              className="form-select"
-              {...register("category", { required: "Issue category is required" })}
-            >
+            <label htmlFor="category">Issue Category</label>
+            <select id="category" {...register("category", { required: "Issue category is required" })} className="form-select">
               <option value="">Select a category</option>
               <option value="technical">Technical</option>
               <option value="system_crash">System Crash</option>
@@ -234,17 +206,10 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </select>
             {errors.category && <p className="error-message">{errors.category.message}</p>}
           </div>
-
           {/* Priority Select */}
           <div className="form-group">
-            <label className="form-label" htmlFor="priority">
-              Priority
-            </label>
-            <select
-              id="priority"
-              className="form-select"
-              {...register("priority", { required: "Priority is required" })}
-            >
+            <label htmlFor="priority">Priority</label>
+            <select id="priority" {...register("priority", { required: "Priority is required" })} className="form-select">
               <option value="">Select priority</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -253,40 +218,21 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
             </select>
             {errors.priority && <p className="error-message">{errors.priority.message}</p>}
           </div>
-
           {/* Title Textarea */}
           <div className="form-group full-width">
-            <label className="form-label" htmlFor="title">
-              Title
-            </label>
-            <textarea
-              id="title"
-              placeholder="Enter a brief title for the issue"
-              className="form-textarea"
-              {...register("title", { required: "Title is required" })}
-            ></textarea>
+            <label htmlFor="title">Title</label>
+            <textarea id="title" placeholder="Enter a brief title for the issue" {...register("title", { required: "Title is required" })} className="form-textarea"></textarea>
             {errors.title && <p className="error-message">{errors.title.message}</p>}
           </div>
-
           {/* Description Textarea */}
           <div className="form-group full-width">
-            <label className="form-label" htmlFor="description">
-              Description
-            </label>
-            <textarea
-              id="description"
-              placeholder="Describe your issue in detail..."
-              className="form-textarea"
-              {...register("description", { required: "Description is required" })}
-            ></textarea>
+            <label htmlFor="description">Description</label>
+            <textarea id="description" placeholder="Describe your issue in detail..." {...register("description", { required: "Description is required" })} className="form-textarea"></textarea>
             {errors.description && <p className="error-message">{errors.description.message}</p>}
           </div>
-
           {/* Image Upload */}
           <div className="form-group full-width">
-            <label className="form-label" htmlFor="image">
-              Upload Image (optional)
-            </label>
+            <label htmlFor="image">Upload Image (optional)</label>
             <label htmlFor="image" className="dropzone block">
               {imagePreview ? (
                 <div className="image-preview">
@@ -296,18 +242,11 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
                 <p className="dropzone-text">Drag & drop an image here, or click to select one.</p>
               )}
             </label>
-            <input
-              id="image"
-              type="file"
-              accept="image/*"
-              className="form-input-file hidden"
-              onChange={handleImageChange}
-            />
+            <input id="image" type="file" accept="image/*" onChange={handleImageChange} className="form-input-file hidden" />
           </div>
-
           {/* Submit Button */}
           <div className="form-group full-width">
-            <button type="submit" className="form-button" disabled={isSubmitting}>
+            <button type="submit" disabled={isSubmitting} className="form-button">
               {isSubmitting ? "Submitting..." : "Submit Ticket"}
             </button>
           </div>
