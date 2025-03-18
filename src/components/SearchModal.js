@@ -93,7 +93,7 @@ const SearchModal = ({ isOpen, onClose }) => {
             placeholder="Search tickets by title or ID..."
             className="flex-1 outline-none bg-transparent text-white placeholder-white"
           />
-          <button onClick={onClose} className="hover:text-[#3B6790]">
+          <button onClick={onClose} className="hover:text-red-500">
             <FiX size={20} />
           </button>
         </div>

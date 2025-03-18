@@ -216,7 +216,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
       <div className="p-8 w-full max-w-2xl bg-white rounded-xl shadow-lg text-center relative max-h-[90vh] overflow-y-auto">
         {/* Close button */}
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-gray-800">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-red-700">
           <X size={24} />
         </button>
 
