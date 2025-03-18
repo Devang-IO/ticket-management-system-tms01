@@ -81,7 +81,7 @@ const SearchModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black bg-opacity-50 rounded-xl">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black bg-opacity-50 backdrop-blur-lg rounded-xl">
       <div ref={modalRef} className="bg-white w-full max-w-xl rounded-xl shadow-lg overflow-hidden">
         <div className="p-4 border-b flex items-center bg-[#EFB036] text-white">
           <FiSearch className="mr-2" size={20} />

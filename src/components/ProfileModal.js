@@ -179,7 +179,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   // Loading state
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
         <div className="p-8 w-full max-w-2xl bg-white rounded-xl shadow-lg text-center">
           <div className="text-center py-10 text-gray-600">Loading profile data...</div>
         </div>
@@ -190,7 +190,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   // Error state if user not found
   if (!user) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
         <div className="p-8 w-full max-w-2xl bg-white rounded-xl shadow-lg text-center">
           <div className="text-center py-10 text-red-600">User profile not found</div>
           <button onClick={onClose} className="mt-3 bg-gray-600 text-white px-4 py-2 rounded">
@@ -202,7 +202,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
       <div className="p-8 w-full max-w-2xl bg-white rounded-xl shadow-lg text-center relative max-h-[90vh] overflow-y-auto">
         {/* Close button */}
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-gray-800">
