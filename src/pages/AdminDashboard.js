@@ -14,20 +14,94 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+const EmployeeActivityStatus = () => {
+  const [employees, setEmployees] = useState([]);
+  const [loadingEmp, setLoadingEmp] = useState(true);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoadingEmp(true);
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, name, is_online, is_on_live_chat, last_activity_at")
+        .eq("role", "employee");
+      if (error) {
+        console.error("Error fetching employees:", error);
+      } else {
+        const now = new Date();
+        const computed = (data || []).map((emp) => {
+          let status = "Offline";
+          if (emp.is_on_live_chat) {
+            status = "On Live Chat";
+          } else if (emp.is_online) {
+            const last = emp.last_activity_at ? new Date(emp.last_activity_at) : 0;
+            status = now - last > 30 * 60 * 1000 ? "Away" : "Online";
+          }
+          return { ...emp, status };
+        });
+        setEmployees(computed);
+      }
+      setLoadingEmp(false);
+    };
+    fetchEmployees();
+  }, []);
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow">
+      <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">Employee Activity Status</h2>
+      {loadingEmp ? (
+        <p>Loading employee status...</p>
+      ) : (
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-200 text-[#23486A]">
+              <th className="p-2 text-left">Employee</th>
+              <th className="p-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((emp) => (
+              <tr key={emp.id} className="border-b">
+                <td className="p-2">{emp.name}</td>
+                <td className="p-2">
+                  <span
+                    className="px-2 py-1 rounded text-white"
+                    style={{
+                      backgroundColor:
+                        emp.status === "Online"
+                          ? "#4CAF50"
+                          : emp.status === "On Live Chat"
+                          ? "#2196F3"
+                          : emp.status === "Away"
+                          ? "#FF9800"
+                          : "#f44336",
+                    }}
+                  >
+                    {emp.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [stats, setStats] = useState([]);
   const [recentTickets, setRecentTickets] = useState([]);
+  const [topPerformers, setTopPerformers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch ticket statistics and recent tickets
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-
-        // Calculate timestamp for 24 hours ago
         const twentyFourHoursAgo = new Date(Date.now() - 86400000).toISOString();
 
-        // Fetch ticket statistics with Promise.all
         const [
           totalTicketsResult,
           newTicketsResult,
@@ -37,23 +111,12 @@ const Dashboard = () => {
           unansweredTicketsResult,
           answeredTicketsResult,
         ] = await Promise.all([
-          // Total tickets count
           supabase.from("tickets").select("count", { head: true, count: "exact" }),
-          // New tickets count (created in last 24 hours)
           supabase.from("tickets").select("count", { head: true, count: "exact" }).gt("created_at", twentyFourHoursAgo),
-          // Open tickets count
           supabase.from("tickets").select("count", { head: true, count: "exact" }).eq("status", "open"),
-          // Closed tickets count
           supabase.from("tickets").select("count", { head: true, count: "exact" }).eq("status", "closed"),
-          // Urgent tickets count (priority High) - case insensitive
           supabase.from("tickets").select("count", { head: true, count: "exact" }).ilike("priority", "high"),
-          // Unanswered tickets: open tickets older than 24 hours
-          supabase
-            .from("tickets")
-            .select("count", { head: true, count: "exact" })
-            .eq("status", "open")
-            .lt("created_at", twentyFourHoursAgo),
-          // Answered tickets: status answered
+          supabase.from("tickets").select("count", { head: true, count: "exact" }).eq("status", "open").lt("created_at", twentyFourHoursAgo),
           supabase.from("tickets").select("count", { head: true, count: "exact" }).eq("status", "answered"),
         ]);
 
@@ -108,25 +171,21 @@ const Dashboard = () => {
           },
         ]);
 
-        // Fetch recent tickets
         const { data: ticketsData, error } = await supabase
           .from("tickets")
           .select("id, title, created_at, status, priority")
           .order("created_at", { ascending: false })
           .limit(4);
-
         if (error) {
           console.error("Error fetching tickets:", error);
           return;
         }
-
         setRecentTickets(
           ticketsData?.map((ticket) => ({
             id: ticket.id,
             title: ticket.title,
             updated: new Date(ticket.created_at).toLocaleString(),
-            action:
-              ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1),
+            action: ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1),
             status: ticket.status === "open" ? "Opened" : "Closed",
             statusColor: ticket.status === "open" ? "#3B6790" : "#EFB036",
             priority: ticket.priority,
@@ -142,29 +201,58 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const [topPerformers, setTopPerformers] = useState([
-    {
-      id: 1,
-      username: "John Doe",
-      role: "Employee",
-      solved_tickets: 45,
-      profile_pic: "https://via.placeholder.com/50",
-    },
-    {
-      id: 2,
-      username: "Jane Smith",
-      role: "Employee",
-      solved_tickets: 38,
-      profile_pic: "https://via.placeholder.com/50",
-    },
-    {
-      id: 3,
-      username: "Alice Johnson",
-      role: "Employee",
-      solved_tickets: 32,
-      profile_pic: "https://via.placeholder.com/50",
-    },
-  ]);
+  // Fetch top performers based on closed tickets
+  useEffect(() => {
+    const fetchTopPerformers = async () => {
+      try {
+        const { data: closedTicketsData, error } = await supabase
+          .from("tickets")
+          .select("closed_by")
+          .eq("status", "closed");
+
+        if (error) {
+          console.error("Error fetching closed tickets:", error);
+          return;
+        }
+
+        const performersMap = {};
+        closedTicketsData.forEach((ticket) => {
+          if (ticket.closed_by) {
+            performersMap[ticket.closed_by] = (performersMap[ticket.closed_by] || 0) + 1;
+          }
+        });
+
+        const userIds = Object.keys(performersMap);
+        const { data: usersData, error: usersError } = await supabase
+          .from("users")
+          .select("id, name, profile_picture, role")
+          .in("id", userIds);
+
+        if (usersError) {
+          console.error("Error fetching users:", usersError);
+          return;
+        }
+
+        const performersArray = userIds.map((userId) => {
+          const user = usersData.find((u) => u.id === userId);
+          return {
+            userId,
+            name: user?.name || "Unknown",
+            profile_picture: user?.profile_picture || "default-avatar.png",
+            role: user?.role || "",
+            solved_tickets: performersMap[userId],
+          };
+        });
+
+        performersArray.sort((a, b) => b.solved_tickets - a.solved_tickets);
+        setTopPerformers(performersArray);
+      } catch (err) {
+        console.error("Error fetching top performers:", err);
+      }
+    };
+
+    fetchTopPerformers();
+  }, []);
 
   const chartData = {
     labels: stats.map((stat) => stat.label),
@@ -218,21 +306,17 @@ const Dashboard = () => {
             style={{ backgroundColor: stat.bgColor }}
           >
             <div className="text-xl">{stat.icon}</div>
-            <p className="text-lg font-semibold">
-              {isLoading ? "..." : stat.value}
-            </p>
+            <p className="text-lg font-semibold">{isLoading ? "..." : stat.value}</p>
             <p className="text-sm">{stat.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Tickets Table & Top Performers Side by Side */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Recent Tickets */}
+      {/* Recent Tickets & Employee Activity Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Recent Tickets Section */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">
-            Recent Tickets
-          </h2>
+          <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">Recent Tickets</h2>
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-200 text-[#23486A]">
@@ -289,47 +373,48 @@ const Dashboard = () => {
           </table>
         </div>
 
-        {/* Top Performers Section */}
+        {/* Employee Activity Status Section */}
+        <EmployeeActivityStatus />
+      </div>
+
+      {/* Chart and Top Performers Section */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        {/* Bar Chart */}
+        <div className="bg-white p-4 rounded-lg shadow flex justify-center items-center" style={{ height: "250px" }}>
+          {isLoading ? (
+            <div>Loading chart data...</div>
+          ) : (
+            <Bar data={chartData} options={chartOptions} />
+          )}
+        </div>
+
+        {/* Top Performers */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">
-            Top Performers
-          </h2>
+          <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">Top Performers</h2>
           {isLoading ? (
             <p>Loading top performers...</p>
+          ) : topPerformers.length === 0 ? (
+            <p>No performer data found.</p>
           ) : (
-            <ul>
-              {topPerformers.map((user) => (
-                <li
-                  key={user.id}
-                  className="flex items-center gap-4 p-2 border-b"
-                >
+            <ol className="list-decimal pl-5">
+              {topPerformers.map((user, index) => (
+                <li key={index} className="mb-4 flex items-center gap-3">
                   <img
-                    src={user.profile_pic || "default-avatar.png"}
-                    alt={user.username}
+                    src={user.profile_picture}
+                    alt={user.name}
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
-                    <p className="font-semibold">
-                      {user.username} ({user.role})
-                    </p>
+                    <p className="font-semibold">{user.name}</p>
                     <p className="text-sm text-gray-600">
-                      Solved Tickets: {user.solved_tickets}
+                      {user.solved_tickets} ticket{user.solved_tickets > 1 ? "s" : ""} solved
                     </p>
                   </div>
                 </li>
               ))}
-            </ul>
+            </ol>
           )}
         </div>
-      </div>
-
-      {/* Bar Chart */}
-      <div className="bg-white p-4 rounded-lg shadow flex justify-center items-center mt-4" style={{ height: "250px" }}>
-        {isLoading ? (
-          <div>Loading chart data...</div>
-        ) : (
-          <Bar data={chartData} options={chartOptions} />
-        )}
       </div>
 
       {/* Footer with Buttons */}
