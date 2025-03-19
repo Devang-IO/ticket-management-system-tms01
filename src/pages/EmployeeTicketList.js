@@ -27,24 +27,31 @@ const EmployeeTicketList = () => {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-
+  
       // Fetch assignments joined with the related ticket data (including closed_by, name, email)
       const { data, error } = await supabase
         .from("assignments")
         .select("ticket: tickets(id, title, created_at, priority, status, closed_by, name, email)")
         .eq("user_id", user.id);
-
+  
       if (error) {
         console.error("Error fetching assigned tickets:", error);
       } else if (data) {
         // Map assignments to extract the ticket object
         const assignedTickets = data.map((assignment) => assignment.ticket);
-        setTickets(assignedTickets);
+        
+        // Sort the tickets so that the latest tickets appear first
+        const sortedTickets = assignedTickets.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+        
+        setTickets(sortedTickets);
       }
     };
-
+  
     fetchAssignedTickets();
   }, []);
+  
 
   // Function to update the ticket in Supabase (without sending email directly)
   const handleCloseTicket = async (ticket) => {
