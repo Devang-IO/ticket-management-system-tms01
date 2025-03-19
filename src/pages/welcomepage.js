@@ -67,7 +67,7 @@ const WelcomePage = () => {
       key={index}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, delay: index * 0.2 }}
+      transition={{ duration: 0.01, delay: index * 0.2 }}
       whileHover={{ scale: 1.1, rotate: 2 }}
       whileTap={{ scale: 0.95 }}
       className="bg-[#4C7B8B] text-white p-6 rounded-3xl shadow-lg text-center transition-transform duration-300 cursor-pointer"

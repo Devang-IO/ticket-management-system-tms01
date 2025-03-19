@@ -21,6 +21,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [profilePicToast, setProfilePicToast] = useState(null);
 
   // Fetch user profile data
   useEffect(() => {
@@ -53,8 +54,6 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   async function fetchTicketStats(userInfo) {
     const role = userInfo.role.toLowerCase();
     if (role === "employee") {
-      // For employees:
-      // Total open tickets
       const { data: openData, error: openError } = await supabase
         .from("tickets")
         .select("id")
@@ -65,7 +64,6 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
       }
       const totalOpen = openData ? openData.length : 0;
 
-      // Assigned tickets for this employee
       const { data: assignedData, error: assignError } = await supabase
         .from("assignments")
         .select("ticket_id")
@@ -76,7 +74,6 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
       }
       const assignedCount = assignedData ? assignedData.length : 0;
 
-      // Closed tickets by this employee (assuming closed_by stores employee id)
       const { data: closedData, error: closedError } = await supabase
         .from("tickets")
         .select("id")
@@ -90,7 +87,6 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
 
       setTicketStats({ open: totalOpen, assigned: assignedCount, closed: closedCount });
     } else if (role === "admin") {
-      // For admin:
       const { count: totalTickets, error: ticketErr } = await supabase
         .from("tickets")
         .select("id", { head: true, count: "exact" });
@@ -115,7 +111,6 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
       }
       setTicketStats({ totalTickets, totalUsers, totalEmployees });
     } else {
-      // For regular users:
       const { data: ticketsData, error } = await supabase
         .from("tickets")
         .select("id, status")
@@ -214,6 +209,12 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
             return;
           }
         }
+        // If a new profile picture was uploaded, set the toast message.
+        if (newProfilePic) {
+          setProfilePicToast(
+            "Profile picture has changed successfully, changes will appear after closing the profile section."
+          );
+        }
         setUser(updatedData);
         localStorage.setItem("username", updatedData.name);
         localStorage.setItem("profilePicture", updatedData.profile_picture);
@@ -255,6 +256,12 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
       <div className="relative p-8 w-full max-w-2xl bg-white rounded-xl shadow-lg text-center max-h-[90vh] overflow-y-auto">
+        {/* Toast Notification */}
+        {profilePicToast && (
+          <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+            {profilePicToast}
+          </div>
+        )}
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-red-700">
           <X size={24} />
         </button>
@@ -266,7 +273,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                 src={
                   newProfilePic
                     ? URL.createObjectURL(newProfilePic)
-                    : formData.profile_picture || "/images/default-avatar.png"
+                    : formData.profile_picture || "/default-avatar.png"
                 }
                 alt="Profile"
                 className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
