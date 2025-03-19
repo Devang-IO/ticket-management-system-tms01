@@ -13,18 +13,16 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const [actionDropdown, setActionDropdown] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Read the query parameter to get a highlighted ticket id.
   const [searchParams] = useSearchParams();
   const highlightedTicketId = searchParams.get("ticketId");
 
-  // Fetch all tickets for Admin
+  // Fetch tickets
   useEffect(() => {
     const fetchTickets = async () => {
       const { data, error } = await supabase
         .from("tickets")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (error) {
         console.error("Error fetching tickets:", error);
       } else {
@@ -35,31 +33,27 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     fetchTickets();
   }, []);
 
-  // Handle ticket deletion
   const handleDeleteTicket = async (ticketId) => {
     if (!window.confirm("Are you sure you want to delete this ticket?")) return;
-
     const { error } = await supabase.from("tickets").delete().eq("id", ticketId);
     if (error) {
       console.error("Error deleting ticket:", error);
     } else {
-      setTickets((prevTickets) => prevTickets.filter(ticket => ticket.id !== ticketId));
+      setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketId));
       setActionDropdown(null);
     }
   };
 
-  // Handle unassigning ticket: update ticket status to "open"
   const handleUnassignTicket = async (ticketId) => {
     const { error } = await supabase
       .from("tickets")
       .update({ status: "open" })
       .eq("id", ticketId);
-
     if (error) {
       console.error("Error unassigning ticket:", error);
     } else {
-      setTickets((prevTickets) =>
-        prevTickets.map(ticket =>
+      setTickets((prev) =>
+        prev.map((ticket) =>
           ticket.id === ticketId ? { ...ticket, status: "open" } : ticket
         )
       );
@@ -67,7 +61,6 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     }
   };
 
-  // Handle outside click for action dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".dropdown-wrapper")) {
@@ -78,17 +71,18 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filter tickets
-  const filteredTickets = tickets.filter(ticket => {
+  const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = searchTerm
       ? ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         ticket.id.toString().includes(searchTerm) ||
         ticket.status.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-
-    const matchesStatus = statusFilter === "All" || ticket.status.toLowerCase() === statusFilter.toLowerCase();
-    const matchesPriority = priorityFilter === "All" || ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
-
+    const matchesStatus =
+      statusFilter === "All" ||
+      ticket.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesPriority =
+      priorityFilter === "All" ||
+      ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
@@ -107,54 +101,32 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </h2>
       </div>
 
-      {/* Filters Section Container */}
-      <div
-        style={{
-          backgroundColor: "#f9fafb",
-          padding: "16px",
-          borderRadius: "8px",
-          border: "1px solid #e5e7eb",
-          marginBottom: "16px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-start",
-            gap: "16px",
-          }}
-        >
-          {/* Show Entries Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <label style={{ fontWeight: "bold", color: "#23486A" }}>Show:</label>
+      {/* Filters Section */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+        <div className="flex gap-4">
+          {/* Entries Filter */}
+          <div className="flex items-center gap-2">
+            <label className="font-bold text-[#23486A]">Show:</label>
             <select
               value={entriesPerPage}
-              onChange={(e) => setEntriesPerPage(Number(e.target.value))}
-              style={{
-                padding: "4px 8px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                backgroundColor: "white",
+              onChange={(e) => {
+                setEntriesPerPage(Number(e.target.value));
+                setCurrentPage(1); // Reset to first page when changing entries
               }}
+              className="p-1 border border-gray-300 rounded bg-white"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={20}>20</option>
             </select>
           </div>
-
           {/* Status Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <label style={{ fontWeight: "bold", color: "#23486A" }}>Status:</label>
+          <div className="flex items-center gap-2">
+            <label className="font-bold text-[#23486A]">Status:</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{
-                padding: "4px 8px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                backgroundColor: "white",
-              }}
+              className="p-1 border border-gray-300 rounded bg-white"
             >
               <option value="All">All</option>
               <option value="Open">Open</option>
@@ -163,19 +135,13 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
               <option value="Resolved">Resolved</option>
             </select>
           </div>
-
           {/* Priority Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <label style={{ fontWeight: "bold", color: "#23486A" }}>Priority:</label>
+          <div className="flex items-center gap-2">
+            <label className="font-bold text-[#23486A]">Priority:</label>
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              style={{
-                padding: "4px 8px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                backgroundColor: "white",
-              }}
+              className="p-1 border border-gray-300 rounded bg-white"
             >
               <option value="All">All</option>
               <option value="High">High</option>
@@ -186,74 +152,58 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="table-container" style={{ overflow: "visible" }}>
-        <table>
+      {/* Tickets Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
           <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Created At</th>
-              <th>Actions</th>
+            <tr className="bg-gray-200 text-[#23486A]">
+              <th className="p-2 text-left">ID</th>
+              <th className="p-2 text-left">Title</th>
+              <th className="p-2 text-left">Status</th>
+              <th className="p-2 text-left">Priority</th>
+              <th className="p-2 text-left">Created At</th>
+              <th className="p-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentTickets.map((ticket) => (
-              <tr
-                key={ticket.id}
-                className={ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""}
-              >
-                <td>{ticket.id}</td>
-                <td className="text-left">
-                  <Link to={`/managetickets?ticketId=${ticket.id}`} className="ticket-link">
+              <tr key={ticket.id} className={ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""}>
+                <td className="p-2">{ticket.id}</td>
+                <td className="p-2">
+                  <Link to={`/managetickets?ticketId=${ticket.id}`} className="text-blue-600">
                     {ticket.title}
                   </Link>
                 </td>
-                <td>{ticket.status}</td>
-                <td>
+                <td className="p-2">{ticket.status}</td>
+                <td className="p-2">
                   <span className={`px-3 py-1 text-white text-sm rounded-xl ${
                     ticket.priority === "High" ? "bg-[#EFB036]" :
-                    ticket.priority === "Medium" ? "bg-[#3B6790]" :
-                    "bg-[#23486A]"
+                    ticket.priority === "Medium" ? "bg-[#3B6790]" : "bg-[#23486A]"
                   }`}>
                     {ticket.priority}
                   </span>
                 </td>
-                <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
-                <td className="action-cell" style={{ position: "relative" }}>
+                <td className="p-2">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                <td className="p-2 relative">
                   <button
                     onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
-                    className="action-btn"
+                    className="bg-gray-200 px-2 py-1 rounded inline-flex items-center"
                   >
-                    Actions <FiChevronDown />
+                    Actions <FiChevronDown className="ml-1" />
                   </button>
-
                   {actionDropdown === ticket.id && (
-                    <div 
-                      className="dropdown-wrapper" 
-                      ref={dropdownRef}
-                      style={{
-                        position: "absolute",
-                        top: "70%",
-                        right: 50,
-                        zIndex: 1000,
-                        backgroundColor: "#fff",
-                        boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
-                        borderRadius: "4px",
-                        marginTop: "4px",
-                      }}
-                    >
-                      <div className="dropdown">
-                        <Link to={`/ticket/${ticket.id}`} className="dropdown-item">
-                          <FiEye className="mr-1" /> View
+                    <div ref={dropdownRef} className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded shadow z-10">
+                      <div className="p-2">
+                        <Link to={`/ticket/${ticket.id}`} className="block text-blue-600 mb-1">
+                          <FiEye className="inline mr-1" /> View
                         </Link>
-                        {/* <button className="dropdown-item" onClick={() => handleUnassignTicket(ticket.id)}>
-                          <FiUserMinus className="mr-1" /> Unassign
-                        </button> */}
-                        <button className="dropdown-item text-red-600" onClick={() => handleDeleteTicket(ticket.id)}>
-                          <FiTrash2 className="mr-1 text-red-600" /> Delete
+                        {/* Uncomment if needed
+                        <button onClick={() => handleUnassignTicket(ticket.id)} className="block text-gray-600 mb-1 w-full text-left">
+                          <FiUserMinus className="inline mr-1" /> Unassign
+                        </button>
+                        */}
+                        <button onClick={() => handleDeleteTicket(ticket.id)} className="block text-red-600 w-full text-left">
+                          <FiTrash2 className="inline mr-1" /> Delete
                         </button>
                       </div>
                     </div>
@@ -267,10 +217,24 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="pagination">
-          <button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>Previous</button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
+        <div className="flex justify-center items-center space-x-4 mt-4">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 hover:bg-blue-700"
+          >
+            Previous
+          </button>
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 hover:bg-blue-700"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
