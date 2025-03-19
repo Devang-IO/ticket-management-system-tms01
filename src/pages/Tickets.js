@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { FiPlus, FiChevronDown, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import {
+  FiPlus,
+  FiChevronDown,
+  FiEye,
+  FiEdit,
+  FiTrash2,
+} from "react-icons/fi";
 import { FaTicketAlt } from "react-icons/fa"; // Ticket icon
 import { supabase } from "../utils/supabase"; // Import Supabase client
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
+import { createPortal } from "react-dom";
 
-const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
+const TicketList = ({ isSidebarOpen }) => {
   const [tickets, setTickets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState(""); // Use searchQuery for search functionality
@@ -14,13 +21,15 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionDropdown, setActionDropdown] = useState(null);
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
-  const dropdownRef = useRef(null);
 
   // Fetch current user
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         setCurrentUser(user);
       }
@@ -58,11 +67,32 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
       console.error("Error deleting ticket:", error);
     } else {
       // Remove the deleted ticket from the state
-      setTickets((prevTickets) => prevTickets.filter((ticket) => ticket.id !== ticketId));
+      setTickets((prevTickets) =>
+        prevTickets.filter((ticket) => ticket.id !== ticketId)
+      );
     }
   };
 
-  // Close dropdown when clicking outside
+  // Handle action button click
+  const handleActionClick = (ticketId, event) => {
+    // If already open for this ticket, close it
+    if (actionDropdown === ticketId) {
+      setActionDropdown(null);
+      return;
+    }
+    // Compute the button's bounding rectangle
+    const rect = event.currentTarget.getBoundingClientRect();
+    // Set the dropdown style with fixed positioning relative to viewport
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 4, // a little below the button
+      left: rect.left,
+      zIndex: 9999,
+    });
+    setActionDropdown(ticketId);
+  };
+
+  // Close dropdown when clicking outside (since the portal is rendered in body)
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".dropdown-wrapper")) {
@@ -78,43 +108,91 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
   // Update the filteredTickets calculation to use searchQuery
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch =
-      ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase()) || // Use searchQuery
-      ticket.id.toString().includes(searchQuery) || // Use searchQuery
-      ticket.status.toLowerCase().includes(searchQuery.toLowerCase()) || // Use searchQuery
-      ticket.employee_name?.toLowerCase().includes(searchQuery.toLowerCase()); // Use searchQuery
-    const matchesStatus = statusFilter === "All" || ticket.status.toLowerCase() === statusFilter.toLowerCase();
-    const matchesPriority = priorityFilter === "All" || ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
+      ticket.title.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+      ticket.id.toString().includes(searchQuery) ||
+      ticket.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.employee_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "All" ||
+      ticket.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesPriority =
+      priorityFilter === "All" ||
+      ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
   // Pagination logic
   const indexOfLastTicket = currentPage * entriesPerPage;
   const indexOfFirstTicket = indexOfLastTicket - entriesPerPage;
-  const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
+  const currentTickets = filteredTickets.slice(
+    indexOfFirstTicket,
+    indexOfLastTicket
+  );
+
+  // Render the dropdown using a portal so that it isn't clipped by table overflow
+  const renderDropdown = (ticketId) => {
+    if (actionDropdown !== ticketId) return null;
+    return createPortal(
+      <div className="dropdown-wrapper" style={dropdownStyle}>
+        <div className="dropdown bg-white shadow rounded p-2">
+          <Link
+            to={`/ticket/${ticketId}`}
+            className="dropdown-item flex items-center gap-1 p-1 hover:bg-gray-200"
+            onClick={() => setActionDropdown(null)}
+          >
+            <FiEye /> View
+          </Link>
+          <button
+            className="delete-btn flex items-center gap-1 p-1 hover:bg-gray-200"
+            onClick={() => {
+              handleDeleteTicket(ticketId);
+              setActionDropdown(null);
+            }}
+          >
+            <FiTrash2 /> Delete
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  };
 
   return (
-    <div className={`tickets-container transition-all duration-300 ${isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"}`}>
+    <div
+      className={`tickets-container transition-all duration-300 ${
+        isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"
+      }`}
+    >
       <div className="tickets-header flex items-center justify-between">
         <h2 className="flex items-center text-3xl font-extrabold">
           <FaTicketAlt className="mr-2 text-yellow-500" /> My Tickets
         </h2>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="btn-primary flex items-center"
+        >
           <FiPlus className="mr-1" /> New Ticket
         </button>
       </div>
 
-      <div className="tickets-controls">
-        <div className="filter-group">
+      <div className="tickets-controls flex flex-wrap items-center gap-4 mt-4">
+        <div className="filter-group flex items-center gap-1">
           <label>Show:</label>
-          <select value={entriesPerPage} onChange={(e) => setEntriesPerPage(Number(e.target.value))}>
+          <select
+            value={entriesPerPage}
+            onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+          >
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={20}>20</option>
           </select>
         </div>
-        <div className="filter-group">
+        <div className="filter-group flex items-center gap-1">
           <label>Status:</label>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="All">All</option>
             <option value="Open">Open</option>
             <option value="Closed">Closed</option>
@@ -122,9 +200,12 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
             <option value="Resolved">Resolved</option>
           </select>
         </div>
-        <div className="filter-group">
+        <div className="filter-group flex items-center gap-1">
           <label>Priority:</label>
-          <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+          >
             <option value="All">All</option>
             <option value="High">High</option>
             <option value="Medium">Medium</option>
@@ -135,13 +216,13 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
           type="text"
           placeholder="Search by title..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery state
-          className="search-input"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input border rounded p-1"
         />
       </div>
 
-      <div className="table-container">
-        <table>
+      <div className="table-container mt-4 overflow-x-auto">
+        <table className="min-w-full">
           <thead>
             <tr>
               <th>ID</th>
@@ -154,7 +235,7 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
           </thead>
           <tbody>
             {currentTickets.map((ticket) => (
-              <tr key={ticket.id}>
+              <tr key={ticket.id} className="border-t">
                 <td>{ticket.id}</td>
                 <td className="text-left">
                   <Link to={`/ticket/${ticket.id}`} className="ticket-link">
@@ -168,36 +249,14 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
                   </span>
                 </td>
                 <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
-                <td className="action-cell">
+                <td className="relative">
                   <button
-                    onClick={() => setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)}
-                    className="action-btn"
+                    onClick={(e) => handleActionClick(ticket.id, e)}
+                    className="action-btn flex items-center gap-1"
                   >
                     Actions <FiChevronDown />
                   </button>
-
-                  {actionDropdown === ticket.id && (
-                    <div className="dropdown-wrapper" ref={dropdownRef}>
-                      <div className="dropdown">
-                        <Link
-                          to={`/ticket/${ticket.id}`}
-                          className="dropdown-item"
-                          onClick={() => setActionDropdown(null)}
-                        >
-                          <FiEye /> View
-                        </Link>
-                        <Link to={`/ticket/edit/${ticket.id}`} className="dropdown-item">
-                          <FiEdit /> Edit
-                        </Link>
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleDeleteTicket(ticket.id)}
-                        >
-                          <FiTrash2 /> Delete
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  {renderDropdown(ticket.id)}
                 </td>
               </tr>
             ))}
@@ -205,7 +264,12 @@ const TicketList = ({ isSidebarOpen }) => { // Removed searchTerm prop
         </table>
       </div>
 
-      {isModalOpen && <TicketSubmissionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <TicketSubmissionModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
