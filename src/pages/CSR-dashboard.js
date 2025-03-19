@@ -20,17 +20,17 @@ const CSRdashboard = () => {
   const [feedback, setFeedback] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch dashboard data (tickets summary, chart data, etc.)
+  // Fetch dashboard data (ticket summary, chart data, etc.)
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // Calculate timestamp for the start of today
+        // Calculate timestamp for the start of today (used for cards only)
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         const todayStartISO = todayStart.toISOString();
 
-        // --- LIVE TICKETS DATA ---
+        // --- LIVE TICKETS DATA (Cards) ---
         const { data: openTicketsData, error: openError } = await supabase
           .from("tickets")
           .select("id, assignments(*)")
@@ -41,13 +41,13 @@ const CSRdashboard = () => {
         const openTicketsCount = openTicketsData ? openTicketsData.length : 0;
         const assignedCount = openTicketsData
           ? openTicketsData.filter(
-            (ticket) =>
-              ticket.assignments && ticket.assignments.length > 0
-          ).length
+              (ticket) =>
+                ticket.assignments && ticket.assignments.length > 0
+            ).length
           : 0;
         const unassignedCount = openTicketsCount - assignedCount;
 
-        // --- RESPONSE TIME TODAY DATA ---
+        // --- RESPONSE TIME TODAY DATA (Cards) ---
         const { data: answeredData, error: answeredError } = await supabase
           .from("tickets")
           .select("created_at, first_response_at")
@@ -67,7 +67,7 @@ const CSRdashboard = () => {
           avgResponseTime = Math.round(totalResponseTime / answeredData.length / 60000);
         }
 
-        // --- EMPLOYEE WORKLOAD (Tickets Assigned) ---
+        // --- EMPLOYEE WORKLOAD (Tickets Assigned for Cards) ---
         let assignmentsCount = 0;
         const { data: currentUserData } = await supabase.auth.getUser();
         const currentUserId = currentUserData?.user?.id;
@@ -79,7 +79,7 @@ const CSRdashboard = () => {
           assignmentsCount = count || 0;
         }
 
-        // --- BUILD SUMMARY DATA ---
+        // --- BUILD SUMMARY DATA (Cards) ---
         const summary = [
           {
             section: "Live Tickets",
@@ -110,26 +110,38 @@ const CSRdashboard = () => {
         ];
         setTicketSummary(summary);
 
-        // --- TICKET CHART DATA ---
-        const { data: todaysTickets, error: todaysError } = await supabase
+        // --- TICKET CHART DATA (Assigned vs Unassigned Tickets - All Time) ---
+        // Fetch all tickets with their assignments (no filter on created_at)
+        const { data: allTickets, error: allError } = await supabase
           .from("tickets")
-          .select("created_at, status")
-          .gte("created_at", todayStartISO);
-        if (todaysError) {
-          console.error("Error fetching today's tickets:", todaysError);
+          .select("created_at, assignments(*)");
+        if (allError) {
+          console.error("Error fetching all tickets:", allError);
         }
+        // Group by the hour-of-day from each ticket's created_at timestamp
         const hours = Array.from({ length: 24 }, (_, i) => i);
-        const chartDataFromBackend = hours.map(hour => {
+        const chartDataFromBackend = hours.map((hour) => {
           const label = `${hour.toString().padStart(2, "0")}:00`;
-          const newCount = todaysTickets ? todaysTickets.filter(ticket => {
-            const date = new Date(ticket.created_at);
-            return date.getHours() === hour && ticket.status !== "closed";
-          }).length : 0;
-          const closedCount = todaysTickets ? todaysTickets.filter(ticket => {
-            const date = new Date(ticket.created_at);
-            return date.getHours() === hour && ticket.status === "closed";
-          }).length : 0;
-          return { time: label, new: newCount, closed: closedCount };
+          const assigned = allTickets
+            ? allTickets.filter((ticket) => {
+                const date = new Date(ticket.created_at);
+                return (
+                  date.getHours() === hour &&
+                  ticket.assignments &&
+                  ticket.assignments.length > 0
+                );
+              }).length
+            : 0;
+          const unassigned = allTickets
+            ? allTickets.filter((ticket) => {
+                const date = new Date(ticket.created_at);
+                return (
+                  date.getHours() === hour &&
+                  (!ticket.assignments || ticket.assignments.length === 0)
+                );
+              }).length
+            : 0;
+          return { time: label, assigned, unassigned };
         });
         setTicketChartData(chartDataFromBackend);
       } catch (error) {
@@ -177,54 +189,6 @@ const CSRdashboard = () => {
     );
   };
 
-  // Prepare chart configuration using our ticketChartData from backend
-  const chartData = {
-    labels: ticketChartData.map(d => d.time),
-    datasets: [
-      {
-        label: "New Tickets",
-        data: ticketChartData.map(d => d.new),
-        fill: false,
-        borderColor: "#8884d8",
-        strokeWidth: 2,
-        dot: { r: 4 },
-      },
-      {
-        label: "Closed Tickets",
-        data: ticketChartData.map(d => d.closed),
-        fill: false,
-        borderColor: "#82ca9d",
-        strokeWidth: 2,
-        dot: { r: 4 },
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    aspectRatio: 2,
-    plugins: {
-      legend: { display: true },
-      title: {
-        display: true,
-        text: "New Tickets vs Closed",
-        color: "#ffffff",
-        font: { size: 15 },
-      },
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { color: "#ccc", font: { size: 10 } },
-      },
-      y: {
-        grid: { color: "#444" },
-        ticks: { color: "#ccc", font: { size: 10 } },
-      },
-    },
-  };
-
   return (
     <div className="w-full min-h-screen text-white overflow-x-hidden">
       <Navbar />
@@ -232,14 +196,24 @@ const CSRdashboard = () => {
         {/* Ticket Summary Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
           {ticketSummary.map((section, index) => (
-            <div key={index} className="p-4 rounded-xl shadow-md text-center bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 text-white">
-              <h2 className="text-lg font-semibold text-gray-300 mb-2">{section.section}</h2>
+            <div
+              key={index}
+              className="p-4 rounded-xl shadow-md text-center bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 text-white"
+            >
+              <h2 className="text-lg font-semibold text-gray-300 mb-2">
+                {section.section}
+              </h2>
               <div className="grid gap-3">
                 {section.items.map((item, i) => (
-                  <div key={i} className={`p-4 rounded-lg shadow ${item.color} flex items-center justify-center gap-3`}>
+                  <div
+                    key={i}
+                    className={`p-4 rounded-lg shadow ${item.color} flex items-center justify-center gap-3`}
+                  >
                     <span className="text-white text-xl">{item.icon}</span>
                     <div>
-                      <h2 className="text-2xl font-bold">{isLoading ? "..." : item.value}</h2>
+                      <h2 className="text-2xl font-bold">
+                        {isLoading ? "..." : item.value}
+                      </h2>
                       <p className="text-sm">{item.label}</p>
                     </div>
                   </div>
@@ -251,30 +225,66 @@ const CSRdashboard = () => {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 animate-fadeIn">
-          {/* Ticket Chart */}
+          {/* Assigned vs Unassigned Tickets Chart */}
           <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full h-[500px] relative">
-            <h3 className="text-xl font-semibold mb-4">New Tickets vs Closed</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              Assigned vs Unassigned Tickets
+            </h3>
             <div className="p-4">
               <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 40, bottom: 40 }}>
+                <LineChart
+                  data={ticketChartData}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 40 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                   <XAxis dataKey="time" stroke="#ccc">
-                    <Label value="Time of the Day" offset={-20} position="insideBottom" />
+                    <Label
+                      value="Time of the Day"
+                      offset={-20}
+                      position="insideBottom"
+                      fill="#ccc"
+                    />
                   </XAxis>
-                  <YAxis>
-                    <Label value="Number of Tickets" angle={-90} position="insideLeft" />
+                  <YAxis stroke="#ccc">
+                    <Label
+                      value="Number of Tickets"
+                      angle={-90}
+                      position="insideLeft"
+                      fill="#ccc"
+                    />
                   </YAxis>
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1f2937",
+                      borderColor: "#374151",
+                      color: "white"
+                    }}
+                  />
                   <Legend verticalAlign="top" align="right" />
-                  <Line type="monotone" dataKey="new" stroke="#8884d8" strokeWidth={2} dot={{ r: 4 }} name="New Tickets" />
-                  <Line type="monotone" dataKey="closed" stroke="#82ca9d" strokeWidth={2} dot={{ r: 4 }} name="Closed Tickets" />
+                  <Line
+                    type="monotone"
+                    dataKey="assigned"
+                    stroke="#8884d8"
+                    strokeWidth={2}
+                    name="Assigned Tickets"
+                    dot={{ stroke: '#8884d8', strokeWidth: 2, r: 4 }}
+                    activeDot={{ stroke: '#8884d8', strokeWidth: 2, r: 6 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="unassigned"
+                    stroke="#82ca9d"
+                    strokeWidth={2}
+                    name="Unassigned Tickets"
+                    dot={{ stroke: '#82ca9d', strokeWidth: 2, r: 4 }}
+                    activeDot={{ stroke: '#82ca9d', strokeWidth: 2, r: 6 }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Customer Feedback with Star Ratings */}
-
-
           <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full">
             <h3 className="text-xl font-semibold mb-4">Customer Feedback</h3>
             <div
@@ -282,11 +292,11 @@ const CSRdashboard = () => {
               style={{ scrollbarWidth: "none" }} // For Firefox
             >
               <style jsx>{`
-      /* Hide scrollbar for Chrome, Safari and Opera */
-      div::-webkit-scrollbar {
-        display: none;
-      }
-    `}</style>
+                /* Hide scrollbar for Chrome, Safari and Opera */
+                div::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
               {feedback.length === 0 ? (
                 <p>No feedback available</p>
               ) : (
@@ -296,7 +306,10 @@ const CSRdashboard = () => {
                     className="flex items-start gap-3 bg-gray-800 p-3 rounded-lg shadow"
                   >
                     <img
-                      src={fb.customer?.profile_picture || "https://via.placeholder.com/50"}
+                      src={
+                        fb.customer?.profile_picture ||
+                        "https://via.placeholder.com/50"
+                      }
                       alt={fb.customer?.email || "User"}
                       className="w-10 h-10 rounded-full"
                     />
@@ -312,8 +325,6 @@ const CSRdashboard = () => {
               )}
             </div>
           </div>
-
-
         </div>
       </div>
       {/* Ticket Submission Modal and Rating Modal would be here if used */}
