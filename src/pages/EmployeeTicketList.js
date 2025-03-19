@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaEye, FaSearch } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
@@ -17,21 +17,27 @@ const EmployeeTicketList = () => {
   const [ticketToClose, setTicketToClose] = useState(null);
   const navigate = useNavigate();
 
+  // Ref to track which tickets have already triggered an email
+  const notifiedTicketIdsRef = useRef(new Set());
+
   useEffect(() => {
     const fetchAssignedTickets = async () => {
       // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch assignments joined with the related ticket data (including closed_by)
+      // Fetch assignments joined with the related ticket data (including closed_by, name, email)
       const { data, error } = await supabase
         .from("assignments")
-        .select("ticket: tickets(id, title, created_at, priority, status, closed_by)")
+        .select("ticket: tickets(id, title, created_at, priority, status, closed_by, name, email)")
         .eq("user_id", user.id);
 
       if (error) {
         console.error("Error fetching assigned tickets:", error);
       } else if (data) {
+        // Map assignments to extract the ticket object
         const assignedTickets = data.map((assignment) => assignment.ticket);
         setTickets(assignedTickets);
       }
@@ -40,16 +46,17 @@ const EmployeeTicketList = () => {
     fetchAssignedTickets();
   }, []);
 
-  // Function to update the ticket in Supabase and update local state
+  // Function to update the ticket in Supabase (without sending email directly)
   const handleCloseTicket = async (ticket) => {
     // Retrieve current employee details
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       alert("User not authenticated");
       return;
     }
 
-    // Use user.id because the 'closed_by' column expects a UUID.
     const userId = user.id;
 
     // Update the ticket to set status as "closed" and record the user.id in closed_by
@@ -61,7 +68,9 @@ const EmployeeTicketList = () => {
     if (error) {
       console.error("Error closing ticket:", error.message);
       alert("Error closing ticket: " + error.message);
+      return;
     } else {
+      // Update the local state
       setTickets((prevTickets) =>
         prevTickets.map((t) =>
           t.id === ticket.id ? { ...t, status: "closed", closed_by: userId } : t
@@ -79,6 +88,52 @@ const EmployeeTicketList = () => {
       setTicketToClose(null);
     }
   };
+
+  // Effect to monitor tickets and send closure email when a ticket changes to "closed"
+  useEffect(() => {
+    tickets.forEach(async (ticket) => {
+      // Check if ticket is closed and hasn't been notified already
+      if (
+        ticket.status.toLowerCase() === "closed" &&
+        !notifiedTicketIdsRef.current.has(ticket.id)
+      ) {
+        // Debug log to see the full ticket data
+        console.log("Full ticket data for closure email:", ticket);
+        
+        // Make sure all required fields are included in the payload
+        const closurePayload = {
+          ticket: {
+            name: ticket.name,
+            email: ticket.email,
+            title: ticket.title,
+            closed: true, // Explicitly setting the closure flag
+          },
+        };
+
+        console.log("Sending closure email payload:", closurePayload);
+
+        try {
+          const response = await fetch("/api/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(closurePayload),
+          });
+          
+          if (!response.ok) {
+            const result = await response.json();
+            console.error("Email sending failed:", result.error);
+          } else {
+            const result = await response.json();
+            console.log("Closure email sent successfully for ticket", ticket.id, result);
+            // Add to notified set only after successful email
+            notifiedTicketIdsRef.current.add(ticket.id);
+          }
+        } catch (emailError) {
+          console.error("Error calling email endpoint:", emailError);
+        }
+      }
+    });
+  }, [tickets]);
 
   // Filter tickets based on the search query (by title)
   const filteredTickets = tickets.filter((ticket) =>
@@ -170,10 +225,7 @@ const EmployeeTicketList = () => {
           <div className="bg-white p-6 rounded-md shadow-lg">
             <h2 className="text-lg font-bold mb-4 text-black">Are you sure?</h2>
             <div className="flex justify-end mt-4 gap-2">
-              <button
-                onClick={handleConfirmClose}
-                className="bg-red-500 text-white px-4 py-2 rounded"
-              >
+              <button onClick={handleConfirmClose} className="bg-red-500 text-white px-4 py-2 rounded">
                 Yes
               </button>
               <button

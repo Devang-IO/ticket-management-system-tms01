@@ -110,6 +110,31 @@ const AdminTicketList = ({ isSidebarOpen }) => {
           return ticket;
         })
       );
+      
+      // Send assignment email notification to the ticket owner
+      try {
+        const response = await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ticket: {
+              name: selectedTicket.name, // Ticket owner name
+              email: selectedTicket.email, // Ticket owner's email
+              title: selectedTicket.title,
+              assignedEmployee: employee.name, // Newly assigned employee
+            },
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          console.error("Email sending failed:", result.error);
+        } else {
+          console.log("Assignment email sent successfully:", result.message);
+        }
+      } catch (emailError) {
+        console.error("Error calling email endpoint:", emailError);
+      }
+
       setTimeout(() => setSuccessMessage(""), 3000);
       setIsModalOpen(false);
     }
@@ -213,9 +238,8 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                 <td className="p-4">{ticket.title}</td>
                 <td className="p-4">
                   {ticket.assignments && ticket.assignments.length > 0
-                    ? ticket.assignments[
-                        ticket.assignments.length - 1
-                      ].employee_name
+                    ? ticket.assignments[ticket.assignments.length - 1]
+                        .employee_name
                     : "Unassigned"}
                 </td>
                 <td className="p-4">
@@ -292,9 +316,7 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                     </span>
                     <p className="text-sm text-gray-500">
                       {employee.role}
-                      {employee.department
-                        ? ` - ${employee.department}`
-                        : ""}
+                      {employee.department ? ` - ${employee.department}` : ""}
                     </p>
                   </div>
                   <button
