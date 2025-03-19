@@ -288,7 +288,7 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
                 >
                   <FaSearchPlus className="text-white text-3xl bg-black bg-opacity-50 p-2 rounded-full border border-white" />
                 </button>
-                <button
+                {/* <button
                   onClick={() => {
                     const link = document.createElement("a");
                     link.href = msg.image_url;
@@ -300,7 +300,7 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <FaDownload className="text-white text-xl bg-black bg-opacity-50 p-1 rounded-full border border-white" />
-                </button>
+                </button> */}
               </div>
             )}
             {msg.content && <p className="text-sm text-gray-800">{msg.content}</p>}
