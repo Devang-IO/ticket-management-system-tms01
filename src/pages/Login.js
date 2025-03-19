@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { supabase } from '../utils/supabase'; // Import Supabase client
+import { supabase } from '../utils/supabase';
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
+import ResetPasswordModal from "../components/ResetPasswordModal";
 
 export default function LoginPage() {
   // State variables
@@ -18,8 +20,51 @@ export default function LoginPage() {
     specialChar: false,
     minLength: false,
   });
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false); // State for password input focus
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check for password reset token in URL
+  useEffect(() => {
+    const checkForResetToken = async () => {
+      // Check the URL hash for recovery parameters
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const type = hashParams.get('type');
+      
+      if (type === 'recovery') {
+        console.log("Found recovery token in URL hash");
+        // Keep the hash in place to allow the modal to use it
+        setIsResetPasswordModalOpen(true);
+        return;
+      }
+
+      // Check URL query parameters as fallback
+      const queryParams = new URLSearchParams(window.location.search);
+      const queryType = queryParams.get('type');
+      
+      if (queryType === 'recovery') {
+        console.log("Found recovery token in URL query parameters");
+        setIsResetPasswordModalOpen(true);
+        return;
+      }
+
+      // If not in URL, check Supabase session
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session?.user?.aal === 'recovery') {
+          console.log("Found recovery session in Supabase");
+          setIsResetPasswordModalOpen(true);
+        }
+      } catch (error) {
+        console.error("Error checking auth session:", error);
+      }
+    };
+
+    checkForResetToken();
+  }, [location]);
 
   // Password validation function
   const validatePassword = (password) => {
@@ -146,7 +191,7 @@ export default function LoginPage() {
       }, 1000); // Delay navigation to allow the toast to be visible
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error.message); // Display error toast
+      toast.error(error.message || "Login failed. Please check your credentials."); // Display error toast
     }
   };
 
@@ -155,9 +200,18 @@ export default function LoginPage() {
     setShowPassword(!showPassword);
   };
 
-  // Navigate to forgot password page
+  // Open forgot password modal
   const handleForgetPassword = () => {
-    navigate("/forgot-password");
+    setIsForgotPasswordModalOpen(true);
+  };
+
+  // Handle reset password modal close
+  const handleResetPasswordModalClose = () => {
+    setIsResetPasswordModalOpen(false);
+    // After closing the modal, clear the URL hash/query to prevent reappearing
+    if (window.location.hash.includes('type=recovery')) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
   };
 
   return (
@@ -232,6 +286,19 @@ export default function LoginPage() {
       <p className="signup-link">
         Don't have an account? <Link to="/register">Sign-Up</Link>
       </p>
+      
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordModalOpen} 
+        onClose={() => setIsForgotPasswordModalOpen(false)} 
+      />
+      
+      {/* Reset Password Modal */}
+      <ResetPasswordModal
+        isOpen={isResetPasswordModalOpen}
+        onClose={handleResetPasswordModalClose}
+      />
+      
       {/* ToastContainer renders toast notifications */}
       <ToastContainer />
     </div>
