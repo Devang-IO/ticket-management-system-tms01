@@ -41,14 +41,13 @@ const CSRdashboard = () => {
         const openTicketsCount = openTicketsData ? openTicketsData.length : 0;
         const assignedCount = openTicketsData
           ? openTicketsData.filter(
-              (ticket) =>
-                ticket.assignments && ticket.assignments.length > 0
-            ).length
+            (ticket) =>
+              ticket.assignments && ticket.assignments.length > 0
+          ).length
           : 0;
         const unassignedCount = openTicketsCount - assignedCount;
 
         // --- RESPONSE TIME TODAY DATA ---
-        // Ensure the column "first_response_at" exists in your tickets table.
         const { data: answeredData, error: answeredError } = await supabase
           .from("tickets")
           .select("created_at, first_response_at")
@@ -143,13 +142,15 @@ const CSRdashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Fetch customer feedback from employee_ratings.
-  // Modified to include the rating value along with other feedback data
+  // Fetch customer feedback for the logged-in employee only.
   useEffect(() => {
     const fetchFeedback = async () => {
+      const { data: currentUserData } = await supabase.auth.getUser();
+      const currentUserId = currentUserData?.user?.id;
       const { data, error } = await supabase
         .from("employee_ratings")
         .select("experience_text, rating, created_at, customer:customer_id(email, profile_picture)")
+        .eq("employee_id", currentUserId)
         .order("created_at", { ascending: false });
       if (error) {
         console.error("Error fetching feedback:", error.message);
@@ -166,9 +167,9 @@ const CSRdashboard = () => {
     return (
       <div className="flex">
         {[...Array(5)].map((_, index) => (
-          <FaStar 
-            key={index} 
-            className={index < rating ? "text-yellow-400" : "text-gray-400"} 
+          <FaStar
+            key={index}
+            className={index < rating ? "text-yellow-400" : "text-gray-400"}
             size={16}
           />
         ))}
@@ -227,7 +228,7 @@ const CSRdashboard = () => {
   return (
     <div className="w-full min-h-screen text-white overflow-x-hidden">
       <Navbar />
-      <div className="pt-20 px-4 lg:px-8 mx-auto w-full max-w-[100vw] overflow-hidden">
+      <div className="pt-24 px-4 lg:px-8 mx-auto w-full max-w-[100vw]">
         {/* Ticket Summary Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
           {ticketSummary.map((section, index) => (
@@ -249,11 +250,11 @@ const CSRdashboard = () => {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 w-full animate-fadeIn">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 animate-fadeIn">
           {/* Ticket Chart */}
-          <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full h-[500px] relative overflow-hidden">
+          <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full h-[500px] relative">
             <h3 className="text-xl font-semibold mb-4">New Tickets vs Closed</h3>
-            <div className="p-4 rounded-lg">
+            <div className="p-4">
               <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={chartData} margin={{ top: 20, right: 30, left: 40, bottom: 40 }}>
                   <XAxis dataKey="time" stroke="#ccc">
@@ -272,31 +273,47 @@ const CSRdashboard = () => {
           </div>
 
           {/* Customer Feedback with Star Ratings */}
+
+
           <div className="bg-gradient-to-br from-gray-900 via-blue-950 to-gray-800 p-6 rounded-xl shadow-md w-full">
             <h3 className="text-xl font-semibold mb-4">Customer Feedback</h3>
-            <div className="space-y-3">
+            <div
+              className="max-h-[400px] overflow-y-auto space-y-3"
+              style={{ scrollbarWidth: "none" }} // For Firefox
+            >
+              <style jsx>{`
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      div::-webkit-scrollbar {
+        display: none;
+      }
+    `}</style>
               {feedback.length === 0 ? (
                 <p>No feedback available</p>
               ) : (
                 feedback.map((fb, index) => (
-                  <div key={index} className="flex items-start gap-3 bg-gray-800 p-3 rounded-lg shadow">
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 bg-gray-800 p-3 rounded-lg shadow"
+                  >
                     <img
                       src={fb.customer?.profile_picture || "https://via.placeholder.com/50"}
                       alt={fb.customer?.email || "User"}
                       className="w-10 h-10 rounded-full"
                     />
                     <div className="flex-1">
-                      <div className="mb-1">
-                        {renderStars(fb.rating)}
-                      </div>
+                      <div className="mb-1">{renderStars(fb.rating)}</div>
                       <p className="text-white">{fb.experience_text}</p>
-                      <p className="text-gray-400 text-sm">{new Date(fb.created_at).toLocaleString()}</p>
+                      <p className="text-gray-400 text-sm">
+                        {new Date(fb.created_at).toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 ))
               )}
             </div>
           </div>
+
+
         </div>
       </div>
       {/* Ticket Submission Modal and Rating Modal would be here if used */}
