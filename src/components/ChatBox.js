@@ -7,7 +7,9 @@ import {
   FaSpinner, 
   FaSmile, 
   FaArrowDown, 
-  FaCheck 
+  FaCheck,
+  FaDownload,
+  FaSearchPlus
 } from "react-icons/fa";
 
 const emojiOptions = ["👍", "😂", "😮", "😢", "❤️"];
@@ -32,6 +34,7 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
   const [reactionPickerMessageId, setReactionPickerMessageId] = useState(null);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState(null);
 
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -277,7 +280,28 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
         <div key={msg.id} className={`flex ${isCurrentUser ? "justify-start" : "justify-end"}`}>
           <div className={`max-w-xs p-3 rounded-lg shadow relative ${isCurrentUser ? "bg-gray-200" : "bg-blue-100"}`}>
             {msg.image_url && (
-              <img src={msg.image_url} alt="Uploaded" className="mb-2 max-w-full h-auto rounded" />
+              <div className="relative group mb-2">
+                <img src={msg.image_url} alt="Uploaded" className="max-w-full h-auto rounded" />
+                <button
+                  onClick={() => setModalImageUrl(msg.image_url)}
+                  className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <FaSearchPlus className="text-white text-3xl bg-black bg-opacity-50 p-2 rounded-full border border-white" />
+                </button>
+                {/* <button
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = msg.image_url;
+                    link.download = "image.jpg";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <FaDownload className="text-white text-xl bg-black bg-opacity-50 p-1 rounded-full border border-white" />
+                </button> */}
+              </div>
             )}
             {msg.content && <p className="text-sm text-gray-800">{msg.content}</p>}
             <div className="flex justify-between items-center mt-1">
@@ -423,6 +447,24 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Image Preview */}
+      {modalImageUrl && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setModalImageUrl(null)}
+        >
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img src={modalImageUrl} alt="Modal Preview" className="max-w-full max-h-screen" />
+            <button
+              onClick={() => setModalImageUrl(null)}
+              className="absolute top-2 right-2 text-white text-2xl"
+            >
+              <FaTimes />
+            </button>
           </div>
         </div>
       )}
