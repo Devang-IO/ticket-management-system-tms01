@@ -12,6 +12,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
   const [currentUser, setCurrentUser] = useState(propUser);
   const [assignedEmployee, setAssignedEmployee] = useState(null);
   const [waitingForEmployee, setWaitingForEmployee] = useState(false);
+  const [chatInitiated, setChatInitiated] = useState(false);
 
   // Fetch current user if not provided as prop
   useEffect(() => {
@@ -41,6 +42,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
 
       setTicket(ticketData);
       setWaitingForEmployee(ticketData.user_waiting || false);
+      setChatInitiated(ticketData.chat_initiated || false);
 
       // Fetch assigned employee name if exists
       if (ticketData.assigned_user_id) {
@@ -64,6 +66,9 @@ const TicketDetails = ({ currentUser: propUser }) => {
       .on('UPDATE', (payload) => {
         // Update the ticket state when changes occur
         setTicket(payload.new);
+        
+        // Update chat initiated state directly
+        setChatInitiated(payload.new.chat_initiated);
         
         // Check if employee has connected
         if (payload.new.employee_connected && !payload.old.employee_connected) {
@@ -110,6 +115,26 @@ const TicketDetails = ({ currentUser: propUser }) => {
     }
     
     setWaitingForEmployee(false);
+  };
+
+  // Function to handle chat closure
+  const handleChatClosed = async () => {
+    // Update local state immediately for UI
+    setChatInitiated(false);
+    
+    // Update the DB
+    const { error } = await supabase
+      .from("tickets")
+      .update({ 
+        chat_initiated: false,
+        user_waiting: false,
+        employee_connected: false
+      })
+      .eq("id", id);
+      
+    if (error) {
+      console.error("Error updating ticket chat status:", error);
+    }
   };
 
   if (!ticket) {
@@ -203,24 +228,14 @@ const TicketDetails = ({ currentUser: propUser }) => {
 
         {/* Right Column: Chat UI */}
         <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 flex flex-col h-[600px] justify-center items-center">
-          {ticket.chat_initiated ? (
+          {chatInitiated ? (
             currentUser ? (
               <ChatBox
                 ticketId={ticket.id}
                 currentUser={currentUser}
                 assignedUserId={ticket.assigned_user_id}
                 ticketCreatorId={ticket.user_id}
-                onChatClosed={() => {
-                  // Update the DB
-                  supabase
-                    .from("tickets")
-                    .update({ 
-                      chat_initiated: false,
-                      user_waiting: false,
-                      employee_connected: false
-                    })
-                    .eq("id", id);
-                }}
+                onChatClosed={handleChatClosed}
               />
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-500">

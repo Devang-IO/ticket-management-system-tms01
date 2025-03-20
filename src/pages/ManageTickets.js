@@ -268,12 +268,12 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                         >
                           <FiEye className="inline mr-1" /> View
                         </Link>
-                        <button
+                        {/* <button
                           className="dropdown-item block text-red-600 w-full text-left"
                           onClick={() => openDeleteModal(ticket.id)}
                         >
                           <FiTrash2 className="inline mr-1" /> Delete
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   )}

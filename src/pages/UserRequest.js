@@ -68,8 +68,12 @@ const UserRequest = () => {
             );
             
             // Play notification sound (optional)
-            const audio = new Audio('/notification-sound.mp3'); // Add this file to your public folder
-            audio.play().catch(e => console.log('Audio play failed:', e));
+            try {
+              const audio = new Audio('/notification-sound.mp3');
+              audio.play().catch(e => console.log('Audio play failed:', e));
+            } catch (error) {
+              console.log('Audio initialization failed:', error);
+            }
           }
         })
         .subscribe();
@@ -85,6 +89,16 @@ const UserRequest = () => {
     ticket.title.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Sort tickets - put user waiting tickets first, then sort the rest
+  const sortedTickets = [...filteredTickets].sort((a, b) => {
+    // First priority: user_waiting status
+    if (a.user_waiting && !b.user_waiting) return -1;
+    if (!a.user_waiting && b.user_waiting) return 1;
+    
+    // Secondary sort by status or created date if needed
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
   // Update ticket status to "answered", enable chat, and navigate
   const handleConnect = async (ticketId) => {
     const { error } = await supabase
@@ -93,7 +107,8 @@ const UserRequest = () => {
         status: "answered", 
         chat_initiated: true,
         user_waiting: false,  // Clear the waiting flag
-        employee_connected: true
+        employee_connected: true,
+        employee_waiting: true  // Add this flag for highlighting on user side
       })
       .eq("id", ticketId);
 
@@ -137,7 +152,7 @@ const UserRequest = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredTickets.map((ticket) => {
+            {sortedTickets.map((ticket) => {
               const isBlinking = blinkingTickets.includes(ticket.id);
               
               return (
