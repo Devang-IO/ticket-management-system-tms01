@@ -11,6 +11,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
   const [ticket, setTicket] = useState(null);
   const [currentUser, setCurrentUser] = useState(propUser);
   const [assignedEmployee, setAssignedEmployee] = useState(null);
+  const [waitingForEmployee, setWaitingForEmployee] = useState(false);
 
   // Fetch current user if not provided as prop
   useEffect(() => {
@@ -39,6 +40,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
       }
 
       setTicket(ticketData);
+      setWaitingForEmployee(ticketData.user_waiting || false);
 
       // Fetch assigned employee name if exists
       if (ticketData.assigned_user_id) {
@@ -55,7 +57,60 @@ const TicketDetails = ({ currentUser: propUser }) => {
     };
 
     fetchTicketAndEmployee();
+
+    // Set up real-time subscription for ticket updates
+    const subscription = supabase
+      .channel(`public:tickets:id=eq.${id}`)
+      .on('UPDATE', (payload) => {
+        // Update the ticket state when changes occur
+        setTicket(payload.new);
+        
+        // Check if employee has connected
+        if (payload.new.employee_connected && !payload.old.employee_connected) {
+          setWaitingForEmployee(false);
+        }
+      })
+      .subscribe();
+
+    // Clean up subscription on component unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [id]);
+
+  // Function to initiate connection request
+  const requestConnection = async () => {
+    const { error } = await supabase
+      .from("tickets")
+      .update({ 
+        user_waiting: true 
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating ticket:", error);
+      return;
+    }
+    
+    setWaitingForEmployee(true);
+  };
+
+  // Function to cancel connection request
+  const cancelRequest = async () => {
+    const { error } = await supabase
+      .from("tickets")
+      .update({ 
+        user_waiting: false 
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating ticket:", error);
+      return;
+    }
+    
+    setWaitingForEmployee(false);
+  };
 
   if (!ticket) {
     return (
@@ -155,7 +210,17 @@ const TicketDetails = ({ currentUser: propUser }) => {
                 currentUser={currentUser}
                 assignedUserId={ticket.assigned_user_id}
                 ticketCreatorId={ticket.user_id}
-                onChatClosed={() => setTicket({ ...ticket, chat_initiated: false })}
+                onChatClosed={() => {
+                  // Update the DB
+                  supabase
+                    .from("tickets")
+                    .update({ 
+                      chat_initiated: false,
+                      user_waiting: false,
+                      employee_connected: false
+                    })
+                    .eq("id", id);
+                }}
               />
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-500">
@@ -180,12 +245,34 @@ const TicketDetails = ({ currentUser: propUser }) => {
                   Your ticket has not yet been assigned to a support representative.
                 </p>
               )}
-              <button 
-                onClick={() => setTicket({ ...ticket, chat_initiated: true })}
-                className="mt-4 px-6 py-3 bg-[#3B6790] hover:bg-[#EFB036] text-white font-semibold rounded-lg shadow-md"
-              >
-                Connect
-              </button>
+              
+              {waitingForEmployee ? (
+                <div className="mt-4">
+                  <div className="animate-pulse bg-orange-100 text-orange-700 p-4 rounded-lg mb-4">
+                    <p className="font-semibold">Waiting for support agent to connect...</p>
+                    <div className="flex justify-center mt-2">
+                      <div className="flex space-x-2">
+                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce"></div>
+                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={cancelRequest}
+                    className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md"
+                  >
+                    Cancel Request
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={requestConnection}
+                  className="mt-4 px-6 py-3 bg-[#3B6790] hover:bg-[#EFB036] text-white font-semibold rounded-lg shadow-md"
+                >
+                  Request Connection
+                </button>
+              )}
             </div>
           )}
         </div>
