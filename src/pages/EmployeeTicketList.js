@@ -13,6 +13,9 @@ const priorityStyles = {
 const EmployeeTicketList = () => {
   const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ticketsPerPage = 5; // Change as needed
   const [showModal, setShowModal] = useState(false);
   const [ticketToClose, setTicketToClose] = useState(null);
   const navigate = useNavigate();
@@ -51,7 +54,64 @@ const EmployeeTicketList = () => {
   
     fetchAssignedTickets();
   }, []);
-  
+
+  // Combined filtering: search by title and by status filter
+  const filteredTickets = tickets.filter((ticket) => {
+    const searchMatch = ticket.title.toLowerCase().includes(search.toLowerCase());
+    const status = ticket.status.trim().toLowerCase();
+    const statusMatch = statusFilter === "all" || status === statusFilter;
+    return searchMatch && statusMatch;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTickets.length / ticketsPerPage);
+  const indexOfLastTicket = currentPage * ticketsPerPage;
+  const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
+  const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
+
+  // Reset pagination if filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
+  // Function to handle requesting ticket closure (resolution notes removed)
+  const handleRequestTicket = async (ticket) => {
+    // Get the current employee's details
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      alert("User not authenticated");
+      return;
+    }
+
+    const userId = user.id;
+
+    // Update the ticket to set status as "requested" without resolution notes
+    const { error } = await supabase
+      .from("tickets")
+      .update({ 
+        status: "requested", 
+        closed_by: userId
+      })
+      .eq("id", ticket.id);
+
+    if (error) {
+      console.error("Error requesting ticket closure:", error.message);
+      alert("Error requesting ticket closure: " + error.message);
+      return;
+    } else {
+      // Update the local state
+      setTickets((prevTickets) =>
+        prevTickets.map((t) =>
+          t.id === ticket.id
+            ? { ...t, status: "requested", closed_by: userId }
+            : t
+        )
+      );
+      alert("Ticket closure request sent successfully");
+    }
+  };
 
   // Function to update the ticket in Supabase (without sending email directly)
   const handleCloseTicket = async (ticket) => {
@@ -142,25 +202,35 @@ const EmployeeTicketList = () => {
     });
   }, [tickets]);
 
-  // Filter tickets based on the search query (by title)
-  const filteredTickets = tickets.filter((ticket) =>
-    ticket.title.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <div className="pt-20 px-6 min-h-screen flex flex-col text-white">
       <h1 className="text-3xl font-bold text-[#23486A] mb-4">Assigned Tickets</h1>
 
-      {/* Search Bar */}
-      <div className="flex items-center w-full max-w-lg bg-[#4C7B8B] text-white rounded-full px-4 py-2 mb-6 shadow-md">
-        <FaSearch className="text-[#EFB036]" />
-        <input
-          type="text"
-          placeholder="Search tickets..."
-          className="ml-2 flex-1 outline-none bg-transparent text-white placeholder-white"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div className="flex items-center bg-[#4C7B8B] rounded-full px-4 py-2 shadow-md">
+          <FaSearch className="text-[#EFB036]" />
+          <input
+            type="text"
+            placeholder="Search tickets..."
+            className="ml-2 flex-1 outline-none bg-transparent text-white placeholder-white"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="mt-4 sm:mt-0">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-[#4C7B8B] text-white p-2 rounded shadow-md outline-none"
+          >
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="answered">Answered</option>
+            <option value="closed">Closed</option>
+            <option value="requested">Requested</option>
+          </select>
+        </div>
       </div>
 
       {/* Tickets Table */}
@@ -178,7 +248,7 @@ const EmployeeTicketList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredTickets.map((ticket, index) => (
+            {currentTickets.map((ticket, index) => (
               <tr
                 key={ticket.id}
                 className={`${index % 2 === 0 ? "bg-gray-100" : "bg-gray-200"} text-black`}
@@ -208,15 +278,13 @@ const EmployeeTicketList = () => {
                   >
                     <FaEye /> View
                   </button>
-                  {ticket.status.trim().toLowerCase() !== "closed" && (
+                  {ticket.status.trim().toLowerCase() !== "closed" && 
+                   ticket.status.trim().toLowerCase() !== "requested" && (
                     <button
-                      onClick={() => {
-                        setTicketToClose(ticket);
-                        setShowModal(true);
-                      }}
+                      onClick={() => handleRequestTicket(ticket)}
                       className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-full flex items-center gap-2 shadow-md transition duration-200"
                     >
-                      Close Ticket
+                      Request
                     </button>
                   )}
                 </td>
@@ -225,6 +293,29 @@ const EmployeeTicketList = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4">
+          <button
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            disabled={currentPage === 1}
+            className="bg-gray-300 text-black px-4 py-2 rounded-l disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4">
+            {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            disabled={currentPage === totalPages}
+            className="bg-gray-300 text-black px-4 py-2 rounded-r disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {showModal && (
