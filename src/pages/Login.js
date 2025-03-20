@@ -117,11 +117,43 @@ export default function LoginPage() {
 
       console.log("Logged in user:", data.user);
 
+      const user = data.user;
+
+      // --- Integrated Functionality Start ---
+      const { data: deletedUserData, error: deletedUserError } = await supabase
+        .from("users")
+        .select("is_deleted")
+        .eq("id", user.id)
+        .single();
+
+      if (deletedUserError) {
+        console.error("Error checking user status:", deletedUserError.message);
+        toast.error("An error occurred. Please try again.");
+        return;
+      }
+
+      if (deletedUserData?.is_deleted) {
+        toast.error("Your account has been removed. You cannot log in again.");
+        await supabase.auth.signOut(); // Ensure user is logged out
+        return;
+      }
+
+      toast.success("🦄 Login successful!", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      // --- Integrated Functionality End ---
+
       // Fetch user profile data from the `users` table
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('name, role, profile_picture')
-        .eq('id', data.user.id)
+        .eq('id', user.id)
         .single();
 
       console.log("Fetched user data:", userData);
@@ -134,9 +166,9 @@ export default function LoginPage() {
           .from('users')
           .insert([
             {
-              id: data.user.id,
-              email: data.user.email,
-              name: data.user.email.split('@')[0], // Default name
+              id: user.id,
+              email: user.email,
+              name: user.email.split('@')[0], // Default name
               role: 'user', // Default role
               profile_picture: null, // Default profile picture
             },
@@ -162,17 +194,6 @@ export default function LoginPage() {
         localStorage.setItem("role", userData.role);
         localStorage.setItem("profilePicture", userData.profile_picture);
       }
-
-      // Display success toast notification
-      toast.success("🦄 Login successful!", {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
 
       // Redirect based on role
       setTimeout(() => {
@@ -249,6 +270,7 @@ export default function LoginPage() {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
+          
           {/* Password validation checkboxes */}
           {isPasswordFocused && (
             <div className="password-checks space-y-2 mt-2">
