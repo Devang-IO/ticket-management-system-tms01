@@ -129,11 +129,13 @@ const QuixkyBot = () => {
             width: "60px",
             height: "60px",
             borderRadius: "50%",
-            backgroundColor: "#007bff",
-            border: "none",
+            backgroundColor: "#ffffff",
+            border: "4px solid #ffffff",
+            boxShadow: "0 8px 15px rgba(0, 0, 0, 0.9)",
             cursor: "pointer",
             padding: 0,
           }}
+          
         >
           <img 
             src="/logo.png" 
