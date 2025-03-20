@@ -129,7 +129,7 @@ const Navbar = ({ sidebarOpen }) => {
         <div className="navbar-right flex items-center gap-4">
           {/* Notifications dropdown */}
           <div className="relative">
-            <button
+            {/* <button
               onClick={() => {
                 setNotificationsOpen(!notificationsOpen);
                 setProfileOpen(false);
@@ -137,7 +137,7 @@ const Navbar = ({ sidebarOpen }) => {
               className="relative p-2"
             >
               <FiBell size={24} className="text-white" />
-            </button>
+            </button> */}
             {notificationsOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out">
                 <div className="p-4">
