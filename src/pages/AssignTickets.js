@@ -185,10 +185,12 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                 <td className="p-4">
                   <span
                     className={`px-3 py-1 text-white text-sm rounded-xl ${
-                      ticket.priority === "High"
+                      ticket.priority === "high"
                         ? "bg-[#EFB036]"
-                        : ticket.priority === "Medium"
+                        : ticket.priority === "medium"
                         ? "bg-[#3B6790]"
+                        : ticket.priority === "low"
+                        ? "bg-[#4C7B8B]"
                         : "bg-[#23486A]"
                     }`}
                   >
@@ -238,17 +240,25 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                 <td className="p-4">{ticket.title}</td>
                 <td className="p-4">
                   {ticket.assignments && ticket.assignments.length > 0
-                    ? ticket.assignments[ticket.assignments.length - 1]
-                        .employee_name
+                    ? ticket.assignments
+                        .map((assignment) => {
+                          const employee = employees.find(
+                            (emp) => emp.id === assignment.user_id
+                          );
+                          return employee ? employee.name : "Unknown";
+                        })
+                        .join(", ")
                     : "Unassigned"}
                 </td>
                 <td className="p-4">
                   <span
                     className={`px-3 py-1 text-white text-sm rounded-xl ${
-                      ticket.priority === "High"
+                      ticket.priority === "high"
                         ? "bg-[#EFB036]"
-                        : ticket.priority === "Medium"
+                        : ticket.priority === "medium"
                         ? "bg-[#3B6790]"
+                        : ticket.priority === "low"
+                        ? "bg-[#4C7B8B]"
                         : "bg-[#23486A]"
                     }`}
                   >

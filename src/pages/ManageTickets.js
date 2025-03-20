@@ -4,19 +4,24 @@ import { FiChevronDown, FiEye, FiTrash2, FiUserMinus } from "react-icons/fi";
 import { FaTicketAlt, FaFilter } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
 import { toast, ToastContainer } from "react-toastify";
+import { createPortal } from "react-dom";
 import "react-toastify/dist/ReactToastify.css";
 
 const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const [tickets, setTickets] = useState([]);
-  const [entriesPerPage, setEntriesPerPage] = useState("10"); // default to "10"; can be "All"
+  const [entriesPerPage, setEntriesPerPage] = useState("5"); // fixed to 5 tickets per page
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
-  const [actionDropdown, setActionDropdown] = useState(null);
-  const dropdownRef = useRef(null);
+  // Instead of inline dropdown state, we store selected ticket id and its dropdown position.
+  const [selectedTicketForActions, setSelectedTicketForActions] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState(null);
 
   // States for delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Read the query parameter to get a highlighted ticket id.
   const [searchParams] = useSearchParams();
@@ -42,7 +47,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const openDeleteModal = (ticketId) => {
     setTicketToDelete(ticketId);
     setShowDeleteModal(true);
-    setActionDropdown(null);
+    setSelectedTicketForActions(null);
   };
 
   // Confirm deletion and show toast notification
@@ -69,17 +74,31 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     setTicketToDelete(null);
   };
 
-  // Handle outside click for action dropdown
+  // Handle click on Actions button
+  const handleActionsClick = (ticketId, event) => {
+    // Get the bounding rect of the clicked button.
+    const rect = event.currentTarget.getBoundingClientRect();
+    setDropdownPosition({
+      top: rect.top + rect.height + 4, // 4px spacing
+      left: rect.left,
+    });
+    setSelectedTicketForActions(ticketId);
+  };
+
+  // Close dropdown if clicking outside the dropdown portal
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest(".dropdown-wrapper")) {
-        setActionDropdown(null);
+      if (dropdownPosition) {
+        // If dropdown is open and click is outside, close it.
+        setSelectedTicketForActions(null);
+        setDropdownPosition(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    if (selectedTicketForActions) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [selectedTicketForActions, dropdownPosition]);
 
   // Filter tickets
   const filteredTickets = tickets.filter((ticket) => {
@@ -97,11 +116,70 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  // Determine current tickets to display
-  const currentTickets =
-    entriesPerPage === "All"
-      ? filteredTickets
-      : filteredTickets.slice(0, Number(entriesPerPage));
+  // Calculate pagination - always show 5 tickets per page
+  const entriesCount = Number(entriesPerPage);
+  const totalPages = Math.ceil(filteredTickets.length / entriesCount);
+  const currentTickets = filteredTickets.slice(
+    (currentPage - 1) * entriesCount,
+    currentPage * entriesCount
+  );
+
+  // Handle page change
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Render the dropdown portal if a ticket is selected for actions.
+  const actionsDropdown =
+    selectedTicketForActions && dropdownPosition
+      ? createPortal(
+          <div
+            className="dropdown-portal bg-white p-4 rounded shadow-lg transition-all duration-200"
+            style={{
+              position: "fixed",
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              zIndex: 1000,
+              minWidth: "180px",
+            }}
+          >
+            <Link
+              to={`/ticket/${selectedTicketForActions}`}
+              className="text-blue-600 hover:underline block mb-2"
+              onClick={() => {
+                setSelectedTicketForActions(null);
+                setDropdownPosition(null);
+              }}
+            >
+              <FiEye className="inline mr-1" /> View Ticket
+            </Link>
+            {/*
+            <button
+              className="text-red-600 hover:underline block text-left mb-2"
+              onClick={() => {
+                openDeleteModal(selectedTicketForActions);
+                setSelectedTicketForActions(null);
+                setDropdownPosition(null);
+              }}
+            >
+              <FiTrash2 className="inline mr-1" /> Delete Ticket
+            </button>
+            */}
+            <button
+              onClick={() => {
+                setSelectedTicketForActions(null);
+                setDropdownPosition(null);
+              }}
+              className="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
+            >
+              Close
+            </button>
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <div
@@ -132,7 +210,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             <label style={{ fontWeight: "bold", color: "#23486A" }}>Show:</label>
             <select
               value={entriesPerPage}
-              onChange={(e) => setEntriesPerPage(e.target.value)}
+              onChange={(e) => {
+                setEntriesPerPage(e.target.value);
+                setCurrentPage(1);
+              }}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -141,9 +222,6 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
               }}
             >
               <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value="All">All</option>
             </select>
           </div>
 
@@ -152,7 +230,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             <label style={{ fontWeight: "bold", color: "#23486A" }}>Status:</label>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -173,7 +254,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             <label style={{ fontWeight: "bold", color: "#23486A" }}>Priority:</label>
             <select
               value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
+              onChange={(e) => {
+                setPriorityFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -191,7 +275,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
       </div>
 
       {/* Table */}
-      <div className="table-container">
+      <div className="table-container overflow-hidden">
         <table className="w-full border-collapse">
           <thead className="bg-gray-200 text-[#23486A]">
             <tr>
@@ -224,10 +308,12 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                 <td className="p-2">
                   <span
                     className={`px-3 py-1 text-white text-sm rounded-xl ${
-                      ticket.priority === "High"
+                      ticket.priority === "high"
                         ? "bg-[#EFB036]"
-                        : ticket.priority === "Medium"
+                        : ticket.priority === "medium"
                         ? "bg-[#3B6790]"
+                        : ticket.priority === "low"
+                        ? "bg-[#4C7B8B]"
                         : "bg-[#23486A]"
                     }`}
                   >
@@ -237,46 +323,13 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                 <td className="p-2">
                   {new Date(ticket.created_at).toLocaleDateString()}
                 </td>
-                <td className="p-2 relative">
+                <td className="p-2" style={{ position: "relative" }}>
                   <button
-                    onClick={() =>
-                      setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)
-                    }
+                    onClick={(e) => handleActionsClick(ticket.id, e)}
                     className="action-btn bg-gray-200 px-2 py-1 rounded inline-flex items-center"
                   >
                     Actions <FiChevronDown className="ml-1" />
                   </button>
-                  {actionDropdown === ticket.id && (
-                    <div
-                      className="dropdown-wrapper"
-                      ref={dropdownRef}
-                      style={{
-                        position: "absolute",
-                        top: "70%",
-                        right: 50,
-                        zIndex: 1000,
-                        backgroundColor: "#fff",
-                        boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
-                        borderRadius: "4px",
-                        marginTop: "4px",
-                      }}
-                    >
-                      <div className="dropdown p-2">
-                        <Link
-                          to={`/ticket/${ticket.id}`}
-                          className="dropdown-item block text-blue-600 mb-1"
-                        >
-                          <FiEye className="inline mr-1" /> View
-                        </Link>
-                        {/* <button
-                          className="dropdown-item block text-red-600 w-full text-left"
-                          onClick={() => openDeleteModal(ticket.id)}
-                        >
-                          <FiTrash2 className="inline mr-1" /> Delete
-                        </button> */}
-                      </div>
-                    </div>
-                  )}
                 </td>
               </tr>
             ))}
@@ -284,9 +337,79 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </table>
       </div>
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4">
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border rounded-l hover:bg-gray-200 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 border-t border-b">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border rounded-r hover:bg-gray-200 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Render Dropdown via Portal */}
+      {selectedTicketForActions && dropdownPosition && createPortal(
+        <div
+          className="dropdown-portal bg-white p-4 rounded shadow-lg transition-all duration-200"
+          style={{
+            position: "fixed",
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            zIndex: 1000,
+            minWidth: "180px",
+          }}
+        >
+          <Link
+            to={`/ticket/${selectedTicketForActions}`}
+            className="text-blue-600 hover:underline block mb-2"
+            onClick={() => {
+              setSelectedTicketForActions(null);
+              setDropdownPosition(null);
+            }}
+          >
+            <FiEye className="inline mr-1" /> View Ticket
+          </Link>
+          {/*
+          <button
+            className="text-red-600 hover:underline block text-left mb-2"
+            onClick={() => {
+              openDeleteModal(selectedTicketForActions);
+              setSelectedTicketForActions(null);
+              setDropdownPosition(null);
+            }}
+          >
+            <FiTrash2 className="inline mr-1" /> Delete Ticket
+          </button>
+          */}
+          <button
+            onClick={() => {
+              setSelectedTicketForActions(null);
+              setDropdownPosition(null);
+            }}
+            className="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
+          >
+            Close
+          </button>
+        </div>,
+        document.body
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-content bg-white p-6 rounded shadow-lg max-w-sm mx-auto">
             <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
             <p className="mb-4">
@@ -310,7 +433,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </div>
       )}
 
-      {/* Toast Container (if not already added in a higher-level component) */}
+      {/* Toast Container */}
       <ToastContainer />
     </div>
   );
