@@ -23,6 +23,21 @@ const EmployeeTicketList = () => {
   // Ref to track which tickets have already triggered an email
   const notifiedTicketIdsRef = useRef(new Set());
 
+  // Function to fetch user name by ID from the 'users' table
+  const fetchUserNameById = async (userId) => {
+    const { data, error } = await supabase
+      .from("users") // Fetch from the 'users' table
+      .select("name")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user name:", error);
+      return "Unknown";
+    }
+    return data?.name || "Unknown";
+  };
+
   useEffect(() => {
     const fetchAssignedTickets = async () => {
       // Get the current user
@@ -30,28 +45,39 @@ const EmployeeTicketList = () => {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-  
-      // Fetch assignments joined with the related ticket data (including closed_by, name, email)
+
+      // Fetch assignments joined with the related ticket data (including closed_by, name, email, and user_id)
       const { data, error } = await supabase
         .from("assignments")
-        .select("ticket: tickets(id, title, created_at, priority, status, closed_by, name, email)")
+        .select("ticket: tickets(id, title, created_at, priority, status, closed_by, user_id, name, email)")
         .eq("user_id", user.id);
-  
+
       if (error) {
         console.error("Error fetching assigned tickets:", error);
       } else if (data) {
         // Map assignments to extract the ticket object
         const assignedTickets = data.map((assignment) => assignment.ticket);
         
+        // For tickets that are closed, fetch the name of the ticket creator (from ticket.user_id)
+        const ticketsWithNames = await Promise.all(
+          assignedTickets.map(async (ticket) => {
+            if (ticket.status.toLowerCase() === "closed") {
+              const creatorName = await fetchUserNameById(ticket.user_id);
+              return { ...ticket, closed_by_name: creatorName };
+            }
+            return ticket;
+          })
+        );
+
         // Sort the tickets so that the latest tickets appear first
-        const sortedTickets = assignedTickets.sort(
+        const sortedTickets = ticketsWithNames.sort(
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
-        
+
         setTickets(sortedTickets);
       }
     };
-  
+
     fetchAssignedTickets();
   }, []);
 
@@ -124,12 +150,11 @@ const EmployeeTicketList = () => {
       return;
     }
 
-    const userId = user.id;
-
-    // Update the ticket to set status as "closed" and record the user.id in closed_by
+    // We want to show the name of the user who created the ticket,
+    // so we fetch the name based on ticket.user_id rather than the current user
     const { error } = await supabase
       .from("tickets")
-      .update({ status: "closed", closed_by: userId })
+      .update({ status: "closed", closed_by: user.id })
       .eq("id", ticket.id);
 
     if (error) {
@@ -137,10 +162,13 @@ const EmployeeTicketList = () => {
       alert("Error closing ticket: " + error.message);
       return;
     } else {
-      // Update the local state
+      // Fetch the creator's name using ticket.user_id
+      const creatorName = await fetchUserNameById(ticket.user_id);
       setTickets((prevTickets) =>
         prevTickets.map((t) =>
-          t.id === ticket.id ? { ...t, status: "closed", closed_by: userId } : t
+          t.id === ticket.id
+            ? { ...t, status: "closed", closed_by: t.user_id, closed_by_name: creatorName }
+            : t
         )
       );
       alert("Ticket closed successfully");
@@ -164,10 +192,8 @@ const EmployeeTicketList = () => {
         ticket.status.toLowerCase() === "closed" &&
         !notifiedTicketIdsRef.current.has(ticket.id)
       ) {
-        // Debug log to see the full ticket data
         console.log("Full ticket data for closure email:", ticket);
         
-        // Make sure all required fields are included in the payload
         const closurePayload = {
           ticket: {
             name: ticket.name,
@@ -192,7 +218,6 @@ const EmployeeTicketList = () => {
           } else {
             const result = await response.json();
             console.log("Closure email sent successfully for ticket", ticket.id, result);
-            // Add to notified set only after successful email
             notifiedTicketIdsRef.current.add(ticket.id);
           }
         } catch (emailError) {
@@ -267,8 +292,8 @@ const EmployeeTicketList = () => {
                   </span>
                 </td>
                 <td className="p-4">
-                  {ticket.status.toLowerCase() === "closed" && ticket.closed_by
-                    ? ticket.closed_by
+                  {ticket.status.toLowerCase() === "closed" && ticket.closed_by_name
+                    ? ticket.closed_by_name
                     : "-"}
                 </td>
                 <td className="p-4 flex gap-2">

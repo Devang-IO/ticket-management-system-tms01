@@ -10,6 +10,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
 
   const [ticket, setTicket] = useState(null);
   const [currentUser, setCurrentUser] = useState(propUser);
+  const [assignedEmployee, setAssignedEmployee] = useState(null);
 
   // Fetch current user if not provided as prop
   useEffect(() => {
@@ -22,23 +23,38 @@ const TicketDetails = ({ currentUser: propUser }) => {
     }
   }, [currentUser]);
 
-  // Fetch ticket details (should include assigned_user_id, user_id, and chat_initiated)
+  // Fetch ticket details and assigned employee
   useEffect(() => {
-    const fetchTicket = async () => {
-      const { data, error } = await supabase
+    const fetchTicketAndEmployee = async () => {
+      // Fetch ticket
+      const { data: ticketData, error: ticketError } = await supabase
         .from("tickets")
         .select("*")
         .eq("id", id)
         .single();
 
-      if (error) {
-        console.error("Error fetching ticket:", error);
-      } else {
-        setTicket(data);
+      if (ticketError) {
+        console.error("Error fetching ticket:", ticketError);
+        return;
+      }
+
+      setTicket(ticketData);
+
+      // Fetch assigned employee name if exists
+      if (ticketData.assigned_user_id) {
+        const { data: employeeData, error: employeeError } = await supabase
+          .from("users")
+          .select("name")
+          .eq("id", ticketData.assigned_user_id)
+          .single();
+
+        if (!employeeError) {
+          setAssignedEmployee(employeeData.name);
+        }
       }
     };
 
-    fetchTicket();
+    fetchTicketAndEmployee();
   }, [id]);
 
   if (!ticket) {
@@ -131,7 +147,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
         </div>
 
         {/* Right Column: Chat UI */}
-        <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 flex flex-col h-[600px]">
+        <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 flex flex-col h-[600px] justify-center items-center">
           {ticket.chat_initiated ? (
             currentUser ? (
               <ChatBox
@@ -147,8 +163,29 @@ const TicketDetails = ({ currentUser: propUser }) => {
               </div>
             )
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              Chat not initiated.
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-[#23486A] mb-4">Connect with Support</h2>
+              {ticket.assigned_user_id ? (
+                assignedEmployee ? (
+                  <p className="text-lg text-gray-700 mb-2">
+                    Your ticket is being handled by <strong>{assignedEmployee}</strong>
+                  </p>
+                ) : (
+                  <p className="text-lg text-gray-700 mb-2">
+                    Loading assigned employee...
+                  </p>
+                )
+              ) : (
+                <p className="text-lg text-gray-700 mb-2">
+                  Your ticket has not yet been assigned to a support representative.
+                </p>
+              )}
+              <button 
+                onClick={() => setTicket({ ...ticket, chat_initiated: true })}
+                className="mt-4 px-6 py-3 bg-[#3B6790] hover:bg-[#EFB036] text-white font-semibold rounded-lg shadow-md"
+              >
+                Connect
+              </button>
             </div>
           )}
         </div>
