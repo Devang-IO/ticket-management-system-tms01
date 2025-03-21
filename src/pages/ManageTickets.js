@@ -1,28 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FiChevronDown, FiEye, FiTrash2, FiUserMinus } from "react-icons/fi";
 import { FaTicketAlt, FaFilter } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
 import { toast, ToastContainer } from "react-toastify";
+import { createPortal } from "react-dom";
 import "react-toastify/dist/ReactToastify.css";
 
 const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const [tickets, setTickets] = useState([]);
-  const [entriesPerPage, setEntriesPerPage] = useState("10"); // default to "10"; can be "All"
+  // "Show" filter: either "5" or "all"
+  const [entriesPerPage, setEntriesPerPage] = useState("5");
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
-  const [actionDropdown, setActionDropdown] = useState(null);
-  const dropdownRef = useRef(null);
-
-  // States for delete modal
+  // Dropdown state for actions
+  const [selectedTicketForActions, setSelectedTicketForActions] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState(null);
+  // Delete modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState(null);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Read the query parameter to get a highlighted ticket id.
+  // Read query param for highlighted ticket id.
   const [searchParams] = useSearchParams();
   const highlightedTicketId = searchParams.get("ticketId");
 
-  // Fetch all tickets for Admin
+  // Fetch tickets
   useEffect(() => {
     const fetchTickets = async () => {
       const { data, error } = await supabase
@@ -42,10 +46,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const openDeleteModal = (ticketId) => {
     setTicketToDelete(ticketId);
     setShowDeleteModal(true);
-    setActionDropdown(null);
+    setSelectedTicketForActions(null);
   };
 
-  // Confirm deletion and show toast notification
+  // Confirm deletion
   const confirmDeleteTicket = async () => {
     const { error } = await supabase
       .from("tickets")
@@ -54,9 +58,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     if (error) {
       console.error("Error deleting ticket:", error);
     } else {
-      setTickets((prev) =>
-        prev.filter((ticket) => ticket.id !== ticketToDelete)
-      );
+      setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketToDelete));
       toast.success("Ticket deleted successfully");
     }
     setShowDeleteModal(false);
@@ -69,19 +71,31 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     setTicketToDelete(null);
   };
 
-  // Handle outside click for action dropdown
+  // Handle click on Actions button
+  const handleActionsClick = (ticketId, event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setDropdownPosition({
+      top: rect.top + rect.height + 4,
+      left: rect.left,
+    });
+    setSelectedTicketForActions(ticketId);
+  };
+
+  // Close dropdown if clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".dropdown-wrapper")) {
-        setActionDropdown(null);
+    const handleClickOutside = () => {
+      if (dropdownPosition) {
+        setSelectedTicketForActions(null);
+        setDropdownPosition(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    if (selectedTicketForActions) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [selectedTicketForActions, dropdownPosition]);
 
-  // Filter tickets
+  // Filter tickets based on search, status, and priority
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = searchTerm
       ? ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -97,11 +111,70 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  // Determine current tickets to display
+  // Pagination logic: if "all" is selected, show all tickets on one page
+  const entriesCount = entriesPerPage === "all" ? filteredTickets.length : Number(entriesPerPage);
+  const totalPages = entriesPerPage === "all" ? 1 : Math.ceil(filteredTickets.length / entriesCount);
   const currentTickets =
-    entriesPerPage === "All"
+    entriesPerPage === "all"
       ? filteredTickets
-      : filteredTickets.slice(0, Number(entriesPerPage));
+      : filteredTickets.slice((currentPage - 1) * entriesCount, currentPage * entriesCount);
+
+  // Handle page change
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Render actions dropdown if open
+  const actionsDropdown =
+    selectedTicketForActions && dropdownPosition
+      ? createPortal(
+          <div
+            className="dropdown-portal bg-white p-4 rounded shadow-lg transition-all duration-200"
+            style={{
+              position: "fixed",
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              zIndex: 1000,
+              minWidth: "180px",
+            }}
+          >
+            <Link
+              to={`/ticket/${selectedTicketForActions}`}
+              className="text-blue-600 hover:underline block mb-2"
+              onClick={() => {
+                setSelectedTicketForActions(null);
+                setDropdownPosition(null);
+              }}
+            >
+              <FiEye className="inline mr-1" /> View Ticket
+            </Link>
+            {/*
+            <button
+              className="text-red-600 hover:underline block text-left mb-2"
+              onClick={() => {
+                openDeleteModal(selectedTicketForActions);
+                setSelectedTicketForActions(null);
+                setDropdownPosition(null);
+              }}
+            >
+              <FiTrash2 className="inline mr-1" /> Delete Ticket
+            </button>
+            */}
+            <button
+              onClick={() => {
+                setSelectedTicketForActions(null);
+                setDropdownPosition(null);
+              }}
+              className="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
+            >
+              Close
+            </button>
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <div
@@ -132,7 +205,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             <label style={{ fontWeight: "bold", color: "#23486A" }}>Show:</label>
             <select
               value={entriesPerPage}
-              onChange={(e) => setEntriesPerPage(e.target.value)}
+              onChange={(e) => {
+                setEntriesPerPage(e.target.value);
+                setCurrentPage(1);
+              }}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -140,10 +216,8 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                 backgroundColor: "white",
               }}
             >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value="All">All</option>
+              <option value="5">5</option>
+              <option value="all">All</option>
             </select>
           </div>
 
@@ -152,7 +226,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             <label style={{ fontWeight: "bold", color: "#23486A" }}>Status:</label>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -173,7 +250,10 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             <label style={{ fontWeight: "bold", color: "#23486A" }}>Priority:</label>
             <select
               value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
+              onChange={(e) => {
+                setPriorityFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -190,8 +270,8 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="table-container">
+      {/* Tickets Table */}
+      <div className="table-container overflow-hidden">
         <table className="w-full border-collapse">
           <thead className="bg-gray-200 text-[#23486A]">
             <tr>
@@ -207,16 +287,11 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             {currentTickets.map((ticket) => (
               <tr
                 key={ticket.id}
-                className={
-                  ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""
-                }
+                className={ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""}
               >
                 <td className="p-2">{ticket.id}</td>
                 <td className="p-2">
-                  <Link
-                    to={`/managetickets?ticketId=${ticket.id}`}
-                    className="text-blue-600"
-                  >
+                  <Link to={`/managetickets?ticketId=${ticket.id}`} className="text-blue-600">
                     {ticket.title}
                   </Link>
                 </td>
@@ -224,59 +299,26 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                 <td className="p-2">
                   <span
                     className={`px-3 py-1 text-white text-sm rounded-xl ${
-                      ticket.priority === "High"
+                      ticket.priority.toLowerCase() === "high"
                         ? "bg-[#EFB036]"
-                        : ticket.priority === "Medium"
+                        : ticket.priority.toLowerCase() === "medium"
                         ? "bg-[#3B6790]"
+                        : ticket.priority.toLowerCase() === "low"
+                        ? "bg-[#4C7B8B]"
                         : "bg-[#23486A]"
                     }`}
                   >
                     {ticket.priority}
                   </span>
                 </td>
-                <td className="p-2">
-                  {new Date(ticket.created_at).toLocaleDateString()}
-                </td>
-                <td className="p-2 relative">
+                <td className="p-2">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                <td className="p-2" style={{ position: "relative" }}>
                   <button
-                    onClick={() =>
-                      setActionDropdown(ticket.id === actionDropdown ? null : ticket.id)
-                    }
+                    onClick={(e) => handleActionsClick(ticket.id, e)}
                     className="action-btn bg-gray-200 px-2 py-1 rounded inline-flex items-center"
                   >
                     Actions <FiChevronDown className="ml-1" />
                   </button>
-                  {actionDropdown === ticket.id && (
-                    <div
-                      className="dropdown-wrapper"
-                      ref={dropdownRef}
-                      style={{
-                        position: "absolute",
-                        top: "70%",
-                        right: 50,
-                        zIndex: 1000,
-                        backgroundColor: "#fff",
-                        boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
-                        borderRadius: "4px",
-                        marginTop: "4px",
-                      }}
-                    >
-                      <div className="dropdown p-2">
-                        <Link
-                          to={`/ticket/${ticket.id}`}
-                          className="dropdown-item block text-blue-600 mb-1"
-                        >
-                          <FiEye className="inline mr-1" /> View
-                        </Link>
-                        <button
-                          className="dropdown-item block text-red-600 w-full text-left"
-                          onClick={() => openDeleteModal(ticket.id)}
-                        >
-                          <FiTrash2 className="inline mr-1" /> Delete
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </td>
               </tr>
             ))}
@@ -284,25 +326,87 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </table>
       </div>
 
+      {/* Pagination Controls (shown only if "5" is selected) */}
+      {entriesPerPage !== "all" && totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4">
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border rounded-l hover:bg-gray-200 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 border-t border-b">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border rounded-r hover:bg-gray-200 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Actions Dropdown Portal */}
+      {selectedTicketForActions && dropdownPosition && createPortal(
+        <div
+          className="dropdown-portal bg-white p-4 rounded shadow-lg transition-all duration-200"
+          style={{
+            position: "fixed",
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            zIndex: 1000,
+            minWidth: "180px",
+          }}
+        >
+          <Link
+            to={`/ticket/${selectedTicketForActions}`}
+            className="text-blue-600 hover:underline block mb-2"
+            onClick={() => {
+              setSelectedTicketForActions(null);
+              setDropdownPosition(null);
+            }}
+          >
+            <FiEye className="inline mr-1" /> View Ticket
+          </Link>
+          {/*
+          <button
+            className="text-red-600 hover:underline block text-left mb-2"
+            onClick={() => {
+              openDeleteModal(selectedTicketForActions);
+              setSelectedTicketForActions(null);
+              setDropdownPosition(null);
+            }}
+          >
+            <FiTrash2 className="inline mr-1" /> Delete Ticket
+          </button>
+          */}
+          <button
+            onClick={() => {
+              setSelectedTicketForActions(null);
+              setDropdownPosition(null);
+            }}
+            className="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
+          >
+            Close
+          </button>
+        </div>,
+        document.body
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-content bg-white p-6 rounded shadow-lg max-w-sm mx-auto">
             <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
-            <p className="mb-4">
-              Are you sure you want to delete this ticket?
-            </p>
+            <p className="mb-4">Are you sure you want to delete this ticket?</p>
             <div className="flex justify-end gap-4">
-              <button
-                onClick={cancelDelete}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
+              <button onClick={cancelDelete} className="px-4 py-2 bg-gray-300 rounded">
                 Cancel
               </button>
-              <button
-                onClick={confirmDeleteTicket}
-                className="px-4 py-2 bg-red-600 text-white rounded"
-              >
+              <button onClick={confirmDeleteTicket} className="px-4 py-2 bg-red-600 text-white rounded">
                 Delete
               </button>
             </div>
@@ -310,7 +414,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </div>
       )}
 
-      {/* Toast Container (if not already added in a higher-level component) */}
+      {/* Toast Container */}
       <ToastContainer />
     </div>
   );

@@ -118,7 +118,7 @@ const ManageEmployees = ({ isSidebarOpen }) => {
           <table className="w-full border-collapse">
             <thead className="bg-[#3B6790] text-white sticky top-0 z-10">
               <tr>
-                <th className="p-4 text-left">ID</th>
+                {/* <th className="p-4 text-left">ID</th> */}
                 <th className="p-4 text-left">Employee Name</th>
                 <th className="p-4 text-left">Rating</th>
                 <th className="p-4 text-left">Tickets Solved</th>
@@ -128,7 +128,7 @@ const ManageEmployees = ({ isSidebarOpen }) => {
             <tbody>
               {employees.map((emp) => (
                 <tr key={emp.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4 font-semibold text-[#23486A]">{emp.id}</td>
+                  {/* <td className="p-4 font-semibold text-[#23486A]">{emp.id}</td> */}
                   <td className="p-4 text-[#23486A] font-semibold">
                     {emp.name}
                   </td>

@@ -2,17 +2,57 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import TicketSubmissionModal from "../components/TicketSubmissionModal";
-import RatingModal from "../components/RatingModal"; // Import the rating modal
+import RatingModal from "../components/RatingModal";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/global.css";
 import { supabase } from "../utils/supabase";
 
+// Ticket closure confirmation modal component (resolution notes removed)
+const TicketCloseConfirmModal = ({ ticket, onClose, onConfirm}) => {
+  if (!ticket) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold text-[#23486A] mb-4">Ticket Closure Request</h2>
+        
+        <p className="mb-4 text-gray-700">
+          Support has requested to close your ticket: <strong>{ticket.title}</strong>
+        </p>
+        
+        {/* Resolution notes section removed */}
+        
+        <p className="mb-6 text-gray-700">
+          Are you satisfied with the solution? Confirming will close this ticket.
+        </p>
+
+        <div className="flex justify-end space-x-3">
+          
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
+          >
+            Not Yet
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-[#23486A] text-white rounded-md hover:bg-[#3B6790] transition"
+          >
+            Yes, Close Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tickets, setTickets] = useState([]);
-  const [ratingTicket, setRatingTicket] = useState(null); // Store the closed ticket that needs a rating
+  const [ratingTicket, setRatingTicket] = useState(null);
+  const [closureTicket, setClosureTicket] = useState(null);
   const navigate = useNavigate();
 
   // Theme Colors
@@ -46,9 +86,33 @@ const Dashboard = () => {
     fetchTickets();
   }, []);
 
-  // Check for any closed ticket that has not been rated
+  // Check for any tickets with closure requested that need confirmation
+  useEffect(() => {
+    const checkForClosureRequests = () => {
+      // Filter for tickets with closure requested
+      const closureRequests = tickets.filter(ticket => ticket.status === "requested");
+      if (closureRequests.length > 0) {
+        // Show the closure confirmation modal for the first ticket
+        setClosureTicket(closureRequests[0]);
+      } else {
+        setClosureTicket(null);
+      }
+    };
+
+    if (tickets.length > 0) {
+      checkForClosureRequests();
+    }
+  }, [tickets]);
+
+  // Check for any closed ticket that has not been rated (only check if no closure request is pending)
   useEffect(() => {
     const checkForUnratedTickets = async () => {
+      // Don't check for ratings if we have a closure request pending
+      if (closureTicket) {
+        setRatingTicket(null);
+        return;
+      }
+
       // Filter for closed tickets
       const closedTickets = tickets.filter(ticket => ticket.status === "closed");
       if (closedTickets.length === 0) {
@@ -84,7 +148,47 @@ const Dashboard = () => {
     if (tickets.length > 0) {
       checkForUnratedTickets();
     }
-  }, [tickets]);
+  }, [tickets, closureTicket]);
+
+  // Handle confirmation of ticket closure
+  const handleConfirmClosure = async () => {
+    if (!closureTicket) return;
+    
+    try {
+      // Update ticket status to closed
+      const { error } = await supabase
+        .from("tickets")
+        .update({ status: "closed" })
+        .eq("id", closureTicket.id);
+
+      if (error) {
+        console.error("Error closing ticket:", error);
+        toast.error("Failed to close ticket. Please try again.");
+        return;
+      }
+
+      // Update local state
+      setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === closureTicket.id ? { ...ticket, status: "closed" } : ticket
+        )
+      );
+      
+      toast.success("Ticket closed successfully");
+      
+      // Clear the closure ticket (closing this modal)
+      setClosureTicket(null);
+      
+    } catch (error) {
+      console.error("Error in handleConfirmClosure:", error);
+      toast.error("An unexpected error occurred");
+    }
+  };
+
+  // Callback when the rating modal is closed (after successful rating submission)
+  const handleRatingModalClose = () => {
+    setRatingTicket(null);
+  };
 
   // Compute counts for each ticket category based on status and priority
   const pendingCount = tickets.filter((ticket) => ticket.status === "open").length;
@@ -115,18 +219,11 @@ const Dashboard = () => {
     }, 2000);
   };
 
-  // Callback when the rating modal is closed (after successful rating submission)
-  const handleRatingModalClose = () => {
-    setRatingTicket(null);
-  };
-
   return (
     <div className="dashboard-container" style={{ backgroundColor: "#F4F6F8" }}>
       {/* Removed extra Sidebar */}
       <div className="dashboard-main">
-        {/* Navbar */}
-        <Navbar style={{ backgroundColor: themeColors.primary, color: "white" }} />
-
+    
         {/* Main Dashboard Content */}
         <div className="dashboard-content">
           <h1 className="dashboard-title" style={{ color: themeColors.primary }}>
@@ -203,7 +300,7 @@ const Dashboard = () => {
                   maxWidth: "600px",
                 }}
               >
-                If you’re facing any issues or need assistance, our support team is here to help!
+                If you're facing any issues or need assistance, our support team is here to help!
                 Submitting a ticket is quick and easy.
               </p>
               <ul
@@ -302,8 +399,18 @@ const Dashboard = () => {
           onSubmit={handleTicketSubmit}
         />
       )}
-      {/* Rating Modal - shows if there is a closed, unrated ticket */}
-      {ratingTicket && (
+      
+      {/* Ticket Close Confirmation Modal - shows first */}
+      {closureTicket && (
+        <TicketCloseConfirmModal
+          ticket={closureTicket}
+          onClose={() => setClosureTicket(null)}
+          onConfirm={handleConfirmClosure}
+        />
+      )}
+      
+      {/* Rating Modal - shows after closure is confirmed */}
+      {ratingTicket && !closureTicket && (
         <RatingModal
           show={true}
           onClose={handleRatingModalClose}

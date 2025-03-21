@@ -10,6 +10,9 @@ const TicketDetails = ({ currentUser: propUser }) => {
 
   const [ticket, setTicket] = useState(null);
   const [currentUser, setCurrentUser] = useState(propUser);
+  const [assignedEmployee, setAssignedEmployee] = useState(null);
+  const [waitingForEmployee, setWaitingForEmployee] = useState(false);
+  const [chatInitiated, setChatInitiated] = useState(false);
 
   // Fetch current user if not provided as prop
   useEffect(() => {
@@ -22,24 +25,117 @@ const TicketDetails = ({ currentUser: propUser }) => {
     }
   }, [currentUser]);
 
-  // Fetch ticket details (should include assigned_user_id, user_id, and chat_initiated)
+  // Fetch ticket details and assigned employee
   useEffect(() => {
-    const fetchTicket = async () => {
-      const { data, error } = await supabase
+    const fetchTicketAndEmployee = async () => {
+      // Fetch ticket
+      const { data: ticketData, error: ticketError } = await supabase
         .from("tickets")
         .select("*")
         .eq("id", id)
         .single();
 
-      if (error) {
-        console.error("Error fetching ticket:", error);
-      } else {
-        setTicket(data);
+      if (ticketError) {
+        console.error("Error fetching ticket:", ticketError);
+        return;
+      }
+
+      setTicket(ticketData);
+      setWaitingForEmployee(ticketData.user_waiting || false);
+      setChatInitiated(ticketData.chat_initiated || false);
+
+      // Fetch assigned employee name if exists
+      if (ticketData.assigned_user_id) {
+        const { data: employeeData, error: employeeError } = await supabase
+          .from("users")
+          .select("name")
+          .eq("id", ticketData.assigned_user_id)
+          .single();
+
+        if (!employeeError) {
+          setAssignedEmployee(employeeData.name);
+        }
       }
     };
 
-    fetchTicket();
+    fetchTicketAndEmployee();
+
+    // Set up real-time subscription for ticket updates
+    const subscription = supabase
+      .channel(`public:tickets:id=eq.${id}`)
+      .on('UPDATE', (payload) => {
+        // Update the ticket state when changes occur
+        setTicket(payload.new);
+        
+        // Update chat initiated state directly
+        setChatInitiated(payload.new.chat_initiated);
+        
+        // Check if employee has connected
+        if (payload.new.employee_connected && !payload.old.employee_connected) {
+          setWaitingForEmployee(false);
+        }
+      })
+      .subscribe();
+
+    // Clean up subscription on component unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [id]);
+
+  // Function to initiate connection request
+  const requestConnection = async () => {
+    const { error } = await supabase
+      .from("tickets")
+      .update({ 
+        user_waiting: true 
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating ticket:", error);
+      return;
+    }
+    
+    setWaitingForEmployee(true);
+  };
+
+  // Function to cancel connection request
+  const cancelRequest = async () => {
+    const { error } = await supabase
+      .from("tickets")
+      .update({ 
+        user_waiting: false 
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating ticket:", error);
+      return;
+    }
+    
+    setWaitingForEmployee(false);
+  };
+
+  // Function to handle chat closure
+  const handleChatClosed = async () => {
+    // Update local state immediately for UI
+    setChatInitiated(false);
+    
+    // Update the DB
+    const { error } = await supabase
+      .from("tickets")
+      .update({ 
+        chat_initiated: false,
+        user_waiting: false,
+        employee_connected: false
+      })
+      .eq("id", id);
+      
+    if (error) {
+      console.error("Error updating ticket chat status:", error);
+    }
+  };
 
   if (!ticket) {
     return (
@@ -131,15 +227,15 @@ const TicketDetails = ({ currentUser: propUser }) => {
         </div>
 
         {/* Right Column: Chat UI */}
-        <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 flex flex-col h-[600px]">
-          {ticket.chat_initiated ? (
+        <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 flex flex-col h-[600px] justify-center items-center">
+          {chatInitiated ? (
             currentUser ? (
               <ChatBox
                 ticketId={ticket.id}
                 currentUser={currentUser}
                 assignedUserId={ticket.assigned_user_id}
                 ticketCreatorId={ticket.user_id}
-                onChatClosed={() => setTicket({ ...ticket, chat_initiated: false })}
+                onChatClosed={handleChatClosed}
               />
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-500">
@@ -147,8 +243,51 @@ const TicketDetails = ({ currentUser: propUser }) => {
               </div>
             )
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              Chat not initiated.
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-[#23486A] mb-4">Connect with Support</h2>
+              {ticket.assigned_user_id ? (
+                assignedEmployee ? (
+                  <p className="text-lg text-gray-700 mb-2">
+                    Your ticket is being handled by <strong>{assignedEmployee}</strong>
+                  </p>
+                ) : (
+                  <p className="text-lg text-gray-700 mb-2">
+                    Loading assigned employee...
+                  </p>
+                )
+              ) : (
+                <p className="text-lg text-gray-700 mb-2">
+                  Your ticket has not yet been assigned to a support representative.
+                </p>
+              )}
+              
+              {waitingForEmployee ? (
+                <div className="mt-4">
+                  <div className="animate-pulse bg-orange-100 text-orange-700 p-4 rounded-lg mb-4">
+                    <p className="font-semibold">Waiting for support agent to connect...</p>
+                    <div className="flex justify-center mt-2">
+                      <div className="flex space-x-2">
+                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce"></div>
+                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={cancelRequest}
+                    className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md"
+                  >
+                    Cancel Request
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={requestConnection}
+                  className="mt-4 px-6 py-3 bg-[#3B6790] hover:bg-[#EFB036] text-white font-semibold rounded-lg shadow-md"
+                >
+                  Request Connection
+                </button>
+              )}
             </div>
           )}
         </div>

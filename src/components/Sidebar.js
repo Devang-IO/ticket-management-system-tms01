@@ -138,6 +138,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   {sidebarOpen && <span className="sidebar-item-text">Manage Employee</span>}
                 </Link>
               </li>
+              <li>
+                <Link to="/admin/analytics" className={`sidebar-item ${location.pathname === "/admin/analytics" ? "sidebar-item-active" : ""}`}>
+                  <FaUserCog size={20} />
+                  {sidebarOpen && <span className="sidebar-item-text">Analytics</span>}
+                </Link>
+              </li>
+              
             </>
           )}
         </ul>
