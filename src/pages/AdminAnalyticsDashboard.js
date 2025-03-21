@@ -888,12 +888,12 @@ const AdminAnalyticsDashboard = () => {
                       >
                         Export as CSV
                       </CSVLink>
-                      <button 
+                      {/* <button 
                         onClick={() => handleDownloadSelect('pdf')}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                       >
                         Export as PDF
-                      </button>
+                      </button> */}
                       <button 
                         onClick={() => handleDownloadSelect('json')}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
