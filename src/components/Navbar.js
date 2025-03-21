@@ -109,6 +109,8 @@ const Navbar = ({ sidebarOpen }) => {
         return "User Requests";
       case "/employeeticketlist":
         return "Assigned Tickets";
+      case "/admin/analytics":
+        return "Analytics Dashboard";
       default:
         return "Page Not Found";
     }

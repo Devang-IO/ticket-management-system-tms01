@@ -19,7 +19,8 @@ import WelcomePage from "../pages/welcomepage";
 import CSRdashboard from "../pages/CSR-dashboard"; // Import CSR Dashboard
 import UserRequest from "../pages/UserRequest"; // Import User Request Page
 import EmployeeTicketList from "../pages/EmployeeTicketList";
-import ManageEmployee from "../pages/ManageEmployee"
+import ManageEmployee from "../pages/ManageEmployee";
+import AdminAnalyticsDashboard from '../pages/AdminAnalyticsDashboard';
 
 
 
@@ -78,6 +79,7 @@ const MainLayout = () => {
           <Route path="/userrequest" element={<UserRequest />} />
           <Route path="/manageemployee" element={<ManageEmployee/>}/>
           <Route path="/employeeticketlist" element={<EmployeeTicketList/>}/>
+          <Route path="/admin/analytics" element={<AdminAnalyticsDashboard />} />
 
         </Routes>
 
