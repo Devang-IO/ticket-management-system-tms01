@@ -2,6 +2,36 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabase";
 
+// Pastel-style page container and text
+const pageContainer =
+  "mt-20 p-4 md:p-6 bg-gray-50 min-h-screen text-gray-800"; // Added pt-24
+const pageTitle = "text-2xl md:text-3xl font-bold text-gray-800 mb-4";
+const searchBarClass =
+  "flex items-center w-full max-w-lg bg-white border border-gray-300 text-gray-600 rounded-full px-4 py-2 mb-6 shadow-md";
+const tableContainer = "w-full overflow-x-auto";
+const tableClass =
+  "w-full text-left border-collapse shadow-md rounded-xl overflow-hidden";
+const tableHeaderClass = "bg-blue-50 border-b border-blue-100 text-blue-800";
+const tableRowBase = "bg-white text-gray-800";
+const tableCellClass = "p-4";
+
+// Pastel status classes based on ticket status
+const getStatusClass = (status) => {
+  const s = status.toLowerCase();
+  if (s === "open") {
+    // "Open" => Yellow pastel
+    return "bg-yellow-50 border border-yellow-100 text-yellow-800";
+  } else if (s === "answered") {
+    // "answered" => Blue pastel
+    return "bg-blue-50 border border-blue-100 text-blue-800";
+  } else if (s === "closed") {
+    // "closed" => Green pastel
+    return "bg-green-50 border border-green-100 text-green-800";
+  }
+  // Default or unknown => Teal pastel
+  return "bg-teal-50 border border-teal-100 text-teal-800";
+};
+
 const UserRequest = () => {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
@@ -11,22 +41,23 @@ const UserRequest = () => {
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setCurrentUser(user);
     };
-
     fetchCurrentUser();
   }, []);
 
   useEffect(() => {
     const fetchAssignedTickets = async () => {
-      // Get the current user
       if (!currentUser) return;
 
-      // Fetch assignments with joined ticket data
       const { data, error } = await supabase
         .from("assignments")
-        .select("ticket: tickets(id, title, created_at, priority, status, chat_initiated, user_waiting)")
+        .select(
+          "ticket: tickets(id, title, created_at, priority, status, chat_initiated, user_waiting)"
+        )
         .eq("user_id", currentUser.id);
 
       if (error) {
@@ -34,13 +65,15 @@ const UserRequest = () => {
       } else if (data) {
         // Extract tickets and filter out closed ones
         const assignedTickets = data.map((assignment) => assignment.ticket);
-        const activeTickets = assignedTickets.filter(ticket => ticket.status !== "closed");
-        
-        // Set tickets that have user_waiting to true as blinking
+        const activeTickets = assignedTickets.filter(
+          (ticket) => ticket.status !== "closed"
+        );
+
+        // Identify tickets that have user_waiting === true
         const waitingTicketIds = activeTickets
-          .filter(ticket => ticket.user_waiting)
-          .map(ticket => ticket.id);
-        
+          .filter((ticket) => ticket.user_waiting)
+          .map((ticket) => ticket.id);
+
         setBlinkingTickets(waitingTicketIds);
         setTickets(activeTickets);
       }
@@ -49,30 +82,29 @@ const UserRequest = () => {
     if (currentUser) {
       fetchAssignedTickets();
 
-      // Set up real-time subscription for assigned tickets
+      // Set up real-time subscription for changes in "tickets" table
       const subscription = supabase
-        .channel('public:tickets')
-        .on('UPDATE', (payload) => {
-          // Update tickets list
-          setTickets(prev => 
-            prev.map(ticket => 
+        .channel("public:tickets")
+        .on("UPDATE", (payload) => {
+          // Update the local ticket list
+          setTickets((prev) =>
+            prev.map((ticket) =>
               ticket.id === payload.new.id ? { ...ticket, ...payload.new } : ticket
             )
           );
-          
-          // Handle user waiting status
+
+          // If user_waiting turned true, highlight ticket
           if (payload.new.user_waiting && !payload.old.user_waiting) {
-            // Add to blinking tickets if not already there
-            setBlinkingTickets(prev => 
+            setBlinkingTickets((prev) =>
               prev.includes(payload.new.id) ? prev : [...prev, payload.new.id]
             );
-            
-            // Play notification sound (optional)
+
+            // Optional: Play notification sound
             try {
-              const audio = new Audio('/notification-sound.mp3');
-              audio.play().catch(e => console.log('Audio play failed:', e));
+              const audio = new Audio("/notification-sound.mp3");
+              audio.play().catch((e) => console.log("Audio play failed:", e));
             } catch (error) {
-              console.log('Audio initialization failed:', error);
+              console.log("Audio initialization failed:", error);
             }
           }
         })
@@ -89,26 +121,23 @@ const UserRequest = () => {
     ticket.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Sort tickets - put user waiting tickets first, then sort the rest
+  // Sort tickets: user_waiting tickets first, then by creation date desc
   const sortedTickets = [...filteredTickets].sort((a, b) => {
-    // First priority: user_waiting status
     if (a.user_waiting && !b.user_waiting) return -1;
     if (!a.user_waiting && b.user_waiting) return 1;
-    
-    // Secondary sort by status or created date if needed
     return new Date(b.created_at) - new Date(a.created_at);
   });
 
-  // Update ticket status to "answered", enable chat, and navigate
+  // Update ticket to "answered", enable chat, then navigate
   const handleConnect = async (ticketId) => {
     const { error } = await supabase
       .from("tickets")
-      .update({ 
-        status: "answered", 
+      .update({
+        status: "answered",
         chat_initiated: true,
-        user_waiting: false,  // Clear the waiting flag
+        user_waiting: false,
         employee_connected: true,
-        employee_waiting: true  // Add this flag for highlighting on user side
+        employee_waiting: true,
       })
       .eq("id", ticketId);
 
@@ -118,55 +147,61 @@ const UserRequest = () => {
     }
 
     // Remove from blinking tickets
-    setBlinkingTickets(prev => prev.filter(id => id !== ticketId));
-    
+    setBlinkingTickets((prev) => prev.filter((id) => id !== ticketId));
+
     // Navigate to ticket details
     navigate(`/ticket/${ticketId}`);
   };
 
   return (
-    <div className="pt-20 px-6 min-h-screen flex flex-col text-white">
-      <h1 className="text-3xl font-bold text-[#23486A] mb-4">User Requests</h1>
-      
+    <div className={pageContainer}>
+      <h1 className={pageTitle}>User Requests</h1>
+
       {/* Search Bar */}
-      <div className="flex items-center w-full max-w-lg bg-[#4C7B8B] text-white rounded-full px-4 py-2 mb-6 shadow-md">
+      <div className={searchBarClass}>
         <input
           type="text"
           placeholder="Search tickets..."
-          className="ml-2 flex-1 outline-none bg-transparent text-white placeholder-white"
+          className="ml-2 flex-1 outline-none bg-transparent placeholder-gray-500"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
       {/* Tickets Table */}
-      <div className="w-full overflow-x-auto">
-        <table className="w-full text-left border-collapse shadow-md rounded-xl overflow-hidden">
-          <thead className="bg-[#23486A] text-white">
+      <div className={tableContainer}>
+        <table className={tableClass}>
+          <thead className={tableHeaderClass}>
             <tr>
-              <th className="p-4">Ticket ID</th>
-              <th className="p-4">Title</th>
-              <th className="p-4">Created Date</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Actions</th>
+              <th className={tableCellClass}>Ticket ID</th>
+              <th className={tableCellClass}>Title</th>
+              <th className={tableCellClass}>Created Date</th>
+              <th className={tableCellClass}>Status</th>
+              <th className={tableCellClass}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {sortedTickets.map((ticket) => {
               const isBlinking = blinkingTickets.includes(ticket.id);
-              
+
               return (
-                <tr 
-                  key={ticket.id} 
-                  className={`bg-gray-100 text-black ${isBlinking ? 'animate-pulse' : ''}`}
-                  style={isBlinking ? { 
-                    backgroundColor: '#FFE0B2',  // Light orange background
-                    boxShadow: '0 0 8px #FF9800', // Orange glow
-                    transition: 'background-color 0.5s, box-shadow 0.5s' 
-                  } : {}}
+                <tr
+                  key={ticket.id}
+                  className={`${tableRowBase} ${
+                    isBlinking ? "animate-pulse" : ""
+                  }`}
+                  style={
+                    isBlinking
+                      ? {
+                          backgroundColor: "#FFE0B2", // Light orange
+                          boxShadow: "0 0 8px #FF9800", // Orange glow
+                          transition: "background-color 0.5s, box-shadow 0.5s",
+                        }
+                      : {}
+                  }
                 >
-                  <td className="p-4">{ticket.id}</td>
-                  <td className="p-4 font-medium">
+                  <td className={tableCellClass}>{ticket.id}</td>
+                  <td className={`${tableCellClass} font-medium`}>
                     {ticket.title}
                     {isBlinking && (
                       <span className="ml-2 inline-block px-2 py-1 bg-orange-500 text-white text-sm rounded-full animate-bounce">
@@ -174,15 +209,16 @@ const UserRequest = () => {
                       </span>
                     )}
                   </td>
-                  <td className="p-4">
+                  <td className={tableCellClass}>
                     {new Date(ticket.created_at).toLocaleDateString()}
                   </td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 rounded text-white ${
-                      ticket.status === "Open" ? "bg-[#EFB036]" :
-                      ticket.status === "answered" ? "bg-[#3B6790]" :
-                      "bg-[#4C7B8B]"
-                    }`}>
+                  <td className={tableCellClass}>
+                    {/* Status Pill in pastel style */}
+                    <span
+                      className={`inline-block px-2 py-1 rounded font-semibold ${getStatusClass(
+                        ticket.status
+                      )}`}
+                    >
                       {ticket.status}
                     </span>
                     {ticket.chat_initiated && (
@@ -191,20 +227,24 @@ const UserRequest = () => {
                       </span>
                     )}
                   </td>
-                  <td className="p-4">
+                  <td className={tableCellClass}>
                     {ticket.chat_initiated ? (
                       <button
                         onClick={() => navigate(`/ticket/${ticket.id}`)}
-                        className="bg-green-500 text-white px-4 py-2 rounded-full"
+                        className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-colors"
                       >
                         Join Chat
                       </button>
                     ) : (
                       <button
                         onClick={() => handleConnect(ticket.id)}
-                        className={`${isBlinking ? 'bg-orange-500 animate-pulse' : 'bg-[#EFB036]'} text-black px-4 py-2 rounded-full font-medium`}
+                        className={`${
+                          isBlinking
+                            ? "bg-orange-500 animate-pulse"
+                            : "bg-yellow-300 hover:bg-yellow-400"
+                        } text-black px-4 py-2 rounded-full font-medium transition-colors`}
                       >
-                        {isBlinking ? 'Connect Now!' : 'Connect'}
+                        {isBlinking ? "Connect Now!" : "Connect"}
                       </button>
                     )}
                   </td>
