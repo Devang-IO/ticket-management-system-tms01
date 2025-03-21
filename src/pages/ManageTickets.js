@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FiChevronDown, FiEye, FiTrash2, FiUserMinus } from "react-icons/fi";
 import { FaTicketAlt, FaFilter } from "react-icons/fa";
@@ -9,25 +9,24 @@ import "react-toastify/dist/ReactToastify.css";
 
 const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const [tickets, setTickets] = useState([]);
-  const [entriesPerPage, setEntriesPerPage] = useState("5"); // fixed to 5 tickets per page
+  // "Show" filter: either "5" or "all"
+  const [entriesPerPage, setEntriesPerPage] = useState("5");
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
-  // Instead of inline dropdown state, we store selected ticket id and its dropdown position.
+  // Dropdown state for actions
   const [selectedTicketForActions, setSelectedTicketForActions] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState(null);
-
-  // States for delete modal
+  // Delete modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState(null);
-
-  // Pagination states
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Read the query parameter to get a highlighted ticket id.
+  // Read query param for highlighted ticket id.
   const [searchParams] = useSearchParams();
   const highlightedTicketId = searchParams.get("ticketId");
 
-  // Fetch all tickets for Admin
+  // Fetch tickets
   useEffect(() => {
     const fetchTickets = async () => {
       const { data, error } = await supabase
@@ -50,7 +49,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     setSelectedTicketForActions(null);
   };
 
-  // Confirm deletion and show toast notification
+  // Confirm deletion
   const confirmDeleteTicket = async () => {
     const { error } = await supabase
       .from("tickets")
@@ -59,9 +58,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     if (error) {
       console.error("Error deleting ticket:", error);
     } else {
-      setTickets((prev) =>
-        prev.filter((ticket) => ticket.id !== ticketToDelete)
-      );
+      setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketToDelete));
       toast.success("Ticket deleted successfully");
     }
     setShowDeleteModal(false);
@@ -76,20 +73,18 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
 
   // Handle click on Actions button
   const handleActionsClick = (ticketId, event) => {
-    // Get the bounding rect of the clicked button.
     const rect = event.currentTarget.getBoundingClientRect();
     setDropdownPosition({
-      top: rect.top + rect.height + 4, // 4px spacing
+      top: rect.top + rect.height + 4,
       left: rect.left,
     });
     setSelectedTicketForActions(ticketId);
   };
 
-  // Close dropdown if clicking outside the dropdown portal
+  // Close dropdown if clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = () => {
       if (dropdownPosition) {
-        // If dropdown is open and click is outside, close it.
         setSelectedTicketForActions(null);
         setDropdownPosition(null);
       }
@@ -100,7 +95,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [selectedTicketForActions, dropdownPosition]);
 
-  // Filter tickets
+  // Filter tickets based on search, status, and priority
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch = searchTerm
       ? ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -116,13 +111,13 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  // Calculate pagination - always show 5 tickets per page
-  const entriesCount = Number(entriesPerPage);
-  const totalPages = Math.ceil(filteredTickets.length / entriesCount);
-  const currentTickets = filteredTickets.slice(
-    (currentPage - 1) * entriesCount,
-    currentPage * entriesCount
-  );
+  // Pagination logic: if "all" is selected, show all tickets on one page
+  const entriesCount = entriesPerPage === "all" ? filteredTickets.length : Number(entriesPerPage);
+  const totalPages = entriesPerPage === "all" ? 1 : Math.ceil(filteredTickets.length / entriesCount);
+  const currentTickets =
+    entriesPerPage === "all"
+      ? filteredTickets
+      : filteredTickets.slice((currentPage - 1) * entriesCount, currentPage * entriesCount);
 
   // Handle page change
   const goToPage = (page) => {
@@ -131,7 +126,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     }
   };
 
-  // Render the dropdown portal if a ticket is selected for actions.
+  // Render actions dropdown if open
   const actionsDropdown =
     selectedTicketForActions && dropdownPosition
       ? createPortal(
@@ -221,7 +216,8 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                 backgroundColor: "white",
               }}
             >
-              <option value={5}>5</option>
+              <option value="5">5</option>
+              <option value="all">All</option>
             </select>
           </div>
 
@@ -274,7 +270,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Tickets Table */}
       <div className="table-container overflow-hidden">
         <table className="w-full border-collapse">
           <thead className="bg-gray-200 text-[#23486A]">
@@ -291,16 +287,11 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
             {currentTickets.map((ticket) => (
               <tr
                 key={ticket.id}
-                className={
-                  ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""
-                }
+                className={ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""}
               >
                 <td className="p-2">{ticket.id}</td>
                 <td className="p-2">
-                  <Link
-                    to={`/managetickets?ticketId=${ticket.id}`}
-                    className="text-blue-600"
-                  >
+                  <Link to={`/managetickets?ticketId=${ticket.id}`} className="text-blue-600">
                     {ticket.title}
                   </Link>
                 </td>
@@ -308,11 +299,11 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                 <td className="p-2">
                   <span
                     className={`px-3 py-1 text-white text-sm rounded-xl ${
-                      ticket.priority === "high"
+                      ticket.priority.toLowerCase() === "high"
                         ? "bg-[#EFB036]"
-                        : ticket.priority === "medium"
+                        : ticket.priority.toLowerCase() === "medium"
                         ? "bg-[#3B6790]"
-                        : ticket.priority === "low"
+                        : ticket.priority.toLowerCase() === "low"
                         ? "bg-[#4C7B8B]"
                         : "bg-[#23486A]"
                     }`}
@@ -320,9 +311,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
                     {ticket.priority}
                   </span>
                 </td>
-                <td className="p-2">
-                  {new Date(ticket.created_at).toLocaleDateString()}
-                </td>
+                <td className="p-2">{new Date(ticket.created_at).toLocaleDateString()}</td>
                 <td className="p-2" style={{ position: "relative" }}>
                   <button
                     onClick={(e) => handleActionsClick(ticket.id, e)}
@@ -337,8 +326,8 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {/* Pagination Controls (shown only if "5" is selected) */}
+      {entriesPerPage !== "all" && totalPages > 1 && (
         <div className="flex justify-center items-center mt-4">
           <button
             onClick={() => goToPage(currentPage - 1)}
@@ -360,7 +349,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </div>
       )}
 
-      {/* Render Dropdown via Portal */}
+      {/* Actions Dropdown Portal */}
       {selectedTicketForActions && dropdownPosition && createPortal(
         <div
           className="dropdown-portal bg-white p-4 rounded shadow-lg transition-all duration-200"
@@ -412,20 +401,12 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-content bg-white p-6 rounded shadow-lg max-w-sm mx-auto">
             <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
-            <p className="mb-4">
-              Are you sure you want to delete this ticket?
-            </p>
+            <p className="mb-4">Are you sure you want to delete this ticket?</p>
             <div className="flex justify-end gap-4">
-              <button
-                onClick={cancelDelete}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
+              <button onClick={cancelDelete} className="px-4 py-2 bg-gray-300 rounded">
                 Cancel
               </button>
-              <button
-                onClick={confirmDeleteTicket}
-                className="px-4 py-2 bg-red-600 text-white rounded"
-              >
+              <button onClick={confirmDeleteTicket} className="px-4 py-2 bg-red-600 text-white rounded">
                 Delete
               </button>
             </div>

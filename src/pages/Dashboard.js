@@ -223,9 +223,7 @@ const Dashboard = () => {
     <div className="dashboard-container" style={{ backgroundColor: "#F4F6F8" }}>
       {/* Removed extra Sidebar */}
       <div className="dashboard-main">
-        {/* Navbar */}
-        <Navbar style={{ backgroundColor: themeColors.primary, color: "white" }} />
-
+    
         {/* Main Dashboard Content */}
         <div className="dashboard-content">
           <h1 className="dashboard-title" style={{ color: themeColors.primary }}>
