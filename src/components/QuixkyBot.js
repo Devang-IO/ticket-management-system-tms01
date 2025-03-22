@@ -12,27 +12,25 @@ const sampleQuestions = [
   "What is the response time?",
 ];
 
-// 3D Model Component: Loads the polar bear GLB file, scales it up,
+// 3D Model Component: Loads the GLB file, scales it up,
 // and makes its head (i.e. the whole model) look at the cursor.
 function PolarBearModel({ mouse }) {
   const modelRef = useRef();
-  const gltf = useLoader(GLTFLoader, "/polarbear.glb");
+  const gltf = useLoader(GLTFLoader, "/model.glb");
 
   useFrame(({ camera }) => {
     if (modelRef.current) {
-      // Create a vector in 3D space that the bear should look at
-      // We use a fixed Z value to ensure consistent behavior
+      // Create a vector in 3D space that the model should look at
       const target = new THREE.Vector3(
         mouse.x * 3, // Multiply by a factor to adjust sensitivity
         mouse.y * 3, 
-        5 // Fixed Z distance in front of the bear
+        5 // Fixed Z distance in front of the model
       );
       
       // Make the model look at the computed target
       modelRef.current.lookAt(target);
       
-      // Optional: Add slight rotation limits to make movement more natural
-      // This keeps the bear from rotating too extremely
+      // Optional: Add slight rotation limits to keep movement natural
       const rotation = modelRef.current.rotation;
       rotation.x = THREE.MathUtils.clamp(rotation.x, -0.5, 0.5);
       rotation.y = THREE.MathUtils.clamp(rotation.y, -0.8, 0.8);
@@ -47,16 +45,16 @@ function PolarBearModel({ mouse }) {
   );
 }
 
-// Icon component that renders the 3D polar bear with a transparent background and shadow.
+// Icon component that renders the 3D model with a transparent background and shadow.
 const PolarBearIcon = ({ mouse }) => (
   <Canvas
     style={{ width: "100%", height: "100%", background: "transparent" }}
     shadows
-    camera={{ position: [.5, .5, 3] }}
+    camera={{ position: [0.5, 0.5, 3] }}
   >
     {/* Increase ambient light for better color visibility */}
     <ambientLight intensity={0.5} />
-    {/* Adjust directional light position, intensity, and color */}
+    {/* Adjust directional light */}
     <directionalLight
       position={[5, 5, 5]}
       intensity={20}
@@ -76,6 +74,35 @@ const PolarBearIcon = ({ mouse }) => (
   </Canvas>
 );
 
+// Typing Indicator Component: Three bouncing dots.
+const TypingIndicator = () => (
+  <div style={{ display: "flex", gap: "4px" }}>
+    <div style={{
+      width: "6px",
+      height: "6px",
+      background: "gray",
+      borderRadius: "50%",
+      animation: "bounce 1.4s infinite ease-in-out both"
+    }}></div>
+    <div style={{
+      width: "6px",
+      height: "6px",
+      background: "gray",
+      borderRadius: "50%",
+      animation: "bounce 1.4s infinite ease-in-out both",
+      animationDelay: "0.2s"
+    }}></div>
+    <div style={{
+      width: "6px",
+      height: "6px",
+      background: "gray",
+      borderRadius: "50%",
+      animation: "bounce 1.4s infinite ease-in-out both",
+      animationDelay: "0.4s"
+    }}></div>
+  </div>
+);
+
 const QuixkyBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   // Conversation history initialization
@@ -92,21 +119,61 @@ const QuixkyBot = () => {
   // Global mouse state normalized between -1 and 1.
   const [globalMouse, setGlobalMouse] = useState({ x: 0, y: 0 });
 
-  // Update global mouse position regardless of where the cursor is.
+  // Tip bubble message state.
+  const [tip, setTip] = useState("Hi, I am here to assist you!");
+
+  // Ref for conversation container to enable auto scroll.
+  const conversationEndRef = useRef(null);
+
+  // Update tip message periodically.
+  useEffect(() => {
+    const tipMessages = [
+      "Tip: You can ask about ticket creation.",
+      "Tip: Try asking 'How to update my ticket?'",
+      "Tip: Our support is here to help you!",
+      "Hi, I am here to assist you!"
+    ];
+    const interval = setInterval(() => {
+      const randomTip = tipMessages[Math.floor(Math.random() * tipMessages.length)];
+      setTip(randomTip);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update global mouse position.
   useEffect(() => {
     const handleMouseMove = (event) => {
-      const x = (event.clientX / window.innerWidth) * .6 - 1;
-      const y = - (event.clientY / window.innerHeight) * 1 + 1;
+      const x = (event.clientX / window.innerWidth) * 0.6 - 1;
+      const y = -(event.clientY / window.innerHeight) * 1 + 1;
       setGlobalMouse({ x, y });
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  // Auto scroll to bottom when conversation updates.
+  useEffect(() => {
+    conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversation]);
+
   const toggleModal = () => setIsOpen(!isOpen);
+
+  // Check if query is related to the project ticket management system.
+  const isRelevantQuery = (text) => {
+    const keywords = ["ticket", "project", "support", "issue", "update", "management"];
+    return keywords.some((keyword) => text.toLowerCase().includes(keyword));
+  };
 
   // Send a query to the API.
   const sendQuery = async (userQuery) => {
+    // If the query is not relevant, return a short canned response.
+    if (!isRelevantQuery(userQuery)) {
+      setConversation((prev) => [
+        ...prev,
+        { sender: "bot", text: "I'm here to answer questions about our ticket management system. Please ask a relevant question." }
+      ]);
+      return;
+    }
     setConversation((prev) => [...prev, { sender: "user", text: userQuery }]);
     setLoading(true);
     setQuery("");
@@ -127,10 +194,12 @@ const QuixkyBot = () => {
           }
         }
       );
-      const botResponse =
+      let botResponse =
         response.data.choices[0]?.message?.content ||
         "I don't have an answer right now.";
-      setConversation((prev) => [...prev, { sender: "bot", text: botResponse }]);
+      // Shorten the response by taking the first sentence.
+      const shortResponse = botResponse.split(". ")[0] + ".";
+      setConversation((prev) => [...prev, { sender: "bot", text: shortResponse }]);
     } catch (error) {
       console.error("API error:", error);
       setConversation((prev) => [
@@ -148,12 +217,12 @@ const QuixkyBot = () => {
     }
   };
 
-  // Render conversation messages and sample question buttons.
+  // Render conversation messages and sample question buttons with fade-in animation.
   const renderConversation = () => {
     return conversation.map((msg, index) => {
       if (msg.type === "sample") {
         return (
-          <div key={index} style={{ marginBottom: "10px" }}>
+          <div key={index} style={{ marginBottom: "10px", animation: "fadeIn 0.5s" }}>
             {msg.questions.map((q, idx) => (
               <button
                 key={idx}
@@ -180,7 +249,8 @@ const QuixkyBot = () => {
           key={index}
           style={{
             textAlign: msg.sender === "user" ? "right" : "left",
-            marginBottom: "10px"
+            marginBottom: "10px",
+            animation: "fadeIn 0.5s"
           }}
         >
           <div
@@ -200,25 +270,64 @@ const QuixkyBot = () => {
 
   return (
     <>
-      {/* Collapsed button with the 3D polar bear icon */}
+      {/* Inject keyframe animations */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes bounce {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1); }
+        }
+      `}</style>
+
+      {/* Collapsed button with the 3D polar bear icon and tip bubble */}
       {!isOpen && (
-        <button
-          onClick={toggleModal}
+        <div
           style={{
             position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            width: "80px", // Adjusted size for larger icon
-            height: "80px",
-            borderRadius: "50%",
-            backgroundColor: "transparent",
-            cursor: "pointer",
-            padding: 0,
-            border: "none"
+            bottom: "10px",
+            right: "10px",
+            width: "70px",
+            height: "70px",
+            zIndex: 1000
           }}
         >
-          <PolarBearIcon mouse={globalMouse} />
-        </button>
+          {/* Tip Bubble - absolutely positioned relative to the container */}
+          <div
+            style={{
+              position: "absolute",
+              top: "-25px",
+              left: "-70%",
+              transform: "translateX(-50%)",
+              padding: "3px 8px",
+              background: "rgba(255,255,255,0.7)",
+              borderRadius: "12px",
+              fontSize: "10px",
+              color: "#333",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+              animation: "fadeIn 0.5s"
+            }}
+          >
+            {tip}
+          </div>
+          <button
+            onClick={toggleModal}
+            style={{
+              width: "70px",
+              height: "70px",
+              borderRadius: "50%",
+              background: "radial-gradient(circle, #ffffff 0%, transparent 70%)",
+              cursor: "pointer",
+              padding: 0,
+              border: "none"
+            }}
+          >
+            <PolarBearIcon mouse={globalMouse} />
+          </button>
+        </div>
       )}
 
       {/* Chat Modal */}
@@ -278,6 +387,21 @@ const QuixkyBot = () => {
               }}
             >
               {renderConversation()}
+              {/* Typing Indicator when loading */}
+              {loading && (
+                <div style={{ textAlign: "left", marginBottom: "10px", animation: "fadeIn 0.5s" }}>
+                  <div style={{
+                    display: "inline-block",
+                    padding: "8px 12px",
+                    background: "#f8d7da",
+                    borderRadius: "15px"
+                  }}>
+                    <TypingIndicator />
+                  </div>
+                </div>
+              )}
+              {/* Dummy div to auto-scroll to */}
+              <div ref={conversationEndRef} />
             </div>
 
             {/* Input Area */}
