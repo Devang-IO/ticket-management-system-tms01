@@ -6,6 +6,7 @@
   "dependencies": {
     "@cloudinary/react": "^1.14.1",
     "@cloudinary/url-gen": "^1.21.0",
+    "@react-three/fiber": "^9.1.0",
     "@sendgrid/mail": "^8.1.4",
     "@supabase/supabase-js": "^2.49.1",
     "abab": "^2.0.6",
@@ -767,6 +768,7 @@
     "text-table": "^0.2.0",
     "thenify": "^3.3.1",
     "thenify-all": "^1.6.0",
+    "three": "^0.174.0",
     "throat": "^6.0.2",
     "thunky": "^1.1.0",
     "tmpl": "^1.0.5",

@@ -1,5 +1,4 @@
-//
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import { Link } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
 import { supabase } from "../utils/supabase"; // Import Supabase client
@@ -26,6 +25,8 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const EmployeeActivityStatus = () => {
+  // (Assuming EmployeeActivityStatus is implemented similarly)
+  // Update inline styles for status badge to use our theme variables.
   const [employees, setEmployees] = useState([]);
   const [loadingEmp, setLoadingEmp] = useState(true);
 
@@ -58,34 +59,38 @@ const EmployeeActivityStatus = () => {
   }, []);
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow">
-      <h2 className="text-xl font-semibold mb-3 text-[#3B6790]">Employee Activity Status</h2>
+    <div className="bg-[#113946] p-4 rounded-xl shadow">
+      <h2 className="text-xl font-semibold mb-3 text-[#FFF2D8]">
+        Employee Activity Status
+      </h2>
       {loadingEmp ? (
-        <p>Loading employee status...</p>
+        <p className="text-[#FFF2D8]">Loading employee status...</p>
       ) : (
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-200 text-[#23486A]">
+            <tr className="bg-[#BCA37F] text-[#FFF2D8]">
               <th className="p-2 text-left">Employee</th>
               <th className="p-2 text-left">Status</th>
             </tr>
           </thead>
           <tbody>
             {employees.map((emp) => (
-              <tr key={emp.id} className="border-b">
-                <td className="p-2">{emp.name}</td>
+              <tr key={emp.id} className="border-b border-[#EAD7BB]">
+                <td className="p-2 text-[#FFF2D8]">{emp.name}</td>
                 <td className="p-2">
                   <span
-                    className="px-2 py-1 rounded text-white"
+                    className="px-2 py-1 rounded"
                     style={{
                       backgroundColor:
                         emp.status === "Online"
-                          ? "#4CAF50"
+                          ? "#EAD7BB"
                           : emp.status === "On Live Chat"
-                          ? "#2196F3"
-                          : emp.status === "Away"
-                          ? "#FF9800"
-                          : "#f44336",
+                          ? "#BCA37F"
+                          : "#FFF2D8",
+                      color:
+                        emp.status === "On Live Chat"
+                          ? "#FFF2D8"
+                          : "#113946",
                     }}
                   >
                     {emp.status}
@@ -136,49 +141,49 @@ const Dashboard = () => {
             label: "Total Tickets",
             value: totalTicketsResult.count || 0,
             icon: <FaBriefcase className="text-2xl" />,
-            bgColor: "#EFB036",
+            bgColor: "#113946",
           },
           {
             label: "New Tickets",
             value: newTicketsResult.count || 0,
             icon: <FaEnvelope className="text-2xl" />,
-            bgColor: "#3B6790",
+            bgColor: "#113946",
           },
           {
             label: "Open Tickets",
             value: openTicketsResult.count || 0,
             icon: <FaUnlockAlt className="text-2xl" />,
-            bgColor: "#23486A",
+            bgColor: "#113946",
           },
           {
             label: "Closed Tickets",
             value: closedTicketsResult.count || 0,
             icon: <FaLock className="text-2xl" />,
-            bgColor: "#4C7B8B",
+            bgColor: "#113946",
           },
           {
             label: "Urgent Tickets",
             value: urgentTicketsResult.count || 0,
             icon: <FaExclamationTriangle className="text-2xl" />,
-            bgColor: "#4C7B8B",
+            bgColor: "#113946",
           },
           {
             label: "Un-Answered Tickets",
             value: unansweredTicketsResult.count || 0,
             icon: <FaArrowLeft className="text-2xl" />,
-            bgColor: "#EFB036",
+            bgColor: "#113946",
           },
           {
             label: "Answered Tickets",
             value: answeredTicketsResult.count || 0,
             icon: <FaCheck className="text-2xl" />,
-            bgColor: "#3B6790",
+            bgColor: "#113946",
           },
           {
             label: "Solved Tickets",
             value: closedTicketsResult.count || 0,
             icon: <FaThumbsUp className="text-2xl" />,
-            bgColor: "#23486A",
+            bgColor: "#113946",
           },
         ]);
 
@@ -198,7 +203,7 @@ const Dashboard = () => {
             updated: new Date(ticket.created_at).toLocaleString(),
             action: ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1),
             status: ticket.status === "open" ? "Opened" : "Closed",
-            statusColor: ticket.status === "open" ? "#3B6790" : "#EFB036",
+            statusColor: ticket.status === "open" ? "#FFF2D8" : "#EAD7BB",
             priority: ticket.priority,
           })) || []
         );
@@ -274,7 +279,7 @@ const Dashboard = () => {
         backgroundColor: stats.map((stat) => stat.bgColor),
         borderRadius: 8,
         borderWidth: 2,
-        borderColor: "#ffffff",
+        borderColor: "#FFF2D8",
         barThickness: 25,
       },
     ],
@@ -289,25 +294,25 @@ const Dashboard = () => {
       title: {
         display: true,
         text: "Ticket Statistics",
-        color: "#23486A",
+        color: "#FFF2D8",
         font: { size: 16, weight: "600" },
       },
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: "#23486A", font: { size: 12 } },
+        ticks: { color: "#FFF2D8", font: { size: 12 } },
       },
       y: {
-        grid: { color: "#e0e0e0" },
-        ticks: { color: "#23486A", font: { size: 12 } },
+        grid: { color: "#EAD7BB" },
+        ticks: { color: "#FFF2D8", font: { size: 12 } },
       },
     },
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen flex flex-col space-y-6">
-      <h1 className="text-3xl font-bold text-[#23486A]">Admin Dashboard</h1>
+    <div className="p-6 bg-[#FFF2D8] min-h-screen flex flex-col space-y-6">
+      <h1 className="text-3xl font-bold text-[#113946]">Admin Dashboard</h1>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -315,7 +320,7 @@ const Dashboard = () => {
           <div
             key={index}
             className="p-4 rounded-xl text-white flex flex-col justify-center items-center shadow-lg"
-            style={{ backgroundColor: stat.bgColor }}
+            style={{ backgroundColor: "#113946" }}
           >
             <div>{stat.icon}</div>
             <p className="text-2xl font-bold mt-2">{isLoading ? "..." : stat.value}</p>
@@ -327,11 +332,11 @@ const Dashboard = () => {
       {/* Recent Tickets & Employee Activity Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Tickets Section */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-[#3B6790]">Recent Tickets</h2>
+        <div className="bg-[#113946] p-6 rounded-xl shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-[#FFF2D8]">Recent Tickets</h2>
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-200 text-[#23486A] rounded-xl">
+              <tr className="bg-[#BCA37F] text-[#FFF2D8] rounded-xl">
                 <th className="p-3 text-left">#</th>
                 <th className="p-3 text-left">Title</th>
                 <th className="p-3 text-left">Updated</th>
@@ -342,36 +347,38 @@ const Dashboard = () => {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan="5" className="p-4 text-center">
+                  <td colSpan="5" className="p-4 text-center text-[#FFF2D8]">
                     Loading tickets...
                   </td>
                 </tr>
               ) : recentTickets.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-4 text-center">
+                  <td colSpan="5" className="p-4 text-center text-[#FFF2D8]">
                     No tickets found
                   </td>
                 </tr>
               ) : (
                 recentTickets.map((ticket, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-3">{index + 1}</td>
+                  <tr key={index} className="border-b border-[#EAD7BB]">
+                    <td className="p-3 text-[#FFF2D8]">{index + 1}</td>
                     <td className="p-3">
                       <Link
                         to={`/managetickets?ticketId=${ticket.id}`}
-                        className="text-blue-600 hover:underline"
+                        className="text-[#FFF2D8] hover:underline"
                       >
                         {ticket.title}
                       </Link>
                     </td>
-                    <td className="p-3">{ticket.updated}</td>
+                    <td className="p-3 text-[#FFF2D8]">{ticket.updated}</td>
                     <td className="p-3">
-                      <span className="px-3 py-1 rounded bg-gray-300">{ticket.action}</span>
+                      <span className="px-3 py-1 rounded bg-[#BCA37F] text-[#FFF2D8]">
+                        {ticket.action}
+                      </span>
                     </td>
                     <td className="p-3">
                       <span
-                        className="px-3 py-1 rounded text-white"
-                        style={{ backgroundColor: ticket.statusColor }}
+                        className="px-3 py-1 rounded"
+                        style={{ backgroundColor: ticket.statusColor, color: ticket.statusColor === "#EAD7BB" ? "#113946" : "#113946" }}
                       >
                         {ticket.status}
                       </span>
@@ -391,25 +398,25 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Bar Chart */}
         <div
-          className="bg-white p-6 rounded-xl shadow-lg flex justify-center items-center"
+          className="bg-[#113946] p-6 rounded-xl shadow-lg flex justify-center items-center"
           style={{ height: "300px" }}
         >
           {isLoading ? (
-            <div>Loading chart data...</div>
+            <div className="text-[#FFF2D8]">Loading chart data...</div>
           ) : (
             <Bar data={chartData} options={chartOptions} />
           )}
         </div>
 
         {/* Top Performers */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-[#3B6790]">Top Performers</h2>
+        <div className="bg-[#113946] p-6 rounded-xl shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-[#FFF2D8]">Top Performers</h2>
           {isLoading ? (
-            <p>Loading top performers...</p>
+            <p className="text-[#FFF2D8]">Loading top performers...</p>
           ) : topPerformers.length === 0 ? (
-            <p>No performer data found.</p>
+            <p className="text-[#FFF2D8]">No performer data found.</p>
           ) : (
-            <ol className="list-decimal pl-5">
+            <ol className="list-decimal pl-5 text-[#FFF2D8]">
               {topPerformers.map((user, index) => (
                 <li key={index} className="mb-4 flex items-center gap-3">
                   <img
@@ -419,7 +426,7 @@ const Dashboard = () => {
                   />
                   <div>
                     <p className="font-semibold">{user.name}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-[#EAD7BB]">
                       {user.solved_tickets} ticket{user.solved_tickets > 1 ? "s" : ""} solved
                     </p>
                   </div>
@@ -431,18 +438,18 @@ const Dashboard = () => {
       </div>
 
       {/* Footer with Buttons */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 p-6 bg-[#EFB036] text-white rounded-xl shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 p-6 bg-[#113946] text-[#FFF2D8] rounded-xl shadow-lg">
         <span className="text-lg font-semibold mb-4 sm:mb-0">
           Manage your tickets efficiently
         </span>
         <div className="space-x-4">
           <Link to="/managetickets">
-            <button className="px-4 py-2 bg-[#3B6790] hover:bg-[#23486A] rounded-xl shadow">
+            <button className="px-4 py-2 bg-[#FFF2D8] hover:bg-[#BCA37F] rounded-xl shadow text-[#113946]">
               Manage Tickets
             </button>
           </Link>
           <Link to="/assigntickets">
-            <button className="px-4 py-2 bg-[#4C7B8B] hover:bg-[#23486A] rounded-xl shadow">
+            <button className="px-4 py-2 bg-[#FFF2D8] hover:bg-[#BCA37F] rounded-xl shadow text-[#113946]">
               Assign Tickets
             </button>
           </Link>

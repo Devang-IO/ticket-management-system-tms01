@@ -81,9 +81,12 @@ const SearchModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black bg-opacity-50 backdrop-blur-lg rounded-xl">
-      <div ref={modalRef} className="bg-white w-full max-w-xl rounded-xl shadow-lg overflow-hidden">
-        <div className="p-4 border-b flex items-center bg-[#EFB036] text-white">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center pt-20 backdrop-blur-lg rounded-xl"
+      style={{ backgroundColor: "transparent" }}
+    >
+      <div ref={modalRef} className="bg-[#FFF2D8] w-full max-w-xl rounded-xl shadow-lg overflow-hidden">
+        <div className="p-4 border-b flex items-center bg-[#113946] text-[#FFF2D8]">
           <FiSearch className="mr-2" size={20} />
           <input
             ref={inputRef}
@@ -91,16 +94,16 @@ const SearchModal = ({ isOpen, onClose }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tickets by title or ID..."
-            className="flex-1 outline-none bg-transparent text-white placeholder-white"
+            className="flex-1 outline-none bg-transparent text-[#FFF2D8] placeholder-[#FFF2D8]"
           />
-          <button onClick={onClose} className="hover:text-red-500">
+          <button onClick={onClose} className="hover:text-[#EAD7BB] transition-colors">
             <FiX size={20} />
           </button>
         </div>
         <div className="max-h-96 overflow-y-auto">
           {isLoading ? (
-            <div className="p-4 text-center text-[#3B6790] flex items-center justify-center">
-              <div className="w-5 h-5 border-2 border-[#4C7B8B] border-t-[#EFB036] rounded-full animate-spin mr-2"></div>
+            <div className="p-4 text-center flex items-center justify-center text-[#BCA37F]">
+              <div className="w-5 h-5 border-2 border-[#BCA37F] border-t-[#EAD7BB] rounded-full animate-spin mr-2"></div>
               Searching...
             </div>
           ) : searchResults.length > 0 ? (
@@ -109,20 +112,35 @@ const SearchModal = ({ isOpen, onClose }) => {
                 <li
                   key={ticket.id}
                   onClick={() => handleTicketClick(ticket.id)}
-                  className="p-3 cursor-pointer border-b flex justify-between text-black items-center hover:bg-[#23486A] hover:text-white"
+                  className="p-3 cursor-pointer border-b flex justify-between items-center transition-colors duration-200"
+                  style={{ color: "#113946" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#BCA37F";
+                    e.currentTarget.style.color = "#FFF2D8";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = "#113946";
+                  }}
                 >
                   <div>
                     <p className="font-medium">{ticket.title}</p>
                     <p className="text-sm">ID: {ticket.id}</p>
                   </div>
                   <div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      ticket.status === "Open" ? "bg-green-100 text-green-800" :
-                      ticket.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
-                      ticket.status === "Closed" ? "bg-gray-100 text-gray-800" :
-                      ticket.status === "Resolved" ? "bg-blue-100 text-blue-800" :
-                      "bg-gray-100 text-gray-800"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        ticket.status === "Open"
+                          ? "bg-[#EAD7BB] text-[#113946]"
+                          : ticket.status === "Pending"
+                          ? "bg-[#BCA37F] text-[#FFF2D8]"
+                          : ticket.status === "Closed"
+                          ? "bg-[#FFF2D8] text-[#113946]"
+                          : ticket.status === "Resolved"
+                          ? "bg-[#EAD7BB] text-[#113946]"
+                          : "bg-[#FFF2D8] text-[#113946]"
+                      }`}
+                    >
                       {ticket.status}
                     </span>
                   </div>
@@ -130,9 +148,9 @@ const SearchModal = ({ isOpen, onClose }) => {
               ))}
             </ul>
           ) : searchQuery ? (
-            <div className="p-4 text-center text-[#3B6790]">No tickets found matching "{searchQuery}"</div>
+            <div className="p-4 text-center text-[#BCA37F]">No tickets found matching "{searchQuery}"</div>
           ) : (
-            <div className="p-4 text-center text-[#3B6790]">Type to search for tickets</div>
+            <div className="p-4 text-center text-[#BCA37F]">Type to search for tickets</div>
           )}
         </div>
       </div>

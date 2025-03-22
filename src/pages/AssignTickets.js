@@ -110,7 +110,7 @@ const AdminTicketList = ({ isSidebarOpen }) => {
           return ticket;
         })
       );
-      
+
       // Send assignment email notification to the ticket owner
       try {
         const response = await fetch("/api/send-email", {
@@ -144,29 +144,29 @@ const AdminTicketList = ({ isSidebarOpen }) => {
     <div
       className={`transition-all duration-300 ${
         isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"
-      } p-6 bg-gray-100 min-h-screen mt-16 rounded-2xl`}
+      } p-6 bg-[#FFF2D8] min-h-screen mt-16 rounded-2xl`}
     >
       <div className="flex items-center gap-2 mb-4">
-        <FaTicketAlt className="text-[#23486A]" size={28} />
-        <h2 className="text-2xl font-semibold text-[#23486A]">
+        <FaTicketAlt className="text-[#113946]" size={28} />
+        <h2 className="text-2xl font-semibold text-[#113946]">
           Assign Tickets
         </h2>
       </div>
 
       {/* Notification displayed outside the modal */}
       {successMessage && (
-        <div className="mb-4 p-2 bg-green-100 text-green-800 rounded-xl text-center">
+        <div className="mb-4 p-2 bg-[#EAD7BB] text-[#113946] rounded-xl text-center">
           {successMessage}
         </div>
       )}
 
       {/* Unassigned Tickets Section */}
-      <div className="bg-white shadow-md rounded-2xl overflow-hidden mb-6">
-        <h3 className="p-4 text-xl font-semibold text-[#23486A] border-b">
+      <div className="bg-[#113946] shadow-md rounded-2xl overflow-hidden mb-6">
+        <h3 className="p-4 text-xl font-semibold text-[#FFF2D8] border-b border-[#EAD7BB]">
           Unassigned Tickets
         </h3>
         <table className="w-full border-collapse text-left">
-          <thead className="bg-[#23486A] text-white">
+          <thead className="bg-[#BCA37F] text-[#FFF2D8]">
             <tr>
               <th className="p-4">ID</th>
               <th className="p-4">Title</th>
@@ -178,26 +178,26 @@ const AdminTicketList = ({ isSidebarOpen }) => {
           </thead>
           <tbody>
             {unassignedTickets.map((ticket) => (
-              <tr key={ticket.id} className="border-b hover:bg-gray-50">
-                <td className="p-4">{ticket.id}</td>
-                <td className="p-4">{ticket.title}</td>
-                <td className="p-4">{ticket.email}</td>
+              <tr key={ticket.id} className="border-b">
+                <td className="p-4 text-[#FFF2D8] ">{ticket.id}</td>
+                <td className="p-4 text-[#FFF2D8]">{ticket.title}</td>
+                <td className="p-4 text-[#FFF2D8]">{ticket.email}</td>
                 <td className="p-4">
                   <span
-                    className={`px-3 py-1 text-white text-sm rounded-xl ${
+                    className={`px-3 py-1 text-sm rounded-xl ${
                       ticket.priority === "high"
-                        ? "bg-[#EFB036]"
+                        ? "bg-[#EAD7BB] text-[#113946]"
                         : ticket.priority === "medium"
-                        ? "bg-[#3B6790]"
+                        ? "bg-[#BCA37F] text-[#FFF2D8]"
                         : ticket.priority === "low"
-                        ? "bg-[#4C7B8B]"
-                        : "bg-[#23486A]"
+                        ? "bg-[#FFF2D8] text-[#113946]"
+                        : "bg-[#113946] text-[#FFF2D8]"
                     }`}
                   >
                     {ticket.priority}
                   </span>
                 </td>
-                <td className="p-4">
+                <td className="p-4 text-[#FFF2D8]">
                   {new Date(ticket.created_at).toLocaleDateString()}
                 </td>
                 <td className="p-4 text-center">
@@ -206,7 +206,7 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                       setSelectedTicket(ticket);
                       setIsModalOpen(true);
                     }}
-                    className="px-4 py-2 text-white rounded-xl flex items-center gap-2 shadow-md bg-gradient-to-r from-[#3B6790] to-[#23486A] hover:from-[#23486A] hover:to-[#3B6790]"
+                    className="px-4 py-2 rounded-xl flex items-center gap-2 shadow-md bg-gradient-to-r from-[#EAD7BB] to-[#BCA37F] hover:from-[#BCA37F] hover:to-[#EAD7BB] text-[#113946]"
                   >
                     Assign <FiUserPlus />
                   </button>
@@ -218,12 +218,12 @@ const AdminTicketList = ({ isSidebarOpen }) => {
       </div>
 
       {/* Assigned Tickets Section */}
-      <div className="bg-white shadow-md rounded-2xl overflow-hidden">
-        <h3 className="p-4 text-xl font-semibold text-[#23486A] border-b">
+      <div className="bg-[#113946] shadow-md rounded-2xl overflow-hidden">
+        <h3 className="p-4 text-xl font-semibold text-[#FFF2D8] border-b border-[#EAD7BB]">
           Assigned Tickets
         </h3>
         <table className="w-full border-collapse text-left">
-          <thead className="bg-[#23486A] text-white">
+          <thead className="bg-[#BCA37F] text-[#FFF2D8]">
             <tr>
               <th className="p-4">ID</th>
               <th className="p-4">Title</th>
@@ -235,10 +235,10 @@ const AdminTicketList = ({ isSidebarOpen }) => {
           </thead>
           <tbody>
             {assignedTickets.map((ticket) => (
-              <tr key={ticket.id} className="border-b hover:bg-gray-50">
-                <td className="p-4">{ticket.id}</td>
-                <td className="p-4">{ticket.title}</td>
-                <td className="p-4">
+              <tr key={ticket.id} className="border-b]">
+                <td className="p-4 text-[#FFF2D8]">{ticket.id}</td>
+                <td className="p-4 text-[#FFF2D8]">{ticket.title}</td>
+                <td className="p-4 text-[#FFF2D8]">
                   {ticket.assignments && ticket.assignments.length > 0
                     ? ticket.assignments
                         .map((assignment) => {
@@ -252,20 +252,20 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                 </td>
                 <td className="p-4">
                   <span
-                    className={`px-3 py-1 text-white text-sm rounded-xl ${
+                    className={`px-3 py-1 text-sm rounded-xl ${
                       ticket.priority === "high"
-                        ? "bg-[#EFB036]"
+                        ? "bg-[#EAD7BB] text-[#113946]"
                         : ticket.priority === "medium"
-                        ? "bg-[#3B6790]"
+                        ? "bg-[#BCA37F] text-[#FFF2D8]"
                         : ticket.priority === "low"
-                        ? "bg-[#4C7B8B]"
-                        : "bg-[#23486A]"
+                        ? "bg-[#FFF2D8] text-[#113946]"
+                        : "bg-[#113946] text-[#FFF2D8]"
                     }`}
                   >
                     {ticket.priority}
                   </span>
                 </td>
-                <td className="p-4">
+                <td className="p-4 text-[#FFF2D8]">
                   {new Date(ticket.created_at).toLocaleDateString()}
                 </td>
                 <td className="p-4 text-center">
@@ -274,7 +274,7 @@ const AdminTicketList = ({ isSidebarOpen }) => {
                       setSelectedTicket(ticket);
                       setIsModalOpen(true);
                     }}
-                    className="px-4 py-2 text-white rounded-xl flex items-center gap-2 shadow-md bg-gradient-to-r from-[#3B6790] to-[#23486A] hover:from-[#23486A] hover:to-[#3B6790]"
+                    className="px-4 py-2 rounded-xl flex items-center gap-2 shadow-md bg-gradient-to-r from-[#EAD7BB] to-[#BCA37F] hover:from-[#BCA37F] hover:to-[#EAD7BB] text-[#113946]"
                   >
                     Reassign <FiUserPlus />
                   </button>
@@ -291,47 +291,47 @@ const AdminTicketList = ({ isSidebarOpen }) => {
         onRequestClose={() => setIsModalOpen(false)}
         className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
       >
-        <div className="bg-white rounded-2xl p-6 shadow-lg w-[40rem] max-h-[80vh] overflow-y-auto">
+        <div className="bg-[#113946] rounded-2xl p-6 shadow-lg w-[40rem] max-h-[80vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-center w-full">
+            <h3 className="text-xl font-semibold text-center w-full text-[#FFF2D8]">
               Assign Employee
             </h3>
             <button
               onClick={() => setIsModalOpen(false)}
-              className="text-gray-600 hover:text-gray-800"
+              className="text-[#EAD7BB] hover:text-[#BCA37F]"
             >
               <FiX size={24} />
             </button>
           </div>
           <div className="relative mb-4">
-            <FiSearch className="absolute left-3 top-3 text-gray-500" />
+            <FiSearch className="absolute left-3 top-3 text-[#EAD7BB]" />
             <input
               type="text"
               placeholder="Search employee..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300"
+              className="w-full pl-10 pr-4 py-2 border border-[#BCA37F] rounded-xl focus:outline-none focus:ring focus:ring-[#EAD7BB] text-[#113946]"
             />
           </div>
-          <div className="max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-[#BCA37F] scrollbar-track-[#EAD7BB]">
             <ul>
               {filteredEmployees.map((employee) => (
                 <li
                   key={employee.id}
-                  className="flex justify-between items-center py-3 border-b last:border-none"
+                  className="flex justify-between items-center py-3 border-b border-[#EAD7BB] last:border-none"
                 >
                   <div>
-                    <span className="text-gray-800 font-semibold">
+                    <span className="text-[#FFF2D8] font-semibold">
                       {employee.name}
                     </span>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-[#EAD7BB]">
                       {employee.role}
                       {employee.department ? ` - ${employee.department}` : ""}
                     </p>
                   </div>
                   <button
                     onClick={() => handleAssign(employee)}
-                    className="px-3 py-1 bg-green-500 text-white rounded-xl hover:bg-green-600"
+                    className="px-3 py-1 bg-[#EAD7BB] text-[#113946] rounded-xl hover:bg-[#BCA37F]"
                   >
                     Assign
                   </button>

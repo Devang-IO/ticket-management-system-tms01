@@ -201,43 +201,43 @@ const Navbar = ({ sidebarOpen }) => {
               </button>
             </div>
             {profileOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out z-50">
-                <ul className="py-2">
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                    onClick={() => {
-                      setProfileModalOpen(true);
-                      setProfileOpen(false);
-                    }}
-                  >
-                    <FiUser className="text-gray-700" />
-                    <span className="text-sm text-gray-700">View Profile</span>
-                  </li>
+  <div className="absolute right-0 mt-2 w-48 bg-[#FFF2D8] rounded-xl shadow-lg transform transition-all duration-300 ease-in-out z-1">
+    <ul className="py-2">
+      <li
+        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2"
+        onClick={() => {
+          setProfileModalOpen(true);
+          setProfileOpen(false);
+        }}
+      >
+        <FiUser className="text-[#113946]" />
+        <span className="text-sm text-[#113946]">View Profile</span>
+      </li>
 
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                    onClick={handleLogout}
-                  >
-                    <FiLogOut className="text-red-500" />
-                    <span className="text-sm text-red-500">Logout</span>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+      <li
+        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2"
+        onClick={handleLogout}
+      >
+        <FiLogOut className="text-[#113946]" />
+        <span className="text-sm text-[#113946]">Logout</span>
+      </li>
+    </ul>
+  </div>
+)}
+</div>
+</div>
+</nav>
 
-      {/* Toast Container */}
-      <ToastContainer position="top-center" autoClose={3000} />
-      
-      {/* Profile Modal */}
-      {profileModalOpen && (
-        <ProfileModal
-          onClose={() => setProfileModalOpen(false)}
-          onProfileUpdate={handleProfileUpdate}
-        />
-      )}
+{/* Toast Container */}
+<ToastContainer position="top-center" autoClose={3000} />
+
+{/* Profile Modal */}
+{profileModalOpen && (
+  <ProfileModal
+    onClose={() => setProfileModalOpen(false)}
+    onProfileUpdate={handleProfileUpdate}
+  />
+)}
       
       {/* Search Modal */}
       <SearchModal 
