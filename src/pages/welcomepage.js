@@ -48,7 +48,7 @@ const WelcomePage = () => {
         <h2 className="text-4xl font-bold mb-4 text-[#113946]">
           Welcome to QuickAssist
         </h2>
-        <p className="text-lg opacity-90">
+        <p className="text-lg opacity-90 text-[#113946]">
           QuickAssist is a powerful helpdesk solution designed to simplify
           customer support. With a ticketing system, community
           forums, and an intuitive interface, we help businesses resolve issues

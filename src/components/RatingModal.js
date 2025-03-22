@@ -40,15 +40,15 @@ const RatingModal = ({ show, onClose, employeeId, ticketId }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4">Your ticket has been closed</h2>
-        <p className="mb-4">How was your experience?</p>
-        <div className="flex mb-4">
+    <div className="fixed inset-0 flex justify-center items-center bg-opacity-70 z-50" style={{ backgroundColor: "#113946" }}>
+      <div className="p-6 rounded-lg shadow-xl max-w-md w-full" style={{ backgroundColor: "#FFF2D8", border: "1px solid #BCA37F" }}>
+        <h2 className="text-2xl font-bold mb-4" style={{ color: "#113946" }}>Your ticket has been closed</h2>
+        <p className="mb-4" style={{ color: "#113946" }}>How was your experience?</p>
+        <div className="flex justify-center mb-6">
           {[...Array(5)].map((star, index) => {
             const ratingValue = index + 1;
             return (
-              <label key={ratingValue}>
+              <label key={ratingValue} className="mx-1">
                 <input
                   type="radio"
                   name="rating"
@@ -57,9 +57,9 @@ const RatingModal = ({ show, onClose, employeeId, ticketId }) => {
                   onClick={() => setRating(ratingValue)}
                 />
                 <FaStar
-                  size={30}
-                  className="cursor-pointer"
-                  color={ratingValue <= (hover || rating) ? "#ffc107" : "#e4e5e9"}
+                  size={36}
+                  className="cursor-pointer transition-colors duration-200"
+                  color={ratingValue <= (hover || rating) ? "#BCA37F" : "#EAD7BB"}
                   onMouseEnter={() => setHover(ratingValue)}
                   onMouseLeave={() => setHover(0)}
                 />
@@ -68,24 +68,35 @@ const RatingModal = ({ show, onClose, employeeId, ticketId }) => {
           })}
         </div>
         <textarea
-          placeholder="How was your experience?"
+          placeholder="Share your experience with us..."
           value={experience}
           onChange={(e) => setExperience(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
+          className="w-full p-3 rounded-lg mb-6 focus:outline-none"
           rows="3"
+          style={{ 
+            backgroundColor: "#EAD7BB", 
+            border: "1px solid #BCA37F",
+            color: "#113946"
+          }}
         />
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Submit
-          </button>
+        <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="bg-gray-300 text-black px-4 py-2 rounded"
+            className="px-4 py-2 rounded-lg"
+            style={{ 
+              backgroundColor: "#EAD7BB", 
+              color: "#113946",
+              border: "1px solid #BCA37F"
+            }}
           >
             Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 rounded-lg text-white"
+            style={{ backgroundColor: "#113946" }}
+          >
+            Submit
           </button>
         </div>
       </div>

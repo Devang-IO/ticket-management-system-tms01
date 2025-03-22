@@ -20,12 +20,12 @@ const TicketRequestModal = ({ show, onClose, ticket, onRequestSubmitted }) => {
         return;
       }
 
-      // Update ticket status to indicate closure requested (resolution notes removed)
+      // Update ticket status to indicate closure requested
       const { error } = await supabase
         .from("tickets")
         .update({
           status: "closure_requested",
-          closed_by: user.id // Set the employee who is requesting to close the ticket
+          closed_by: user.id,
         })
         .eq("id", ticket.id);
 
@@ -34,7 +34,7 @@ const TicketRequestModal = ({ show, onClose, ticket, onRequestSubmitted }) => {
       } else {
         toast.success("Closure request submitted successfully");
         onRequestSubmitted(ticket.id, user.id);
-        onClose(); // Close the modal after successful submission
+        onClose();
       }
     } catch (error) {
       toast.error("An error occurred: " + error.message);
@@ -45,29 +45,29 @@ const TicketRequestModal = ({ show, onClose, ticket, onRequestSubmitted }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Request Ticket Closure</h2>
+      <div className="bg-[#FFF2D8] rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4 text-[#113946]">Request Ticket Closure</h2>
         
         <div className="mb-4">
-          <p>You are requesting to close ticket: <strong>{ticket.title}</strong></p>
+          <p className="text-[#113946]">
+            You are requesting to close ticket: <strong>{ticket.title}</strong>
+          </p>
         </div>
         
-        {/* Resolution notes input removed */}
-
         <div className="flex justify-end space-x-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
             disabled={isSubmitting}
+            className="px-4 py-2 bg-[#EAD7BB] text-[#113946] rounded-md hover:bg-[#BCA37F] transition duration-200"
           >
             Not Now
           </button>
           <button
             type="button"
             onClick={handleCloseTicket}
-            className="px-4 py-2 bg-[#23486A] text-white rounded-md hover:bg-[#3B6790] transition"
             disabled={isSubmitting}
+            className="px-4 py-2 bg-[#BCA37F] text-white rounded-md hover:bg-[#113946] transition duration-200"
           >
             {isSubmitting ? "Submitting..." : "Yes, Close Ticket"}
           </button>

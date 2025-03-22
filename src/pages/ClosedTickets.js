@@ -68,7 +68,7 @@ const ClosedTickets = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FFF2D8] to-[#F5E7C1] px-4 py-6 md:px-8 md:py-8 mt-20 z-0">
+    <div className="min-h-screen bg-gradient-to-b from-[#FFF2D8] to-[#F5E7C1] px-4 py-6 md:px-8 md:py-8 mt-10 z-0">
       {/* Page Header */}
       <div className="bg-[#113946] shadow-lg rounded-xl p-6 max-w-7xl mx-auto transform transition-all duration-300 hover:shadow-xl z-0">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center z-0">

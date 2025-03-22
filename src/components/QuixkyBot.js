@@ -61,10 +61,10 @@ const PolarBearIcon = ({ mouse }) => (
       castShadow
       shadow-mapSize-width={1024}
       shadow-mapSize-height={1024}
-      color="#ffffff"
+      color="#FFF2D8"
     />
     {/* Optional: Add a point light to fill in shadows */}
-    <pointLight position={[-5, -5, -5]} intensity={0.5} />
+    <pointLight position={[-5, -5, -5]} intensity={0.5} color="#EAD7BB" />
     <PolarBearModel mouse={mouse} />
     {/* Ground plane to receive shadow */}
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
@@ -80,14 +80,14 @@ const TypingIndicator = () => (
     <div style={{
       width: "6px",
       height: "6px",
-      background: "gray",
+      background: "#113946",
       borderRadius: "50%",
       animation: "bounce 1.4s infinite ease-in-out both"
     }}></div>
     <div style={{
       width: "6px",
       height: "6px",
-      background: "gray",
+      background: "#113946",
       borderRadius: "50%",
       animation: "bounce 1.4s infinite ease-in-out both",
       animationDelay: "0.2s"
@@ -95,7 +95,7 @@ const TypingIndicator = () => (
     <div style={{
       width: "6px",
       height: "6px",
-      background: "gray",
+      background: "#113946",
       borderRadius: "50%",
       animation: "bounce 1.4s infinite ease-in-out both",
       animationDelay: "0.4s"
@@ -228,15 +228,19 @@ const QuixkyBot = () => {
                 key={idx}
                 onClick={() => sendQuery(q)}
                 style={{
-                  background: "#e9ecef",
+                  background: "#BCA37F",
                   border: "none",
                   padding: "5px 10px",
                   borderRadius: "15px",
                   cursor: "pointer",
                   fontSize: "12px",
                   marginRight: "5px",
-                  marginBottom: "5px"
+                  marginBottom: "5px",
+                  color: "#FFF2D8",
+                  transition: "background-color 0.3s"
                 }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#113946"}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#BCA37F"}
               >
                 {q}
               </button>
@@ -257,8 +261,10 @@ const QuixkyBot = () => {
             style={{
               display: "inline-block",
               padding: "8px 12px",
-              background: msg.sender === "user" ? "#d1e7dd" : "#f8d7da",
-              borderRadius: "15px"
+              background: msg.sender === "user" ? "#113946" : "#EAD7BB",
+              color: msg.sender === "user" ? "#FFF2D8" : "#113946",
+              borderRadius: "15px",
+              maxWidth: "80%"
             }}
           >
             {msg.text}
@@ -302,11 +308,11 @@ const QuixkyBot = () => {
               left: "-70%",
               transform: "translateX(-50%)",
               padding: "3px 8px",
-              background: "rgba(255,255,255,0.7)",
+              background: "#FFF2D8",
               borderRadius: "12px",
-              border: "1px solid #ccc",
+              border: "1px solid #BCA37F",
               fontSize: "10px",
-              color: "#333",
+              color: "#113946",
               textAlign: "center",
               whiteSpace: "nowrap",
               animation: "fadeIn 0.5s"
@@ -320,10 +326,11 @@ const QuixkyBot = () => {
               width: "70px",
               height: "70px",
               borderRadius: "50%",
-              background: "radial-gradient(circle, #ffffff 0%, transparent 70%)",
+              background: "radial-gradient(circle, #EAD7BB 0%, transparent 70%)",
               cursor: "pointer",
               padding: 0,
-              border: "none"
+              border: "none",
+              boxShadow: "0 2px 8px rgba(17, 57, 70, 0.3)"
             }}
           >
             <PolarBearIcon mouse={globalMouse} />
@@ -341,12 +348,12 @@ const QuixkyBot = () => {
               right: "20px",
               width: "320px",
               height: "450px",
-              backgroundColor: "white",
-              border: "1px solid #ccc",
+              backgroundColor: "#FFF2D8",
+              border: "1px solid #BCA37F",
               borderRadius: "8px",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+              boxShadow: "0 2px 10px rgba(17, 57, 70, 0.3)",
               zIndex: 1000
             }}
           >
@@ -357,7 +364,8 @@ const QuixkyBot = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "10px",
-                borderBottom: "1px solid #eee"
+                borderBottom: "1px solid #BCA37F",
+                backgroundColor: "#EAD7BB"
               }}
             >
               <img
@@ -365,14 +373,15 @@ const QuixkyBot = () => {
                 alt="QuickAssist Logo"
                 style={{ width: "40px", height: "40px" }}
               />
-              <strong>Quixky Bot</strong>
+              <strong style={{ color: "#113946" }}>Quixky Bot</strong>
               <button
                 onClick={toggleModal}
                 style={{
                   background: "none",
                   border: "none",
                   fontSize: "20px",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  color: "#113946"
                 }}
               >
                 ×
@@ -384,7 +393,8 @@ const QuixkyBot = () => {
               style={{
                 flex: 1,
                 padding: "10px",
-                overflowY: "auto"
+                overflowY: "auto",
+                backgroundColor: "#FFF2D8"
               }}
             >
               {renderConversation()}
@@ -394,7 +404,7 @@ const QuixkyBot = () => {
                   <div style={{
                     display: "inline-block",
                     padding: "8px 12px",
-                    background: "#f8d7da",
+                    background: "#EAD7BB",
                     borderRadius: "15px"
                   }}>
                     <TypingIndicator />
@@ -409,7 +419,8 @@ const QuixkyBot = () => {
             <div
               style={{
                 padding: "10px",
-                borderTop: "1px solid #eee"
+                borderTop: "1px solid #BCA37F",
+                backgroundColor: "#EAD7BB"
               }}
             >
               <form onSubmit={handleSubmit}>
@@ -421,9 +432,11 @@ const QuixkyBot = () => {
                   style={{
                     width: "100%",
                     padding: "8px",
-                    marginBottom: "5px",
+                    marginBottom: "8px",
                     borderRadius: "4px",
-                    border: "1px solid #ccc"
+                    border: "1px solid #BCA37F",
+                    backgroundColor: "#FFF2D8",
+                    color: "#113946"
                   }}
                 />
                 <button
@@ -431,11 +444,15 @@ const QuixkyBot = () => {
                   style={{
                     width: "100%",
                     padding: "8px",
-                    backgroundColor: "#007bff",
-                    color: "white",
+                    backgroundColor: "#113946",
+                    color: "#FFF2D8",
                     border: "none",
-                    borderRadius: "4px"
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    transition: "background-color 0.3s"
                   }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#BCA37F"}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#113946"}
                 >
                   {loading ? "Loading..." : "Send"}
                 </button>
