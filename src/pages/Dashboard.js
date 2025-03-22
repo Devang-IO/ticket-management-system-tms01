@@ -171,29 +171,31 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen mt-10" style={{ backgroundColor: COLORS.light }}>
-      <div className="container mx-auto px-4 py-8">
+    // Changed from "w-screen" to "w-full" to prevent horizontal overflow
+    <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: COLORS.light }}>
+      {/* Made container responsive with max-width and auto margins */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 mt-10">
         {/* Header with gradient underline */}
         <h1 className="text-4xl font-bold mb-2" style={{ color: COLORS.primary }}>
           My Dashboard
         </h1>
-       <br></br>
+        <br />
         
-        {/* Overview Cards - Grid layout with dark cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Overview Cards - Made more responsive with better breakpoints */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
           {ticketData.map((ticket, index) => (
             <div
               key={index}
               className="rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
               style={{ backgroundColor: COLORS.primary }}
             >
-              <div className="p-5">
+              <div className="p-4 md:p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold" style={{ color: COLORS.light }}>{ticket.name}</h2>
+                  <h2 className="text-lg md:text-xl font-semibold" style={{ color: COLORS.light }}>{ticket.name}</h2>
                   <div style={{ color: COLORS.light }}>{ticket.icon}</div>
                 </div>
                 <div className="flex items-end">
-                  <p className="text-3xl font-bold" style={{ color: COLORS.accent }}>{ticket.value}</p>
+                  <p className="text-2xl md:text-3xl font-bold" style={{ color: COLORS.accent }}>{ticket.value}</p>
                   <p className="ml-2 text-sm" style={{ color: COLORS.light }}>tickets</p>
                 </div>
               </div>
@@ -202,44 +204,47 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Chart and Help Card - 2-column layout */}
+        {/* Chart and Help Card - 2-column layout with better responsiveness */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Bar Chart with custom styling */}
-          <div className="rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl" style={{ backgroundColor: "white" }}>
-            <h2 className="text-xl font-semibold mb-6 flex items-center" style={{ color: COLORS.primary }}>
+          <div className="rounded-xl shadow-lg p-4 md:p-6 transition-all duration-300 hover:shadow-xl" style={{ backgroundColor: "white" }}>
+            <h2 className="text-xl font-semibold mb-4 md:mb-6 flex items-center" style={{ color: COLORS.primary }}>
               <FiList className="mr-2" size={20} />
               Ticket Status Distribution
             </h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={ticketData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                <XAxis dataKey="name" stroke={COLORS.primary} />
-                <YAxis stroke={COLORS.primary} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: "rgba(255, 255, 255, 0.95)", 
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    border: "none",
-                    color: COLORS.primary
-                  }}
-                />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                  {ticketData.map((entry, index) => {
-                    // Alternating colors for bars
-                    const barColors = [COLORS.primary, COLORS.secondary];
-                    return <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />;
-                  })}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {/* Made chart height responsive */}
+            <div className="w-full h-64 md:h-72 lg:h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ticketData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                  <XAxis dataKey="name" stroke={COLORS.primary} />
+                  <YAxis stroke={COLORS.primary} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "rgba(255, 255, 255, 0.95)", 
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      border: "none",
+                      color: COLORS.primary
+                    }}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {ticketData.map((entry, index) => {
+                      // Alternating colors for bars
+                      const barColors = [COLORS.primary, COLORS.secondary];
+                      return <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />;
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Help Card with custom styling */}
-          <div className="rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl flex flex-col justify-center" 
+          <div className="rounded-xl shadow-lg p-4 md:p-6 transition-all duration-300 hover:shadow-xl flex flex-col justify-center" 
                style={{ backgroundColor: "white" }}>
-            <div className="flex items-center mb-5">
+            <div className="flex items-center mb-4 md:mb-5">
               <div className="h-10 w-2 rounded-full mr-3" style={{ backgroundColor: COLORS.secondary }}></div>
-              <h2 className="text-2xl font-semibold flex items-center" style={{ color: COLORS.primary }}>
+              <h2 className="text-xl md:text-2xl font-semibold flex items-center" style={{ color: COLORS.primary }}>
                 <FiHelpCircle className="mr-2" size={24} />
                 Need Help?
               </h2>
@@ -250,8 +255,8 @@ const Dashboard = () => {
               Submitting a ticket is quick and easy.
             </p>
             
-            <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: COLORS.light }}>
-              <ul className="space-y-3" style={{ color: COLORS.primary }}>
+            <div className="rounded-lg p-3 md:p-4 mb-4" style={{ backgroundColor: COLORS.light }}>
+              <ul className="space-y-2 md:space-y-3" style={{ color: COLORS.primary }}>
                 <li className="flex items-center">
                   <span className="inline-flex items-center justify-center h-6 w-6 rounded-full text-xs mr-3" 
                         style={{ backgroundColor: COLORS.primary, color: COLORS.light }}>1</span>
@@ -282,11 +287,11 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Quick Actions - Centered, improved buttons */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+        {/* Quick Actions - Improved responsiveness */}
+        <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4 mb-6">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            className="flex items-center justify-center px-4 md:px-6 py-3 rounded-xl font-semibold shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
             style={{ backgroundColor: COLORS.primary, color: COLORS.light }}
           >
             <FiPlusCircle className="mr-2" size={20} /> Create New Ticket
@@ -294,7 +299,7 @@ const Dashboard = () => {
           
           <Link
             to="/tickets"
-            className="flex items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            className="flex items-center justify-center px-4 md:px-6 py-3 rounded-xl font-semibold shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
             style={{ backgroundColor: COLORS.secondary, color: COLORS.light }}
           >
             <FiList className="mr-2" size={20} /> View My Tickets
