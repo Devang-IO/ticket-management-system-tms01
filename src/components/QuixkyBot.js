@@ -304,6 +304,7 @@ const QuixkyBot = () => {
               padding: "3px 8px",
               background: "rgba(255,255,255,0.7)",
               borderRadius: "12px",
+              border: "1px solid #ccc",
               fontSize: "10px",
               color: "#333",
               textAlign: "center",
