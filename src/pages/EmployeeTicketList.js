@@ -10,27 +10,58 @@ const priorityStyles = {
   Critical: "bg-[#113946]",
 };
 
+/**
+ * Returns the pill classes for the Status column.
+ * Pastel background + darker border + text color
+ */
+const getStatusPillClass = (status) => {
+  const s = (status || "").toLowerCase().trim();
+  switch (s) {
+    case "open":
+      return "inline-block px-3 py-1 border border-yellow-600 bg-yellow-50 text-yellow-700 rounded-full";
+    case "answered":
+      return "inline-block px-3 py-1 border border-blue-600 bg-blue-50 text-blue-700 rounded-full";
+    case "closed":
+      return "inline-block px-3 py-1 border border-green-600 bg-green-50 text-green-700 rounded-full";
+    case "requested":
+      return "inline-block px-3 py-1 border border-red-600 bg-red-50 text-red-700 rounded-full";
+    default:
+      // Fallback
+      return "inline-block px-3 py-1 border border-teal-600 bg-teal-50 text-teal-700 rounded-full";
+  }
+};
+
+// Main container + styling
+const pageContainer = "pt-24 px-6 min-h-screen flex flex-col bg-gray-50 text-gray-800";
+const pageTitle = "text-3xl font-bold text-[#23486A] mb-4";
+const searchBarClass = "flex items-center w-full max-w-lg bg-white border border-gray-300 text-gray-600 rounded-full px-4 py-2 mb-6 shadow-md";
+const tableContainer = "w-full overflow-x-auto";
+const tableClass = "w-full text-left border-collapse shadow-md rounded-xl overflow-hidden";
+const tableHeaderClass = "bg-blue-50 border-b border-blue-100 text-blue-800";
+const tableCellClass = "p-4";
+const rowEven = "bg-gray-50";
+const rowOdd = "bg-white";
+
 const EmployeeTicketList = () => {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const ticketsPerPage = 5; // Change as needed
+  const ticketsPerPage = 5;
   const [showModal, setShowModal] = useState(false);
   const [ticketToClose, setTicketToClose] = useState(null);
-  const navigate = useNavigate();
 
-  // Ref to track which tickets have already triggered an email
+  // Keep track of which tickets have already triggered closure email
   const notifiedTicketIdsRef = useRef(new Set());
 
-  // Function to fetch user name by ID from the 'users' table
+  // Fetch user name from 'users' table
   const fetchUserNameById = async (userId) => {
     const { data, error } = await supabase
-      .from("users") // Fetch from the 'users' table
+      .from("users")
       .select("name")
       .eq("id", userId)
       .single();
-
     if (error) {
       console.error("Error fetching user name:", error);
       return "Unknown";
@@ -40,13 +71,11 @@ const EmployeeTicketList = () => {
 
   useEffect(() => {
     const fetchAssignedTickets = async () => {
-      // Get the current user
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch assignments joined with the related ticket data (including closed_by, name, email, and user_id)
       const { data, error } = await supabase
         .from("assignments")
         .select("ticket: tickets(id, title, created_at, priority, status, closed_by, user_id, name, email)")
@@ -55,13 +84,12 @@ const EmployeeTicketList = () => {
       if (error) {
         console.error("Error fetching assigned tickets:", error);
       } else if (data) {
-        // Map assignments to extract the ticket object
         const assignedTickets = data.map((assignment) => assignment.ticket);
-        
-        // For tickets that are closed, fetch the name of the ticket creator (from ticket.user_id)
+
+        // If ticket is closed, fetch the name of the ticket's creator
         const ticketsWithNames = await Promise.all(
           assignedTickets.map(async (ticket) => {
-            if (ticket.status.toLowerCase() === "closed") {
+            if ((ticket.status || "").toLowerCase() === "closed") {
               const creatorName = await fetchUserNameById(ticket.user_id);
               return { ...ticket, closed_by_name: creatorName };
             }
@@ -69,11 +97,10 @@ const EmployeeTicketList = () => {
           })
         );
 
-        // Sort the tickets so that the latest tickets appear first
+        // Sort tickets by created date descending
         const sortedTickets = ticketsWithNames.sort(
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
-
         setTickets(sortedTickets);
       }
     };
@@ -81,12 +108,14 @@ const EmployeeTicketList = () => {
     fetchAssignedTickets();
   }, []);
 
-  // Combined filtering: search by title and by status filter
+  // Filter by search + status
   const filteredTickets = tickets.filter((ticket) => {
-    const searchMatch = ticket.title.toLowerCase().includes(search.toLowerCase());
-    const status = ticket.status.trim().toLowerCase();
+    const titleMatch = (ticket.title || "")
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const status = (ticket.status || "").toLowerCase().trim();
     const statusMatch = statusFilter === "all" || status === statusFilter;
-    return searchMatch && statusMatch;
+    return titleMatch && statusMatch;
   });
 
   // Pagination logic
@@ -95,14 +124,13 @@ const EmployeeTicketList = () => {
   const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
   const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
 
-  // Reset pagination if filter changes
+  // Reset to page 1 if filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter]);
 
-  // Function to handle requesting ticket closure (resolution notes removed)
+  // Request closure
   const handleRequestTicket = async (ticket) => {
-    // Get the current employee's details
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -110,38 +138,28 @@ const EmployeeTicketList = () => {
       alert("User not authenticated");
       return;
     }
-
     const userId = user.id;
-
-    // Update the ticket to set status as "requested" without resolution notes
     const { error } = await supabase
       .from("tickets")
-      .update({ 
-        status: "requested", 
-        closed_by: userId
-      })
+      .update({ status: "requested", closed_by: userId })
       .eq("id", ticket.id);
 
     if (error) {
       console.error("Error requesting ticket closure:", error.message);
       alert("Error requesting ticket closure: " + error.message);
       return;
-    } else {
-      // Update the local state
-      setTickets((prevTickets) =>
-        prevTickets.map((t) =>
-          t.id === ticket.id
-            ? { ...t, status: "requested", closed_by: userId }
-            : t
-        )
-      );
-      alert("Ticket closure request sent successfully");
     }
+    // Update local state
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticket.id ? { ...t, status: "requested", closed_by: userId } : t
+      )
+    );
+    alert("Ticket closure request sent successfully");
   };
 
-  // Function to update the ticket in Supabase (without sending email directly)
+  // Close ticket
   const handleCloseTicket = async (ticket) => {
-    // Retrieve current employee details
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -149,9 +167,6 @@ const EmployeeTicketList = () => {
       alert("User not authenticated");
       return;
     }
-
-    // We want to show the name of the user who created the ticket,
-    // so we fetch the name based on ticket.user_id rather than the current user
     const { error } = await supabase
       .from("tickets")
       .update({ status: "closed", closed_by: user.id })
@@ -161,21 +176,20 @@ const EmployeeTicketList = () => {
       console.error("Error closing ticket:", error.message);
       alert("Error closing ticket: " + error.message);
       return;
-    } else {
-      // Fetch the creator's name using ticket.user_id
-      const creatorName = await fetchUserNameById(ticket.user_id);
-      setTickets((prevTickets) =>
-        prevTickets.map((t) =>
-          t.id === ticket.id
-            ? { ...t, status: "closed", closed_by: t.user_id, closed_by_name: creatorName }
-            : t
-        )
-      );
-      alert("Ticket closed successfully");
     }
+    // Fetch creator's name
+    const creatorName = await fetchUserNameById(ticket.user_id);
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticket.id
+          ? { ...t, status: "closed", closed_by: t.user_id, closed_by_name: creatorName }
+          : t
+      )
+    );
+    alert("Ticket closed successfully");
   };
 
-  // Called when user confirms closing the ticket in the modal
+  // Confirm close from modal
   const handleConfirmClose = async () => {
     if (ticketToClose) {
       await handleCloseTicket(ticketToClose);
@@ -184,34 +198,25 @@ const EmployeeTicketList = () => {
     }
   };
 
-  // Effect to monitor tickets and send closure email when a ticket changes to "closed"
+  // Watch for closed tickets => send closure email
   useEffect(() => {
     tickets.forEach(async (ticket) => {
-      // Check if ticket is closed and hasn't been notified already
-      if (
-        ticket.status.toLowerCase() === "closed" &&
-        !notifiedTicketIdsRef.current.has(ticket.id)
-      ) {
-        console.log("Full ticket data for closure email:", ticket);
-        
+      const s = (ticket.status || "").toLowerCase();
+      if (s === "closed" && !notifiedTicketIdsRef.current.has(ticket.id)) {
         const closurePayload = {
           ticket: {
             name: ticket.name,
             email: ticket.email,
             title: ticket.title,
-            closed: true, // Explicitly setting the closure flag
+            closed: true,
           },
         };
-
-        console.log("Sending closure email payload:", closurePayload);
-
         try {
           const response = await fetch("/api/send-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(closurePayload),
           });
-          
           if (!response.ok) {
             const result = await response.json();
             console.error("Email sending failed:", result.error);

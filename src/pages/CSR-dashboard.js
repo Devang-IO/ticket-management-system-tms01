@@ -13,6 +13,25 @@ import {
 import Navbar from "../components/Navbar";
 import { FaClock, FaTasks, FaCheckCircle, FaStar, FaUser, FaMailBulk } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
+// Import Chart.js auto-registration to fix "category" scale errors
+import "chart.js/auto";
+import { format } from "date-fns";
+
+// --- Pastel Card Classes (from your AdminAnalyticsDashboard screenshot) ---
+const cardBase = "p-4 rounded-lg border";
+const cardOpen = `${cardBase} bg-yellow-50 border-yellow-100 text-yellow-700`;       // Open
+const cardUnassigned = `${cardBase} bg-orange-50 border-orange-100 text-orange-600`; // Unassigned
+const cardResponse = `${cardBase} bg-blue-50 border-blue-100 text-blue-600`;         // First Response
+const cardSLA = `${cardBase} bg-green-50 border-green-100 text-green-700`;           // SLA
+const cardCSAT = `${cardBase} bg-purple-50 border-purple-100 text-purple-600`;       // CSAT
+const cardWorkload = `${cardBase} bg-indigo-50 border-indigo-100 text-indigo-600`;   // Workload
+
+// Page container and card styles (similar to your AdminAnalyticsDashboard)
+const pageContainer = "w-full min-h-screen bg-gray-50 text-gray-800 overflow-x-hidden";
+const mainContent = "pt-24 px-4 lg:px-8 mx-auto max-w-[100vw]";
+const gridContainer = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6";
+const cardContainer = "bg-white rounded-lg shadow-md p-4 mb-4";
+const cardTitle = "text-lg font-semibold text-blue-800 mb-2 text-center";
 
 const CSRdashboard = () => {
   const [ticketSummary, setTicketSummary] = useState([]);
@@ -33,7 +52,7 @@ const CSRdashboard = () => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // Calculate timestamp for the start of today (used for cards only)
+        // Calculate timestamp for the start of today (used for cards)
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         const todayStartISO = todayStart.toISOString();
@@ -119,14 +138,13 @@ const CSRdashboard = () => {
         setTicketSummary(summary);
 
         // --- TICKET CHART DATA (Assigned vs Unassigned Tickets - All Time) ---
-        // Fetch all tickets with their assignments (no filter on created_at)
         const { data: allTickets, error: allError } = await supabase
           .from("tickets")
           .select("created_at, assignments(*)");
         if (allError) {
           console.error("Error fetching all tickets:", allError);
         }
-        // Group by the hour-of-day from each ticket's created_at timestamp
+        // Group by hour-of-day from each ticket's created_at
         const hours = Array.from({ length: 24 }, (_, i) => i);
         const chartDataFromBackend = hours.map((hour) => {
           const label = `${hour.toString().padStart(2, "0")}:00`;
@@ -162,7 +180,7 @@ const CSRdashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Fetch customer feedback for the logged-in employee only.
+  // Fetch customer feedback for the logged-in employee only
   useEffect(() => {
     const fetchFeedback = async () => {
       const { data: currentUserData } = await supabase.auth.getUser();
@@ -182,7 +200,7 @@ const CSRdashboard = () => {
     fetchFeedback();
   }, []);
 
-  // Render the star rating based on the rating value
+  // Render star ratings
   const renderStars = (rating) => {
     return (
       <div className="flex">
@@ -206,7 +224,7 @@ const CSRdashboard = () => {
       <div className="pt-24 px-4 lg:px-8 mx-auto w-full max-w-[100vw]">
         
         {/* Ticket Summary Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
+        <div className={`${gridContainer} animate-fadeIn`}>
           {ticketSummary.map((section, index) => (
             <div
               key={index}
