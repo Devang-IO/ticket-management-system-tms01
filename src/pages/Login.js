@@ -267,30 +267,30 @@ export default function LoginPage() {
               className="password-toggle"
               onClick={togglePasswordVisibility}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {/* {showPassword ? <FaEyeSlash /> : <FaEye />} */}
             </span>
           </div>
           
           {/* Password validation checkboxes */}
           {isPasswordFocused && (
             <div className="password-checks space-y-2 mt-2">
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.uppercase ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.uppercase ? 'text-blue-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.uppercase} readOnly className="form-checkbox" />
                 <span>Uppercase letter</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.lowercase ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.lowercase ? 'text-blue-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.lowercase} readOnly className="form-checkbox" />
                 <span>Lowercase letter</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.number ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.number ? 'text-blue-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.number} readOnly className="form-checkbox" />
                 <span>Number</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.specialChar ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.specialChar ? 'text-blue-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.specialChar} readOnly className="form-checkbox" />
                 <span>Special character</span>
               </div>
-              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.minLength ? 'text-yellow-500 animate-wobble' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${passwordChecks.minLength ? 'text-blue-500 animate-wobble' : 'text-gray-400'}`}>
                 <input type="checkbox" checked={passwordChecks.minLength} readOnly className="form-checkbox" />
                 <span>8 characters or more</span>
               </div>
