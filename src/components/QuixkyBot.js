@@ -52,7 +52,7 @@ const PolarBearIcon = ({ mouse }) => (
   <Canvas
     style={{ width: "100%", height: "100%", background: "transparent" }}
     shadows
-    camera={{ position: [0, .5, 3] }}
+    camera={{ position: [.5, .5, 3] }}
   >
     {/* Increase ambient light for better color visibility */}
     <ambientLight intensity={0.5} />
