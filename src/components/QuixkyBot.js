@@ -95,7 +95,7 @@ const QuixkyBot = () => {
   // Update global mouse position regardless of where the cursor is.
   useEffect(() => {
     const handleMouseMove = (event) => {
-      const x = (event.clientX / window.innerWidth) * .5 - 1;
+      const x = (event.clientX / window.innerWidth) * .6 - 1;
       const y = - (event.clientY / window.innerHeight) * 1 + 1;
       setGlobalMouse({ x, y });
     };
