@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { FiChevronDown, FiEye, FiTrash2, FiUserMinus } from "react-icons/fi";
+import { FiChevronDown, FiEye, FiTrash2, FiUserMinus, FiSearch, FiX } from "react-icons/fi";
 import { FaTicketAlt, FaFilter } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
 import { toast, ToastContainer } from "react-toastify";
@@ -8,6 +8,16 @@ import { createPortal } from "react-dom";
 import "react-toastify/dist/ReactToastify.css";
 
 const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
+  // Color palette from original code
+  const colors = {
+    background: "#FFF2D8",
+    dark: "#113946",
+    medium: "#BCA37F",
+    light: "#EAD7BB",
+    white: "#FFFFFF",
+    lightText: "#FFF2D8"
+  };
+
   const [tickets, setTickets] = useState([]);
   // "Show" filter: either "5" or "all"
   const [entriesPerPage, setEntriesPerPage] = useState("5");
@@ -21,6 +31,8 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   const [ticketToDelete, setTicketToDelete] = useState(null);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
+  // Local search state
+  const [localSearch, setLocalSearch] = useState(searchTerm || "");
 
   // Read query param for highlighted ticket id.
   const [searchParams] = useSearchParams();
@@ -29,18 +41,25 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
   // Fetch tickets
   useEffect(() => {
     const fetchTickets = async () => {
-      const { data, error } = await supabase
-        .from("tickets")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) {
-        console.error("Error fetching tickets:", error);
-      } else {
-        setTickets(data);
+      try {
+        const { data, error } = await supabase
+          .from("tickets")
+          .select("*")
+          .order("created_at", { ascending: false });
+       
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        toast.error("An unexpected error occurred");
       }
     };
+    
     fetchTickets();
   }, []);
+
+  // Update local search when prop changes
+  useEffect(() => {
+    setLocalSearch(searchTerm || "");
+  }, [searchTerm]);
 
   // Open delete modal for confirmation
   const openDeleteModal = (ticketId) => {
@@ -51,18 +70,26 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
 
   // Confirm deletion
   const confirmDeleteTicket = async () => {
-    const { error } = await supabase
-      .from("tickets")
-      .delete()
-      .eq("id", ticketToDelete);
-    if (error) {
-      console.error("Error deleting ticket:", error);
-    } else {
-      setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketToDelete));
-      toast.success("Ticket deleted successfully");
+    try {
+      const { error } = await supabase
+        .from("tickets")
+        .delete()
+        .eq("id", ticketToDelete);
+        
+      if (error) {
+        console.error("Error deleting ticket:", error);
+        toast.error("Failed to delete ticket");
+      } else {
+        setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketToDelete));
+        toast.success("Ticket deleted successfully");
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setShowDeleteModal(false);
+      setTicketToDelete(null);
     }
-    setShowDeleteModal(false);
-    setTicketToDelete(null);
   };
 
   // Cancel deletion
@@ -73,6 +100,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
 
   // Handle click on Actions button
   const handleActionsClick = (ticketId, event) => {
+    event.stopPropagation();
     const rect = event.currentTarget.getBoundingClientRect();
     setDropdownPosition({
       top: rect.top + rect.height + 4,
@@ -83,35 +111,38 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
 
   // Close dropdown if clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
-      if (dropdownPosition) {
+    const handleClickOutside = (event) => {
+      if (selectedTicketForActions && !event.target.closest('.action-dropdown')) {
         setSelectedTicketForActions(null);
         setDropdownPosition(null);
       }
     };
-    if (selectedTicketForActions) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [selectedTicketForActions, dropdownPosition]);
+  }, [selectedTicketForActions]);
 
   // Filter tickets based on search, status, and priority
   const filteredTickets = tickets.filter((ticket) => {
-    const matchesSearch = searchTerm
-      ? ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.id.toString().includes(searchTerm) ||
-        ticket.status.toLowerCase().includes(searchTerm.toLowerCase())
+    const searchTermToUse = localSearch || searchTerm || "";
+    const matchesSearch = searchTermToUse
+      ? ticket.title.toLowerCase().includes(searchTermToUse.toLowerCase()) ||
+        ticket.id.toString().includes(searchTermToUse) ||
+        ticket.status.toLowerCase().includes(searchTermToUse.toLowerCase())
       : true;
+      
     const matchesStatus =
       statusFilter === "All" ||
       ticket.status.toLowerCase() === statusFilter.toLowerCase();
+      
     const matchesPriority =
       priorityFilter === "All" ||
       ticket.priority.toLowerCase() === priorityFilter.toLowerCase();
+      
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  // Pagination logic: if "all" is selected, show all tickets on one page
+  // Pagination logic
   const entriesCount = entriesPerPage === "all" ? filteredTickets.length : Number(entriesPerPage);
   const totalPages = entriesPerPage === "all" ? 1 : Math.ceil(filteredTickets.length / entriesCount);
   const currentTickets =
@@ -126,118 +157,138 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
     }
   };
 
-  // Render actions dropdown if open
-  const actionsDropdown =
-    selectedTicketForActions && dropdownPosition
-      ? createPortal(
-          <div
-            className="dropdown-portal bg-white p-4 rounded shadow-lg transition-all duration-200"
-            style={{
-              position: "fixed",
-              top: dropdownPosition.top,
-              left: dropdownPosition.left,
-              zIndex: 1000,
-              minWidth: "180px",
-            }}
-          >
-            <Link
-              to={`/ticket/${selectedTicketForActions}`}
-              className="text-blue-600 hover:underline block mb-2"
-              onClick={() => {
-                setSelectedTicketForActions(null);
-                setDropdownPosition(null);
-              }}
-            >
-              <FiEye className="inline mr-1" /> View Ticket
-            </Link>
-            {/*
-            <button
-              className="text-red-600 hover:underline block text-left mb-2"
-              onClick={() => {
-                openDeleteModal(selectedTicketForActions);
-                setSelectedTicketForActions(null);
-                setDropdownPosition(null);
-              }}
-            >
-              <FiTrash2 className="inline mr-1" /> Delete Ticket
-            </button>
-            */}
-            <button
-              onClick={() => {
-                setSelectedTicketForActions(null);
-                setDropdownPosition(null);
-              }}
-              className="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
-            >
-              Close
-            </button>
-          </div>,
-          document.body
-        )
-      : null;
+  // Reset all filters
+  const resetFilters = () => {
+    setStatusFilter("All");
+    setPriorityFilter("All");
+    setLocalSearch("");
+    setCurrentPage(1);
+  };
+
+  // Get priority badge style
+  const getPriorityBadgeStyle = (priority) => {
+    switch(priority.toLowerCase()) {
+      case 'high':
+        return `bg-[${colors.medium}] text-[${colors.dark}]`;
+      case 'medium':
+        return `bg-[${colors.light}] text-[${colors.dark}]`;
+      case 'low':
+        return `bg-[${colors.lightText}] text-[${colors.dark}]`;
+      default:
+        return `bg-[${colors.dark}] text-[${colors.lightText}]`;
+    }
+  };
+
+  // Format date nicely
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
 
   return (
     <div
-      className={`tickets-container transition-all duration-300 ${
+      className={`tickets-container transition-all duration-300 mt-10 ${
         isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"
-      }`}
+      } p-6`}
+      style={{ backgroundColor: colors.background }}
     >
-      {/* Header */}
-      <div className="tickets-header flex items-center justify-between">
-        <h2 className="flex items-center text-3xl font-extrabold">
-          <FaTicketAlt className="mr-2 text-yellow-500" /> Manage Tickets
+      {/* Header Section */}
+      <div className="tickets-header flex flex-col md:flex-row md:items-center justify-between py-4 mb-6">
+        <h2 className="flex items-center text-3xl font-bold mb-4 md:mb-0" style={{ color: colors.dark }}>
+          <FaTicketAlt className="mr-3" style={{ color: colors.medium }} /> 
+          <span className="relative">
+            Manage Tickets
+           
+          </span>
         </h2>
+        
+        {/* Search component */}
+        <div className="relative w-full md:w-72 z-0">
+          <FiSearch className="absolute left-3 top-3" style={{ color: colors.dark }} />
+          <input
+            type="text"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="Search tickets..."
+            className="w-full py-2 pl-10 pr-4 rounded-full border focus:outline-none"
+            style={{ 
+              backgroundColor: colors.white, 
+              color: colors.dark,
+              borderColor: colors.medium 
+            }}
+          />
+          {localSearch && (
+            <button 
+              onClick={() => setLocalSearch("")}
+              className="absolute right-3 top-3 hover:opacity-70"
+              style={{ color: colors.dark }}
+            >
+              <FiX />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filters Section */}
       <div
-        style={{
-          backgroundColor: "#f9fafb",
-          padding: "16px",
-          borderRadius: "8px",
-          border: "1px solid #e5e7eb",
-          marginBottom: "16px",
-        }}
+        className="p-4 rounded-xl shadow-lg mb-6"
+        style={{ backgroundColor: colors.dark }}
       >
-        <div style={{ display: "flex", justifyContent: "flex-start", gap: "16px" }}>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-3">
+          <h3 className="flex items-center text-lg font-semibold mb-3 md:mb-0" style={{ color: colors.lightText }}>
+            <FaFilter className="mr-2" /> Filter Tickets
+          </h3>
+          
+          <div className="flex space-x-2">
+            <button
+              onClick={resetFilters}
+              className="px-4 py-2 rounded-md hover:opacity-90 transition-opacity duration-200 flex items-center"
+              style={{ backgroundColor: colors.light, color: colors.dark }}
+            >
+              <FiX className="mr-1" /> Reset Filters
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Show Entries Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <label style={{ fontWeight: "bold", color: "#23486A" }}>Show:</label>
+          <div className="flex flex-col space-y-1">
+            <label className="text-sm font-medium" style={{ color: colors.lightText }}>Show Entries</label>
             <select
               value={entriesPerPage}
               onChange={(e) => {
                 setEntriesPerPage(e.target.value);
                 setCurrentPage(1);
               }}
-              style={{
-                padding: "4px 8px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                backgroundColor: "white",
+              className="p-2 rounded-md border focus:outline-none"
+              style={{ 
+                backgroundColor: colors.background, 
+                color: colors.dark,
+                borderColor: colors.medium 
               }}
             >
-              <option value="5">5</option>
-              <option value="all">All</option>
+              <option value="5">5 entries</option>
+              <option value="all">All entries</option>
             </select>
           </div>
 
           {/* Status Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <label style={{ fontWeight: "bold", color: "#23486A" }}>Status:</label>
+          <div className="flex flex-col space-y-1">
+            <label className="text-sm font-medium" style={{ color: colors.lightText }}>Status</label>
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              style={{
-                padding: "4px 8px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                backgroundColor: "white",
+              className="p-2 rounded-md border focus:outline-none"
+              style={{ 
+                backgroundColor: colors.background, 
+                color: colors.dark,
+                borderColor: colors.medium 
               }}
             >
-              <option value="All">All</option>
+              <option value="All">All Statuses</option>
               <option value="Open">Open</option>
               <option value="Closed">Closed</option>
               <option value="Pending">Pending</option>
@@ -246,22 +297,22 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
           </div>
 
           {/* Priority Filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <label style={{ fontWeight: "bold", color: "#23486A" }}>Priority:</label>
+          <div className="flex flex-col space-y-1">
+            <label className="text-sm font-medium" style={{ color: colors.lightText }}>Priority</label>
             <select
               value={priorityFilter}
               onChange={(e) => {
                 setPriorityFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              style={{
-                padding: "4px 8px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                backgroundColor: "white",
+              className="p-2 rounded-md border focus:outline-none"
+              style={{ 
+                backgroundColor: colors.background, 
+                color: colors.dark,
+                borderColor: colors.medium 
               }}
             >
-              <option value="All">All</option>
+              <option value="All">All Priorities</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>
@@ -270,143 +321,245 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
         </div>
       </div>
 
+      {/* Results Summary */}
+      <div className="flex justify-between items-center mb-4">
+        <p style={{ color: colors.dark }}>
+          Showing {currentTickets.length} of {filteredTickets.length} tickets
+          {(statusFilter !== "All" || priorityFilter !== "All" || localSearch) && (
+            <span> (filtered)</span>
+          )}
+        </p>
+        
+        {entriesPerPage !== "all" && totalPages > 0 && (
+          <p style={{ color: colors.dark }}>
+            Page {currentPage} of {totalPages}
+          </p>
+        )}
+      </div>
+
       {/* Tickets Table */}
-      <div className="table-container overflow-hidden">
+      <div className="overflow-auto rounded-xl shadow-md mb-6" style={{ backgroundColor: colors.dark }}>
         <table className="w-full border-collapse">
-          <thead className="bg-gray-200 text-[#23486A]">
-            <tr>
-              <th className="p-2 text-left">ID</th>
-              <th className="p-2 text-left">Title</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Priority</th>
-              <th className="p-2 text-left">Created At</th>
-              <th className="p-2 text-left">Actions</th>
+          <thead>
+            <tr style={{ backgroundColor: colors.medium }}>
+              <th className="p-3 text-left font-semibold" style={{ color: colors.dark }}>ID</th>
+              <th className="p-3 text-left font-semibold" style={{ color: colors.dark }}>Title</th>
+              <th className="p-3 text-left font-semibold" style={{ color: colors.dark }}>Status</th>
+              <th className="p-3 text-left font-semibold" style={{ color: colors.dark }}>Priority</th>
+              <th className="p-3 text-left font-semibold" style={{ color: colors.dark }}>Created</th>
+              <th className="p-3 text-center font-semibold" style={{ color: colors.dark }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentTickets.map((ticket) => (
-              <tr
-                key={ticket.id}
-                className={ticket.id.toString() === highlightedTicketId ? "bg-yellow-100" : ""}
-              >
-                <td className="p-2">{ticket.id}</td>
-                <td className="p-2">
-                  <Link to={`/managetickets?ticketId=${ticket.id}`} className="text-blue-600">
-                    {ticket.title}
-                  </Link>
-                </td>
-                <td className="p-2">{ticket.status}</td>
-                <td className="p-2">
-                  <span
-                    className={`px-3 py-1 text-white text-sm rounded-xl ${
-                      ticket.priority.toLowerCase() === "high"
-                        ? "bg-[#EFB036]"
-                        : ticket.priority.toLowerCase() === "medium"
-                        ? "bg-[#3B6790]"
-                        : ticket.priority.toLowerCase() === "low"
-                        ? "bg-[#4C7B8B]"
-                        : "bg-[#23486A]"
-                    }`}
-                  >
-                    {ticket.priority}
-                  </span>
-                </td>
-                <td className="p-2">{new Date(ticket.created_at).toLocaleDateString()}</td>
-                <td className="p-2" style={{ position: "relative" }}>
-                  <button
-                    onClick={(e) => handleActionsClick(ticket.id, e)}
-                    className="action-btn bg-gray-200 px-2 py-1 rounded inline-flex items-center"
-                  >
-                    Actions <FiChevronDown className="ml-1" />
-                  </button>
+            {currentTickets.length > 0 ? (
+              currentTickets.map((ticket, index) => (
+                <tr
+                  key={ticket.id}
+                  className="border-b transition-colors duration-150"
+                  style={{ 
+                    backgroundColor: ticket.id.toString() === highlightedTicketId ? colors.light : colors.dark,
+                    borderColor: colors.medium,
+                    color: ticket.id.toString() === highlightedTicketId ? colors.dark : colors.lightText
+                  }}
+                >
+                  <td className="p-3">#{ticket.id}</td>
+                  <td className="p-3">
+                    <Link 
+                      to={`/ticket/${ticket.id}`} 
+                      className="font-medium hover:underline transition-colors duration-200"
+                      style={{ color: colors.light }}
+                    >
+                      {ticket.title}
+                    </Link>
+                  </td>
+                  <td className="p-3">
+                    <span 
+                      className="px-3 py-1 text-xs font-medium rounded-full"
+                      style={{ 
+                        backgroundColor: colors.light,
+                        color: colors.dark 
+                      }}
+                    >
+                      {ticket.status}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <span 
+                      className="px-3 py-1 text-xs font-medium rounded-full"
+                      style={{ 
+                        backgroundColor: 
+                          ticket.priority.toLowerCase() === "high" ? colors.medium :
+                          ticket.priority.toLowerCase() === "medium" ? colors.light : 
+                          colors.background,
+                        color: colors.dark 
+                      }}
+                    >
+                      {ticket.priority}
+                    </span>
+                  </td>
+                  <td className="p-3">{formatDate(ticket.created_at)}</td>
+                  <td className="p-3 text-center">
+                    <div className="relative inline-block action-dropdown">
+                      <button
+                        onClick={(e) => handleActionsClick(ticket.id, e)}
+                        className="px-3 py-1 rounded-xl inline-flex items-center hover:opacity-90 transition-opacity duration-200"
+                        style={{ 
+                          backgroundColor: colors.light,
+                          color: colors.dark
+                        }}
+                      >
+                        Actions <FiChevronDown className="ml-1" />
+                      </button>
+                      
+                      {selectedTicketForActions === ticket.id && (
+                        <div
+                          className="absolute right-0 mt-2 w-48 rounded-md shadow-lg z-10 ring-1 ring-opacity-5"
+                          style={{ 
+                            backgroundColor: colors.background, 
+                            top: "100%",
+                            borderColor: colors.medium
+                          }}
+                        >
+                          <div className="py-1">
+                            <Link
+                              to={`/ticket/${ticket.id}`}
+                              className="block px-4 py-2 text-sm hover:opacity-80"
+                              style={{ color: colors.dark }}
+                            >
+                              <FiEye className="inline mr-2" /> View Details
+                            </Link>
+                            {/* Uncomment if needed
+                            <button
+                              onClick={() => openDeleteModal(ticket.id)}
+                              className="block w-full text-left px-4 py-2 text-sm hover:opacity-80"
+                              style={{ color: colors.dark }}
+                            >
+                              <FiTrash2 className="inline mr-2" /> Delete Ticket
+                            </button>
+                            */}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-4 text-center" style={{ color: colors.lightText }}>
+                  No tickets match your filters. Try adjusting your search criteria.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination Controls (shown only if "5" is selected) */}
+      {/* Pagination Controls */}
       {entriesPerPage !== "all" && totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4">
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <button
+            onClick={() => goToPage(1)}
+            disabled={currentPage === 1}
+            className="px-3 py-2 rounded-md transition-opacity duration-200 disabled:opacity-50"
+            style={{
+              backgroundColor: colors.light,
+              color: colors.dark,
+            }}
+          >
+            First
+          </button>
           <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-4 py-2 border rounded-l hover:bg-gray-200 disabled:opacity-50"
+            className="px-3 py-2 rounded-md transition-opacity duration-200 disabled:opacity-50"
+            style={{
+              backgroundColor: colors.light,
+              color: colors.dark,
+            }}
           >
             Previous
           </button>
-          <span className="px-4 py-2 border-t border-b">
-            Page {currentPage} of {totalPages}
-          </span>
+          
+          <div 
+            className="flex items-center px-4 py-2 rounded-md border"
+            style={{ 
+              backgroundColor: colors.background, 
+              borderColor: colors.medium,
+              color: colors.dark 
+            }}
+          >
+            <span>
+              {currentPage} of {totalPages}
+            </span>
+          </div>
+          
           <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border rounded-r hover:bg-gray-200 disabled:opacity-50"
+            className="px-3 py-2 rounded-md transition-opacity duration-200 disabled:opacity-50"
+            style={{
+              backgroundColor: colors.light,
+              color: colors.dark,
+            }}
           >
             Next
+          </button>
+          <button
+            onClick={() => goToPage(totalPages)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-2 rounded-md transition-opacity duration-200 disabled:opacity-50"
+            style={{
+              backgroundColor: colors.light,
+              color: colors.dark,
+            }}
+          >
+            Last
           </button>
         </div>
       )}
 
-      {/* Actions Dropdown Portal */}
-      {selectedTicketForActions && dropdownPosition && createPortal(
-        <div
-          className="dropdown-portal bg-white p-4 rounded shadow-lg transition-all duration-200"
-          style={{
-            position: "fixed",
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            zIndex: 1000,
-            minWidth: "180px",
-          }}
-        >
-          <Link
-            to={`/ticket/${selectedTicketForActions}`}
-            className="text-blue-600 hover:underline block mb-2"
-            onClick={() => {
-              setSelectedTicketForActions(null);
-              setDropdownPosition(null);
-            }}
-          >
-            <FiEye className="inline mr-1" /> View Ticket
-          </Link>
-          {/*
-          <button
-            className="text-red-600 hover:underline block text-left mb-2"
-            onClick={() => {
-              openDeleteModal(selectedTicketForActions);
-              setSelectedTicketForActions(null);
-              setDropdownPosition(null);
-            }}
-          >
-            <FiTrash2 className="inline mr-1" /> Delete Ticket
-          </button>
-          */}
-          <button
-            onClick={() => {
-              setSelectedTicketForActions(null);
-              setDropdownPosition(null);
-            }}
-            className="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
-          >
-            Close
-          </button>
-        </div>,
-        document.body
-      )}
-
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-content bg-white p-6 rounded shadow-lg max-w-sm mx-auto">
-            <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
-            <p className="mb-4">Are you sure you want to delete this ticket?</p>
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <div 
+            className="rounded-xl shadow-lg p-6 max-w-md mx-auto transform transition-all duration-300 scale-100"
+            style={{ backgroundColor: colors.background }}
+          >
+            <h3 
+              className="text-xl font-bold mb-4" 
+              style={{ color: colors.dark }}
+            >
+              Confirm Delete
+            </h3>
+            <p 
+              className="mb-6" 
+              style={{ color: colors.dark }}
+            >
+              Are you sure you want to delete this ticket? This action cannot be undone.
+            </p>
             <div className="flex justify-end gap-4">
-              <button onClick={cancelDelete} className="px-4 py-2 bg-gray-300 rounded">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 rounded-md border hover:opacity-80 transition-opacity duration-200"
+                style={{ 
+                  backgroundColor: colors.light,
+                  color: colors.dark,
+                  borderColor: colors.medium
+                }}
+              >
                 Cancel
               </button>
-              <button onClick={confirmDeleteTicket} className="px-4 py-2 bg-red-600 text-white rounded">
+              <button
+                onClick={confirmDeleteTicket}
+                className="px-4 py-2 rounded-md hover:opacity-80 transition-opacity duration-200"
+                style={{ 
+                  backgroundColor: colors.medium,
+                  color: colors.dark 
+                }}
+              >
                 Delete
               </button>
             </div>
@@ -415,7 +568,7 @@ const ManageTickets = ({ isSidebarOpen, searchTerm }) => {
       )}
 
       {/* Toast Container */}
-      <ToastContainer />
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
   );
 };
