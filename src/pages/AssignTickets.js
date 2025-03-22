@@ -178,7 +178,7 @@ const AdminTicketList = ({ isSidebarOpen }) => {
           </thead>
           <tbody>
             {unassignedTickets.map((ticket) => (
-              <tr key={ticket.id} className="border-b hover:bg-[#EAD7BB]">
+              <tr key={ticket.id} className="border-b">
                 <td className="p-4 text-[#FFF2D8] ">{ticket.id}</td>
                 <td className="p-4 text-[#FFF2D8]">{ticket.title}</td>
                 <td className="p-4 text-[#FFF2D8]">{ticket.email}</td>
@@ -235,7 +235,7 @@ const AdminTicketList = ({ isSidebarOpen }) => {
           </thead>
           <tbody>
             {assignedTickets.map((ticket) => (
-              <tr key={ticket.id} className="border-b hover:bg-[#EAD7BB]">
+              <tr key={ticket.id} className="border-b]">
                 <td className="p-4 text-[#FFF2D8]">{ticket.id}</td>
                 <td className="p-4 text-[#FFF2D8]">{ticket.title}</td>
                 <td className="p-4 text-[#FFF2D8]">

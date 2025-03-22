@@ -126,7 +126,7 @@ const ManageEmployees = ({ isSidebarOpen }) => {
             </thead>
             <tbody>
               {employees.map((emp) => (
-                <tr key={emp.id} className="border-b hover:bg-[#EAD7BB] hover:text-[#113946] transition-colors duration-200">
+                <tr key={emp.id} className="border-b  hover:text-[#113946] transition-colors duration-200">
                   <td className="p-4 font-semibold text-[#FFF2D8]">{emp.name}</td>
                   <td className="p-4 text-[#FFF2D8]">{emp.avgRating}/5</td>
                   <td className="p-4 text-[#FFF2D8]">{emp.solvedCount}</td>
