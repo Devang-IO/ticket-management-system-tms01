@@ -364,6 +364,7 @@ const QuixkyBot = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "10px",
+                borderRadius: "8px",
                 borderBottom: "1px solid #BCA37F",
                 backgroundColor: "#EAD7BB"
               }}
@@ -420,6 +421,7 @@ const QuixkyBot = () => {
               style={{
                 padding: "10px",
                 borderTop: "1px solid #BCA37F",
+                borderRadius: "8px",
                 backgroundColor: "#EAD7BB"
               }}
             >
@@ -447,7 +449,7 @@ const QuixkyBot = () => {
                     backgroundColor: "#113946",
                     color: "#FFF2D8",
                     border: "none",
-                    borderRadius: "4px",
+              borderRadius: "4px",
                     cursor: "pointer",
                     transition: "background-color 0.3s"
                   }}
