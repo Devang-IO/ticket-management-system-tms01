@@ -139,7 +139,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
 
   if (!ticket) {
     return (
-      <div className="text-center text-red-500 mt-16">
+      <div className="text-center text-[#113946] mt-16">
         Loading ticket...
       </div>
     );
@@ -149,43 +149,43 @@ const TicketDetails = ({ currentUser: propUser }) => {
     <div className="w-full min-h-screen bg-[#EEF3F7] p-6  mt-16">
       {/* Page Title */}
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-[#23486A]">Ticket Details</h1>
-        <hr className="my-4 border-t-2 border-[#3B6790]" />
+        <h1 className="text-3xl font-bold text-[#113946]">Ticket Details</h1>
+        <hr className="my-4 border-t-2 border-[#BCA37F]" />
       </div>
 
       {/* Two-column layout */}
       <div className="flex flex-col md:flex-row gap-6">
         {/* Left Column: Ticket Info */}
-        <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-semibold text-[#3B6790]">{ticket.title}</h2>
+        <div className="w-full md:w-1/2 bg-[#EAD7BB] shadow-lg rounded-lg p-6">
+          <h2 className="text-2xl font-semibold text-[#113946]">{ticket.title}</h2>
 
           <div className="flex items-center gap-x-6 mt-3">
             <div className="flex items-center gap-2">
-              <FaInfoCircle className="text-[#3B6790] text-xl" />
-              <span className="font-bold text-lg">Status:</span>
+              <FaInfoCircle className="text-[#113946] text-xl" />
+              <span className="font-bold text-lg text-[#113946]">Status:</span>
               <span
-                className={`px-3 py-1 rounded-lg text-white font-semibold text-lg shadow ${
+                className={`px-3 py-1 rounded-xl text-white font-semibold text-lg shadow ${
                   ticket.status === "Open"
-                    ? "bg-[#EFB036]"
+                    ? "bg-[#BCA37F]"
                     : ticket.status === "Closed"
-                    ? "bg-[#23486A]"
+                    ? "bg-[#113946]"
                     : ticket.status === "Pending"
-                    ? "bg-[#3B6790]"
-                    : "bg-[#4C7B8B]"
+                    ? "bg-[#113946]"
+                    : "bg-[#BCA37F]"
                 }`}
               >
                 {ticket.status}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-lg">Priority:</span>
+              <span className="font-bold text-lg text-[#113946]">Priority:</span>
               <span
-                className={`px-3 py-1 rounded-lg text-white font-semibold text-lg shadow ${
+                className={`px-3 py-1 rounded-xl text-white font-semibold text-lg shadow ${
                   ticket.priority === "High"
-                    ? "bg-[#EFB036]"
+                    ? "bg-[#113946]"
                     : ticket.priority === "Medium"
-                    ? "bg-[#3B6790]"
-                    : "bg-[#4C7B8B]"
+                    ? "bg-[#BCA37F]"
+                    : "bg-[#BCA37F]"
                 }`}
               >
                 {ticket.priority}
@@ -194,32 +194,32 @@ const TicketDetails = ({ currentUser: propUser }) => {
           </div>
 
           <div className="mt-4 flex items-center gap-2">
-            <FaFileAlt className="text-[#3B6790] text-xl" />
-            <p className="text-lg text-[#23486A]">{ticket.description}</p>
+            <FaFileAlt className="text-[#113946] text-xl" />
+            <p className="text-lg text-[#113946]">{ticket.description}</p>
           </div>
 
           <div className="mt-6">
-            <h3 className="text-xl font-bold flex items-center gap-3">
-              <FaPaperclip className="text-[#3B6790] text-2xl" /> Attachments
+            <h3 className="text-xl font-bold flex items-center gap-3 text-[#113946]">
+              <FaPaperclip className="text-[#113946] text-2xl" /> Attachments
             </h3>
             {ticket.image_url ? (
               <div className="mt-4 flex items-center gap-3">
-                <FaImage className="text-2xl text-[#3B6790]" />
+                <FaImage className="text-2xl text-[#113946]" />
                 <img
                   src={ticket.image_url}
                   alt="Ticket attachment"
-                  className="max-w-xs h-auto rounded-lg border p-1"
+                  className="max-w-xs h-auto rounded-lg border border-[#BCA37F] p-1"
                 />
               </div>
             ) : (
-              <p className="mt-2 text-gray-500">No attachments.</p>
+              <p className="mt-2 text-[#113946] opacity-70">No attachments.</p>
             )}
           </div>
 
           <div className="mt-6 flex justify-center">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 bg-[#3B6790] hover:bg-[#EFB036] text-white px-4 py-2 rounded-lg shadow-md"
+              className="flex items-center gap-2 bg-[#113946] hover:bg-[#BCA37F] text-white px-4 py-2 rounded-xl shadow-md transition-colors duration-300"
             >
               <FaArrowLeft /> Back
             </button>
@@ -227,7 +227,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
         </div>
 
         {/* Right Column: Chat UI */}
-        <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 flex flex-col h-[600px] justify-center items-center">
+        <div className="w-full md:w-1/2 bg-[#EAD7BB] shadow-lg rounded-lg p-6 flex flex-col h-[600px] justify-center items-center">
           {chatInitiated ? (
             currentUser ? (
               <ChatBox
@@ -238,44 +238,44 @@ const TicketDetails = ({ currentUser: propUser }) => {
                 onChatClosed={handleChatClosed}
               />
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="flex-1 flex items-center justify-center text-[#113946] opacity-70">
                 Loading user...
               </div>
             )
           ) : (
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-[#23486A] mb-4">Connect with Support</h2>
+              <h2 className="text-2xl font-bold text-[#113946] mb-4">Connect with Support</h2>
               {ticket.assigned_user_id ? (
                 assignedEmployee ? (
-                  <p className="text-lg text-gray-700 mb-2">
+                  <p className="text-lg text-[#113946] mb-2">
                     Your ticket is being handled by <strong>{assignedEmployee}</strong>
                   </p>
                 ) : (
-                  <p className="text-lg text-gray-700 mb-2">
+                  <p className="text-lg text-[#113946] mb-2">
                     Loading assigned employee...
                   </p>
                 )
               ) : (
-                <p className="text-lg text-gray-700 mb-2">
+                <p className="text-lg text-[#113946] mb-2">
                   Your ticket has not yet been assigned to a support representative.
                 </p>
               )}
               
               {waitingForEmployee ? (
                 <div className="mt-4">
-                  <div className="animate-pulse bg-orange-100 text-orange-700 p-4 rounded-lg mb-4">
+                  <div className="animate-pulse bg-[#FFF2D8] text-[#113946] p-4 rounded-lg mb-4 border border-[#BCA37F]">
                     <p className="font-semibold">Waiting for support agent to connect...</p>
                     <div className="flex justify-center mt-2">
                       <div className="flex space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce"></div>
-                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-3 h-3 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                        <div className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce"></div>
+                        <div className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                       </div>
                     </div>
                   </div>
                   <button 
                     onClick={cancelRequest}
-                    className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md"
+                    className="px-6 py-3 bg-[#BCA37F] hover:bg-[#113946] text-white font-semibold rounded-lg shadow-md transition-colors duration-300"
                   >
                     Cancel Request
                   </button>
@@ -283,7 +283,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
               ) : (
                 <button 
                   onClick={requestConnection}
-                  className="mt-4 px-6 py-3 bg-[#3B6790] hover:bg-[#EFB036] text-white font-semibold rounded-lg shadow-md"
+                  className="mt-4 px-6 py-3 bg-[#113946] hover:bg-[#BCA37F] text-white font-semibold rounded-xl shadow-md transition-colors duration-300"
                 >
                   Request Connection
                 </button>

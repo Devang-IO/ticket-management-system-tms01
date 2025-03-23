@@ -152,7 +152,7 @@ const Navbar = ({ sidebarOpen }) => {
         </div>
 
         {/* Navbar right side */}
-        <div className="navbar-right flex items-center gap-2 md:gap-4">
+        <div className="navbar-right flex items-center gap-2 md:gap-4 z-50">
           {/* Search input with icon */}
           <div className="relative flex items-center">
           
@@ -166,8 +166,8 @@ const Navbar = ({ sidebarOpen }) => {
           </div>
 
           {/* Profile dropdown */}
-          <div className="relative">
-            <div className="flex items-center justify-between profile-section">
+          <div className="relative z-50">
+            <div className="flex items-center justify-between profile-section z-50">
               {/* Username and Role (Left) - Hidden on small screens */}
               <div className="user-info text-white flex-col items-end hidden md:flex">
                 <p className="username font-bold whitespace-nowrap">{username}</p>
@@ -201,43 +201,44 @@ const Navbar = ({ sidebarOpen }) => {
               </button>
             </div>
             {profileOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out z-50">
-                <ul className="py-2">
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                    onClick={() => {
-                      setProfileModalOpen(true);
-                      setProfileOpen(false);
-                    }}
-                  >
-                    <FiUser className="text-gray-700" />
-                    <span className="text-sm text-gray-700">View Profile</span>
-                  </li>
+ <div className="absolute right-0 mt-2 w-48 bg-[#FFF2D8] rounded-xl shadow-lg transform transition-all duration-300 ease-in-out z-[9999]">
 
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                    onClick={handleLogout}
-                  >
-                    <FiLogOut className="text-red-500" />
-                    <span className="text-sm text-red-500">Logout</span>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+    <ul className="py-2">
+      <li
+        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
+        onClick={() => {
+          setProfileModalOpen(true);
+          setProfileOpen(false);
+        }}
+      >
+        <FiUser className="text-[#113946]" />
+        <span className="text-sm text-[#113946]">View Profile</span>
+      </li>
 
-      {/* Toast Container */}
-      <ToastContainer position="top-center" autoClose={3000} />
-      
-      {/* Profile Modal */}
-      {profileModalOpen && (
-        <ProfileModal
-          onClose={() => setProfileModalOpen(false)}
-          onProfileUpdate={handleProfileUpdate}
-        />
-      )}
+      <li
+        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
+        onClick={handleLogout}
+      >
+        <FiLogOut className="text-[#113946]" />
+        <span className="text-sm text-[#113946]">Logout</span>
+      </li>
+    </ul>
+  </div>
+)}
+</div>
+</div>
+</nav>
+
+{/* Toast Container */}
+<ToastContainer position="top-center" autoClose={3000} />
+
+{/* Profile Modal */}
+{profileModalOpen && (
+  <ProfileModal
+    onClose={() => setProfileModalOpen(false)}
+    onProfileUpdate={handleProfileUpdate}
+  />
+)}
       
       {/* Search Modal */}
       <SearchModal 

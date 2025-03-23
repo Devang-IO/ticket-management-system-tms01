@@ -21,17 +21,17 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Color palette to match your UI
 const STATUS_COLORS = {
-  total: '#f0b94b',      // Yellow
-  new: '#4471a0',        // Blue
-  open: '#2c5878',       // Dark Blue
-  closed: '#4a909a',     // Teal
-  urgent: '#5a8a94',     // Seafoam
-  unanswered: '#f0b94b', // Yellow
-  answered: '#2c5878',   // Dark Blue
-  solved: '#4a909a',     // Teal
+  total: '#EAD7BB',      // Accent
+  new: '#BCA37F',        // Secondary
+  open: '#113946',       // Primary
+  closed: '#113946',     // Primary
+  urgent: '#BCA37F',     // Secondary
+  unanswered: '#EAD7BB', // Accent
+  answered: '#113946',   // Primary
+  solved: '#113946',     // Primary
 };
 
-const PIE_COLORS = ['#4471a0', '#2c5878', '#4a909a', '#5a8a94', '#f0b94b', '#e27b4e'];
+const PIE_COLORS = ['#113946', '#BCA37F', '#EAD7BB', '#113946', '#BCA37F', '#EAD7BB'];
 
 const AdminAnalyticsDashboard = () => {
   // State for dashboard data
@@ -478,10 +478,10 @@ const AdminAnalyticsDashboard = () => {
         format: 'a4'
       });
       
-      // Add title and header
-      doc.setFillColor(38, 78, 112); // Dark blue header
+      // Add title and header using the color palette
+      doc.setFillColor(17, 57, 70); // #113946 in RGB
       doc.rect(0, 0, 210, 20, 'F');
-      doc.setTextColor(255, 255, 255);
+      doc.setTextColor(255, 242, 216); // #FFF2D8 in RGB
       doc.setFontSize(16);
       doc.text('Support System Analytics Report', 15, 12);
       
@@ -489,6 +489,7 @@ const AdminAnalyticsDashboard = () => {
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       doc.text(`Generated on: ${new Date().toLocaleDateString()} for ${dateRange.replace('last', 'Last ').replace('days', ' Days')}`, 15, 25);
+
       
       // Add summary stats
       doc.setFontSize(14);
@@ -783,454 +784,433 @@ const AdminAnalyticsDashboard = () => {
       fetchAnalyticsData();
     };
     
-    // CSS classes for cards
-    const cardClass = "bg-white rounded-lg shadow-md p-4 mb-4";
-    const cardHeaderClass = "flex justify-between items-center mb-4";
-    const cardTitleClass = "text-lg font-semibold text-blue-800";
-    const iconButtonClass = "text-gray-500 hover:text-gray-700 transition-colors";
-    const statValueClass = "text-2xl font-bold";
-    const statLabelClass = "text-sm text-gray-500";
-    const cardContentClass = "mt-2";
-    
-    // Get total of all employees
-    const totalAssignedTickets = employeeWorkload.reduce((sum, emp) => sum + emp.assignedTickets, 0);
-    
-    if (loading) {
-      return (
-        <div className="p-8 flex items-center justify-center h-screen">
-          <div className="text-center">
-            <FiRefreshCw className="animate-spin text-blue-600 text-4xl mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700">Loading analytics data...</h2>
-            <p className="text-gray-500 mt-2">Please wait while we fetch the latest information.</p>
-          </div>
+// CSS classes for cards
+const cardClass = "bg-[#113946] rounded-xl shadow-lg p-6 mb-6 border border-[#BCA37F] transition-all duration-300 hover:shadow-xl"; // Enhanced card with border
+const cardHeaderClass = "flex justify-between items-center mb-4 border-b border-[#BCA37F] pb-3"; // Slightly more padding
+const cardTitleClass = "text-xl font-bold text-[#FFF2D8] flex items-center"; // Added flex for icon alignment
+const iconButtonClass = "text-[#EAD7BB] hover:text-[#BCA37F] transition-colors duration-200"; // Added transition
+const statValueClass = "text-3xl font-bold text-[#EAD7BB] mt-1"; // Added spacing
+const statLabelClass = "text-sm font-medium text-[#BCA37F]"; // Improved font weight
+const cardContentClass = "mt-4";
+
+// Get total of all employees
+const totalAssignedTickets = employeeWorkload.reduce((sum, emp) => sum + emp.assignedTickets, 0);
+
+if (loading) {
+  return (
+    <div className="p-8 flex items-center justify-center h-screen" style={{ backgroundColor: "#FFF2D8" }}>
+      <div className="text-center bg-[#113946] p-8 rounded-xl shadow-lg">
+        <FiRefreshCw className="animate-spin text-[#EAD7BB] text-5xl mx-auto mb-4" />
+        <h2 className="text-2xl font-semibold text-[#FFF2D8]">Loading analytics data...</h2>
+        <p className="text-[#BCA37F] mt-2">Please wait while we fetch the latest information.</p>
+      </div>
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div className="p-8 flex items-center justify-center h-screen" style={{ backgroundColor: "#FFF2D8" }}>
+      <div className="bg-[#113946] border-2 border-[#BCA37F] text-[#FFF2D8] px-8 py-6 rounded-xl shadow-lg max-w-md" role="alert">
+        <div className="flex items-center">
+          <FiAlertTriangle className="text-[#EAD7BB] mr-3 text-3xl" />
+          <span className="font-semibold text-xl">Error loading analytics data</span>
         </div>
-      );
-    }
-    
-    if (error) {
-      return (
-        <div className="p-8">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <div className="flex items-center">
-              <FiAlertTriangle className="text-red-500 mr-2 text-xl" />
-              <span className="block sm:inline font-medium">Error loading analytics data</span>
-            </div>
-            <p className="mt-2">{error}</p>
-            <button 
-              onClick={handleRefresh}
-              className="mt-3 bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-4 rounded inline-flex items-center"
-            >
-              <FiRefreshCw className="mr-2" />
-              Retry
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="p-4 md:p-6 bg-gray-50 min-h-screen z-10">
-        {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pt-20">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">Support Analytics Dashboard</h1>
-            <p className="text-gray-600">Comprehensive view of your support system performance</p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row mt-4 md:mt-0 space-y-2 sm:space-y-0 sm:space-x-2 z-1">
-            {/* Date Range Filter */}
-            <div className="">
-              <select
-                value={dateRange}
-                onChange={(e) => handleDateRangeChange(e.target.value)}
-                className="bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 z-1"
-              >
-                <option value="last7days">Last 7 Days</option>
-                <option value="last30days">Last 30 Days</option>
-                <option value="last90days">Last 90 Days</option>
-              </select>
-              {/* <FiCalendar className="relative left-10 right-40 text-gray-400 pointer-events-none" /> */}
-            </div>
-            
-            {/* Refresh Button */}
-            <button 
-              onClick={handleRefresh}
-              className="bg-white border border-gray-300 rounded-md py-2 px-4 text-sm flex items-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 z-1"
-            >
-              <FiRefreshCw className="mr-2" />
-              Refresh
-            </button>
-            
-            {/* Download Report Button */}
-            <div className="">
-              <button 
-                onClick={() => setShowDownloadOptions(!showDownloadOptions)}
-                className="bg-blue-600 text-white rounded-md py-2 px-4 text-sm flex items-center hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                <FiDownload className="mr-2" />
-                Download Report
-                {showDownloadOptions ? <FiChevronUp className="ml-2" /> : <FiChevronDown className="ml-2" />}
-              </button>
-              
-              {showDownloadOptions && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-[-10] border border-gray-200">
-                  {isGeneratingReport ? (
-                    <div className="px-4 py-3 text-sm text-gray-600 flex items-center">
-                      <FiRefreshCw className="animate-spin mr-2" />
-                      Generating report...
-                    </div>
-                  ) : (
-                    <>
-                      <CSVLink 
-                        data={prepareCSVData()} 
-                        filename={`support-analytics-${dateRange}.csv`}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                      >
-                        Export as CSV
-                      </CSVLink>
-                      {/* <button 
-                        onClick={() => handleDownloadSelect('pdf')}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                      >
-                        Export as PDF
-                      </button> */}
-                      <button 
-                        onClick={() => handleDownloadSelect('json')}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                      >
-                        Export as JSON
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+        <p className="mt-4 text-[#EAD7BB]">{error}</p>
+        <button 
+          onClick={handleRefresh}
+          className="mt-6 bg-[#BCA37F] hover:bg-[#EAD7BB] text-[#113946] font-semibold py-2 px-6 rounded-lg inline-flex items-center transition-colors duration-200 w-full justify-center"
+        >
+          <FiRefreshCw className="mr-2" />
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
+
+return (
+  <div className="p-6 md:p-8" style={{ backgroundColor: "#FFF2D8", minHeight: "100vh", zIndex: 10 }}>
+    {/* Dashboard Header */}
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pt-20">
+      <div>
+        <h1 className="text-4xl font-bold" style={{ color: "#113946" }}>
+          Support Analytics
+        </h1>
+        <p className="mt-2 text-lg" style={{ color: "#BCA37F" }}>
+          Comprehensive view of your support system performance
+        </p>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-4 mt-6 md:mt-0 relative">
+        {/* Date Range Filter */}
+        <div>
+          <select
+            value={dateRange}
+            onChange={(e) => handleDateRangeChange(e.target.value)}
+            className="bg-[#FFF2D8] border-2 border-[#BCA37F] rounded-lg py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#EAD7BB] focus:border-[#EAD7BB]"
+            style={{ color: "#113946" }}
+          >
+            <option value="last7days">Last 7 Days</option>
+            <option value="last30days">Last 30 Days</option>
+            <option value="last90days">Last 90 Days</option>
+          </select>
         </div>
         
-        {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Ticket Stats */}
-          <div className={cardClass + " lg:col-span-4"}>
-            <div className={cardHeaderClass}>
-              <h2 className={cardTitleClass}>
-                <FiFileText className="inline-block mr-2" />
-                Ticket Statistics
-              </h2>
-              <button 
-                className={iconButtonClass} 
-                onClick={() => toggleCardCollapse('tickets')}
-                aria-label="Toggle ticket statistics"
-              >
-                {cardsCollapsed.tickets ? <FiChevronDown /> : <FiChevronUp />}
-              </button>
-            </div>
-            
-            {!cardsCollapsed.tickets && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Total Tickets */}
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <div className={statLabelClass}>Total Tickets</div>
-                  <div className={statValueClass + " text-blue-700"}>{stats.totalTickets}</div>
-                </div>
-                
-                {/* New Tickets */}
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                  <div className={statLabelClass}>New Tickets</div>
-                  <div className={statValueClass + " text-blue-600"}>{stats.newTickets}</div>
-                </div>
-                
-                {/* Open Tickets */}
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                  <div className={statLabelClass}>Open Tickets</div>
-                  <div className={statValueClass + " text-yellow-700"}>{stats.openTickets}</div>
-                </div>
-                
-                {/* Closed Tickets */}
-                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                  <div className={statLabelClass}>Closed Tickets</div>
-                  <div className={statValueClass + " text-green-700"}>{stats.closedTickets}</div>
-                </div>
-                
-                {/* Urgent Tickets */}
-                <div className="bg-red-50 p-4 rounded-lg border border-red-100">
-                  <div className={statLabelClass}>Urgent Tickets</div>
-                  <div className={statValueClass + " text-red-600"}>{stats.urgentTickets}</div>
-                </div>
-                
-                {/* Unanswered Tickets */}
-                <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
-                  <div className={statLabelClass}>Unanswered</div>
-                  <div className={statValueClass + " text-orange-600"}>{stats.unansweredTickets}</div>
-                </div>
-                
-                {/* Answered Tickets */}
-                <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-                  <div className={statLabelClass}>Answered</div>
-                  <div className={statValueClass + " text-indigo-600"}>{stats.answeredTickets}</div>
-                </div>
-                
-                {/* Solved Tickets */}
-                <div className="bg-teal-50 p-4 rounded-lg border border-teal-100">
-                  <div className={statLabelClass}>Solved</div>
-                  <div className={statValueClass + " text-teal-600"}>{stats.solvedTickets}</div>
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Refresh Button */}
+        <button 
+          onClick={handleRefresh}
+          className="bg-[#EAD7BB] border-2 border-[#BCA37F] rounded-lg py-2 px-6 text-sm flex items-center hover:bg-[#BCA37F] focus:outline-none focus:ring-2 focus:ring-[#EAD7BB] transition-colors duration-200 font-medium"
+          style={{ color: "#113946" }}
+        >
+          <FiRefreshCw className="mr-2" />
+          Refresh
+        </button>
+        
+        {/* Download Report Button */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowDownloadOptions(!showDownloadOptions)}
+            className="bg-[#113946] text-[#FFF2D8] rounded-lg py-2 px-6 text-sm flex items-center hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-[#EAD7BB] transition-colors duration-200 font-medium"
+          >
+            <FiDownload className="mr-2" />
+            Download Report
+            {showDownloadOptions ? <FiChevronUp className="ml-2" /> : <FiChevronDown className="ml-2" />}
+          </button>
           
-          {/* User Stats */}
-          <div className={cardClass + " lg:col-span-3"}>
-            <div className={cardHeaderClass}>
-              <h2 className={cardTitleClass}>
-                <FiUsers className="inline-block mr-2" />
-                User Statistics
-              </h2>
-              <button 
-                className={iconButtonClass} 
-                onClick={() => toggleCardCollapse('users')}
-                aria-label="Toggle user statistics"
-              >
-                {cardsCollapsed.users ? <FiChevronDown /> : <FiChevronUp />}
-              </button>
-            </div>
-            
-            {!cardsCollapsed.users && (
-              <div>
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {/* Total Users */}
-                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                    <div className={statLabelClass}>Total Users</div>
-                    <div className={statValueClass + " text-purple-600"}>{stats.totalUsers}</div>
-                  </div>
-                  
-                  {/* Total Employees */}
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <div className={statLabelClass}>Employees</div>
-                    <div className={statValueClass + " text-blue-600"}>{stats.totalEmployees}</div>
-                  </div>
-                  
-                  {/* Total Admins */}
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <div className={statLabelClass}>Admins</div>
-                    <div className={statValueClass + " text-gray-600"}>{stats.totalAdmins}</div>
-                  </div>
+          {showDownloadOptions && (
+            <div className="absolute right-0 mt-2 w-48 bg-[#FFF2D8] rounded-lg shadow-lg z-10 border-2 border-[#BCA37F] overflow-hidden">
+              {isGeneratingReport ? (
+                <div className="px-4 py-3 text-sm text-[#113946] flex items-center justify-center">
+                  <FiRefreshCw className="animate-spin mr-2" />
+                  Generating report...
                 </div>
-                
-                {/* User Trends Chart */}
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">User Registration Trends</h3>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={userTrends} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis 
-                          dataKey="displayDate" 
-                          tick={{ fontSize: 12 }} 
-                          tickFormatter={(value) => value}
-                        />
-                        <YAxis 
-                          allowDecimals={false}
-                          tick={{ fontSize: 12 }}
-                        />
-                        <Tooltip 
-                          formatter={(value) => [`${value} new users`, 'Registrations']}
-                          labelFormatter={(value) => `Date: ${value}`}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="count" 
-                          name="New Users" 
-                          stroke="#8884d8" 
-                          fill="#8884d8" 
-                          fillOpacity={0.2} 
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Ticket Status Pie Chart */}
-          <div className={cardClass + " lg:col-span-1"}>
-            <div className={cardHeaderClass}>
-              <h2 className={cardTitleClass}>Ticket Status</h2>
-            </div>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={ticketStatusData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    nameKey="name"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
+              ) : (
+                <>
+                  <CSVLink 
+                    data={prepareCSVData()} 
+                    filename={`support-analytics-${dateRange}.csv`}
+                    className="block px-4 py-3 text-sm text-[#113946] hover:bg-[#EAD7BB] transition-colors w-full text-left font-medium border-b border-[#BCA37F]"
                   >
-                    {ticketStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value, name) => [value, name]} />
-                  <Legend verticalAlign="bottom" align="center" />
-                </PieChart>
-              </ResponsiveContainer>
+                    Export as CSV
+                  </CSVLink>
+                  <button 
+                    onClick={() => handleDownloadSelect('json')}
+                    className="block px-4 py-3 text-sm text-[#113946] hover:bg-[#EAD7BB] transition-colors w-full text-left font-medium"
+                  >
+                    Export as JSON
+                  </button>
+                </>
+              )}
             </div>
-          </div>
-          
-          {/* Ticket Trends Chart */}
-          <div className={cardClass + " lg:col-span-2"}>
-            <div className={cardHeaderClass}>
-              <h2 className={cardTitleClass}>Ticket Trends</h2>
-            </div>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={ticketTrends} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="displayDate" 
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => value}
-                  />
-                  <YAxis 
-                    allowDecimals={false}
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`${value} tickets`, 'Created']}
-                    labelFormatter={(value) => `Date: ${value}`}
-                  />
-                  <Legend verticalAlign="top" align="right" />
-                  <Line 
-                    type="monotone" 
-                    dataKey="count" 
-                    name="New Tickets" 
-                    stroke={STATUS_COLORS.new} 
-                    activeDot={{ r: 8 }} 
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          
-          {/* Employee Workload Chart */}
-          <div className={cardClass + " lg:col-span-2"}>
-            <div className={cardHeaderClass}>
-              <h2 className={cardTitleClass}>Employee Workload</h2>
-            </div>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={employeeWorkload}
-                  layout="vertical" 
-                  margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis type="number" domain={[0, 'dataMax + 2']} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    tick={{ fontSize: 12 }}
-                    width={80}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`${value} tickets`, 'Assigned']}
-                    labelFormatter={(value) => `Employee: ${value}`}
-                  />
-                  <Legend />
-                  <Bar 
-                    dataKey="assignedTickets" 
-                    fill={STATUS_COLORS.open}
-                    name="Assigned Tickets"
-                    label={{ 
-                      position: 'right', 
-                      formatter: (value) => value > 0 ? value : '',
-                      fill: '#666'
-                    }}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          
-          {/* Recent Tickets */}
-          <div className={cardClass + " lg:col-span-7"}>
-            <div className={cardHeaderClass}>
-              <h2 className={cardTitleClass}>Recent Tickets</h2>
-            </div>
-            <div className={cardContentClass + " overflow-x-auto"}>
-              <table className="min-w-full bg-white">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 text-xs leading-4 text-gray-500 uppercase tracking-wider">
-                    <th className="px-4 py-3 text-left">ID</th>
-                    <th className="px-4 py-3 text-left">Title</th>
-                    <th className="px-4 py-3 text-left">Updated</th>
-                    <th className="px-4 py-3 text-left">Action</th>
-                    <th className="px-4 py-3 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm leading-5 text-gray-700">
-                  {recentTickets.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
-                        No recent tickets to display
-                      </td>
-                    </tr>
-                  ) : (
-                    recentTickets.map((ticket, index) => (
-                      <tr key={ticket.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                        <td className="px-4 py-3 whitespace-nowrap">#{ticket.id}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-medium overflow-hidden overflow-ellipsis" 
-                            style={{ maxWidth: '200px', textOverflow: 'ellipsis' }}>
-                          {ticket.title}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          {typeof ticket.updated === 'string' 
-                            ? ticket.updated 
-                            : formatDistanceToNow(new Date(ticket.updated), { addSuffix: true })}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          {ticket.action === 'Answered' && (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                              <FiMessageSquare className="mr-1" /> Answered
-                            </span>
-                          )}
-                          {ticket.action === 'Closed' && (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                              <FiCheckCircle className="mr-1" /> Closed
-                            </span>
-                          )}
-                          {ticket.action === 'Open' && (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                              <FiThumbsUp className="mr-1" /> Open
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            ticket.status === 'Open' ? 'bg-yellow-100 text-yellow-800' :
-                            ticket.status === 'Closed' ? 'bg-green-100 text-green-800' :
-                            ticket.status === 'New' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {ticket.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          )}
         </div>
       </div>
-    );
-  };
-  
-  export default AdminAnalyticsDashboard;
+    </div>
+    
+    {/* Main Grid Layout */}
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Ticket Stats */}
+      <div className={cardClass + " lg:col-span-4"}>
+        <div className={cardHeaderClass}>
+          <h2 className={cardTitleClass}>
+            <FiFileText className="inline-block mr-3 text-[#EAD7BB]" />
+            Ticket Statistics
+          </h2>
+          <button 
+            className={iconButtonClass} 
+            onClick={() => toggleCardCollapse('tickets')}
+            aria-label="Toggle ticket statistics"
+          >
+            {cardsCollapsed.tickets ? <FiChevronDown size={20} /> : <FiChevronUp size={20} />}
+          </button>
+        </div>
+        
+        {!cardsCollapsed.tickets && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {/* Total Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>Total Tickets</div>
+              <div className={statValueClass}>{stats.totalTickets}</div>
+            </div>
+            
+            {/* New Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>New Tickets</div>
+              <div className={statValueClass}>{stats.newTickets}</div>
+            </div>
+            
+            {/* Open Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>Open Tickets</div>
+              <div className={statValueClass}>{stats.openTickets}</div>
+            </div>
+            
+            {/* Closed Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>Closed Tickets</div>
+              <div className={statValueClass}>{stats.closedTickets}</div>
+            </div>
+            
+            {/* Urgent Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>Urgent Tickets</div>
+              <div className={statValueClass}>{stats.urgentTickets}</div>
+            </div>
+            
+            {/* Unanswered Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>Unanswered</div>
+              <div className={statValueClass}>{stats.unansweredTickets}</div>
+            </div>
+            
+            {/* Answered Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>Answered</div>
+              <div className={statValueClass}>{stats.answeredTickets}</div>
+            </div>
+            
+            {/* Solved Tickets */}
+            <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+              <div className={statLabelClass}>Solved</div>
+              <div className={statValueClass}>{stats.solvedTickets}</div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* User Stats */}
+      <div className={cardClass + " lg:col-span-3"}>
+        <div className={cardHeaderClass}>
+          <h2 className={cardTitleClass}>
+            <FiUsers className="inline-block mr-3 text-[#EAD7BB]" />
+            User Statistics
+          </h2>
+          <button 
+            className={iconButtonClass} 
+            onClick={() => toggleCardCollapse('users')}
+            aria-label="Toggle user statistics"
+          >
+            {cardsCollapsed.users ? <FiChevronDown size={20} /> : <FiChevronUp size={20} />}
+          </button>
+        </div>
+        
+        {!cardsCollapsed.users && (
+          <div>
+            <div className="grid grid-cols-3 gap-6 mb-6">
+              {/* Total Users */}
+              <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+                <div className={statLabelClass}>Total Users</div>
+                <div className={statValueClass}>{stats.totalUsers}</div>
+              </div>
+              
+              {/* Total Employees */}
+              <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+                <div className={statLabelClass}>Employees</div>
+                <div className={statValueClass}>{stats.totalEmployees}</div>
+              </div>
+              
+              {/* Total Admins */}
+              <div className="bg-[#113946] p-4 rounded-lg border-2 border-[#BCA37F] relative overflow-hidden hover:shadow-md transition-all duration-200">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#EAD7BB]"></div>
+                <div className={statLabelClass}>Admins</div>
+                <div className={statValueClass}>{stats.totalAdmins}</div>
+              </div>
+            </div>
+            
+            {/* User Trends Chart */}
+            <div className="mt-6">
+              <h3 className="text-sm font-medium text-[#EAD7BB] mb-3">User Registration Trends</h3>
+              <div className="h-64 bg-[#113946] p-2 rounded-lg border border-[#BCA37F]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={userTrends} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#BCA37F" opacity={0.3} />
+                    <XAxis dataKey="displayDate" tick={{ fontSize: 12, fill: "#EAD7BB" }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#EAD7BB" }} />
+                    <Tooltip 
+                      formatter={(value) => [`${value} new users`, 'Registrations']} 
+                      labelFormatter={(value) => `Date: ${value}`}
+                      contentStyle={{ backgroundColor: "#113946", borderColor: "#BCA37F", color: "#FFF2D8" }}
+                    />
+                    <Area type="monotone" dataKey="count" name="New Users" stroke="#EAD7BB" fill="#EAD7BB" fillOpacity={0.2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Ticket Status Pie Chart */}
+      <div className={cardClass + " lg:col-span-1"}>
+        <div className={cardHeaderClass}>
+          <h2 className={cardTitleClass}>
+            <FiFileText className="inline-block mr-3 text-[#EAD7BB]" />
+            Ticket Status
+          </h2>
+        </div>
+        <div className="h-64 bg-[#113946] p-2 rounded-lg border border-[#BCA37F]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={ticketStatusData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                dataKey="value"
+                nameKey="name"
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+              >
+                {ticketStatusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value, name) => [value, name]} 
+                contentStyle={{ backgroundColor: "#113946", borderColor: "#BCA37F", color: "#FFF2D8" }}
+              />
+              <Legend verticalAlign="bottom" align="center" formatter={(value) => <span style={{ color: "#EAD7BB" }}>{value}</span>} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      
+      {/* Ticket Trends Chart */}
+      <div className={cardClass + " lg:col-span-2"}>
+        <div className={cardHeaderClass}>
+          <h2 className={cardTitleClass}>
+            <FiFileText className="inline-block mr-3 text-[#EAD7BB]" />
+            Ticket Trends
+          </h2>
+        </div>
+        <div className="h-64 bg-[#113946] p-2 rounded-lg border border-[#BCA37F]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={ticketTrends} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#BCA37F" opacity={0.3} />
+              <XAxis dataKey="displayDate" tick={{ fontSize: 12, fill: "#EAD7BB" }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#EAD7BB" }} />
+              <Tooltip 
+                formatter={(value) => [`${value} tickets`, 'Created']} 
+                labelFormatter={(value) => `Date: ${value}`}
+                contentStyle={{ backgroundColor: "#113946", borderColor: "#BCA37F", color: "#FFF2D8" }}
+              />
+              <Legend verticalAlign="top" align="right" formatter={(value) => <span style={{ color: "#EAD7BB" }}>{value}</span>} />
+              <Line type="monotone" dataKey="count" name="New Tickets" stroke={STATUS_COLORS.new} activeDot={{ r: 8 }} strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      
+      {/* Employee Workload Chart */}
+      <div className={cardClass + " lg:col-span-2"}>
+        <div className={cardHeaderClass}>
+          <h2 className={cardTitleClass}>
+            <FiUsers className="inline-block mr-3 text-[#EAD7BB]" />
+            Employee Workload
+          </h2>
+        </div>
+        <div className="h-64 bg-[#113946] p-2 rounded-lg border border-[#BCA37F]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={employeeWorkload} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#BCA37F" opacity={0.3} />
+              <XAxis type="number" domain={[0, 'dataMax + 2']} tick={{ fill: "#EAD7BB" }} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "#EAD7BB" }} width={80} />
+              <Tooltip 
+                formatter={(value) => [`${value} tickets`, 'Assigned']} 
+                labelFormatter={(value) => `Employee: ${value}`}
+                contentStyle={{ backgroundColor: "#113946", borderColor: "#BCA37F", color: "#FFF2D8" }}
+              />
+              <Legend formatter={(value) => <span style={{ color: "#EAD7BB" }}>{value}</span>} />
+              <Bar dataKey="assignedTickets" fill={STATUS_COLORS.open} name="Assigned Tickets" label={{ position: 'right', formatter: (value) => value > 0 ? value : '', fill: "#FFF2D8" }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      
+      {/* Recent Tickets */}
+      <div className={cardClass + " lg:col-span-4"}>
+        <div className={cardHeaderClass}>
+          <h2 className={cardTitleClass}>
+            <FiFileText className="inline-block mr-3 text-[#EAD7BB]" />
+            Recent Tickets
+          </h2>
+        </div>
+        <div className={cardContentClass + " overflow-x-auto"}>
+          <table className="min-w-full rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-[#113946] border-b-2 border-[#BCA37F] text-xs leading-4 text-[#FFF2D8] uppercase tracking-wider">
+                <th className="px-4 py-3 text-left">ID</th>
+                <th className="px-4 py-3 text-left">Title</th>
+                <th className="px-4 py-3 text-left">Updated</th>
+                <th className="px-4 py-3 text-left">Action</th>
+                <th className="px-4 py-3 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm leading-5 text-[#113946] divide-y divide-[#BCA37F]">
+              {recentTickets.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-4 py-8 text-center text-[#BCA37F] bg-[#113946]">
+                    No recent tickets to display
+                  </td>
+                </tr>
+              ) : (
+                recentTickets.map((ticket, index) => (
+                  <tr key={ticket.id} className={index % 2 === 0 ? 'bg-[#BCA37F]' : 'bg-[#EAD7BB]'} style={{ transition: "all 0.2s" }}>
+                    <td className="px-4 py-3 whitespace-nowrap font-medium">#{ticket.id}</td>
+                    <td className="px-4 py-3 whitespace-nowrap font-medium overflow-hidden overflow-ellipsis" style={{ maxWidth: '200px' }}>
+                      {ticket.title}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {typeof ticket.updated === 'string' 
+                        ? ticket.updated 
+                        : formatDistanceToNow(new Date(ticket.updated), { addSuffix: true })}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {ticket.action === 'Answered' && (
+                        <span className="px-3 py-1 inline-flex items-center text-xs font-semibold rounded-full bg-[#113946] text-[#FFF2D8]">
+                          <FiMessageSquare className="mr-1" /> Answered
+                        </span>
+                      )}
+                      {ticket.action === 'Closed' && (
+                        <span className="px-3 py-1 inline-flex items-center text-xs font-semibold rounded-full bg-[#BCA37F] text-[#FFF2D8]">
+                          <FiCheckCircle className="mr-1" /> Closed
+                        </span>
+                      )}
+                      {ticket.action === 'Open' && (
+                        <span className="px-3 py-1 inline-flex items-center text-xs font-semibold rounded-full bg-[#EAD7BB] text-[#113946]">
+                          <FiThumbsUp className="mr-1" /> Open
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`px-3 py-1 inline-flex items-center text-xs font-semibold rounded-full ${
+                        ticket.status === 'Open' ? 'bg-[#EAD7BB] text-[#113946]' :
+                        ticket.status === 'Closed' ? 'bg-[#BCA37F] text-[#FFF2D8]' :
+                        ticket.status === 'New' ? 'bg-[#113946] text-[#FFF2D8]' :
+                        'bg-[#FFF2D8] text-[#113946]'
+                      }`}>
+                        {ticket.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+);}
+export default AdminAnalyticsDashboard;
