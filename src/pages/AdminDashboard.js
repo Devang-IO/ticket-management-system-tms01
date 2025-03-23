@@ -823,148 +823,153 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Tickets & Employee Activity Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Tickets Section */}
-        <div className="bg-[#113946] p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-[#FFF2D8]">Recent Tickets</h2>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-[#BCA37F] text-[#FFF2D8] rounded-xl">
-                <th className="p-3 text-left">#</th>
-                <th className="p-3 text-left">Title</th>
-                <th className="p-3 text-left">Updated</th>
-                <th className="p-3 text-left">Action</th>
-                <th className="p-3 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan="5" className="p-4 text-center text-[#FFF2D8]">
-                    Loading tickets...
-                  </td>
-                </tr>
-              ) : recentTickets.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-4 text-center text-[#FFF2D8]">
-                    No tickets found
-                  </td>
-                </tr>
-              ) : (
-                recentTickets.map((ticket, index) => (
-                  <tr key={ticket.id} className="border-b border-[#EAD7BB]">
-                    <td className="p-3 text-[#FFF2D8]">{index + 1}</td>
-                    <td className="p-3">
-                      <Link
-                        to={`/managetickets?ticketId=${ticket.id}`}
-                        className="text-[#FFF2D8] hover:underline"
-                      >
-                        {ticket.title}
-                      </Link>
-                    </td>
-                    <td className="p-3 text-[#FFF2D8]">{ticket.updated}</td>
-                    <td className="p-3">
-                      <span className="px-3 py-1 rounded bg-[#BCA37F] text-[#FFF2D8]">
-                        {ticket.action}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <span
-                        className="px-3 py-1 rounded"
-                        style={{ 
-                          backgroundColor: ticket.statusColor, 
-                          color: "#113946" 
-                        }}
-                      >
-                        {ticket.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Employee Activity Status Section */}
-        <EmployeeActivityStatus />
-      </div>
-
-      {/* Chart and Top Performers Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Bar Chart */}
-        <div
-          className="bg-[#113946] p-6 rounded-xl shadow-lg flex justify-center items-center"
-          style={{ height: "300px" }}
-        >
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {/* Recent Tickets Section */}
+  <div className="bg-[#113946] p-4 md:p-6 rounded-xl shadow-lg">
+    <h2 className="text-lg md:text-xl font-semibold mb-4 text-[#FFF2D8]">
+      Recent Tickets
+    </h2>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="bg-[#BCA37F] text-[#FFF2D8]">
+            <th className="p-2 md:p-3 text-left">#</th>
+            <th className="p-2 md:p-3 text-left">Title</th>
+            <th className="p-2 md:p-3 text-left">Updated</th>
+            <th className="p-2 md:p-3 text-left">Action</th>
+            <th className="p-2 md:p-3 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody>
           {isLoading ? (
-            <div className="text-[#FFF2D8]">Loading chart data...</div>
+            <tr>
+              <td colSpan="5" className="p-4 text-center text-[#FFF2D8]">
+                Loading tickets...
+              </td>
+            </tr>
+          ) : recentTickets.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="p-4 text-center text-[#FFF2D8]">
+                No tickets found
+              </td>
+            </tr>
           ) : (
-            <Bar data={chartData} options={chartOptions} />
-          )}
-        </div>
-
-        {/* Top Performers */}
-        <div className="bg-[#113946] p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-[#FFF2D8]">Top Performers</h2>
-          {isLoading ? (
-            <p className="text-[#FFF2D8]">Loading top performers...</p>
-          ) : topPerformers.length === 0 ? (
-            <p className="text-[#FFF2D8]">No performer data found.</p>
-          ) : (
-            <ol className="list-decimal pl-5 text-[#FFF2D8]">
-              {topPerformers.map((user) => (
-                <li key={user.userId} className="mb-4 flex items-center gap-3">
-                  <img
-                    src={user.profile_picture}
-                    alt={user.name}
-                    className="w-10 h-10 rounded-full"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "default-avatar.png";
+            recentTickets.map((ticket, index) => (
+              <tr key={ticket.id} className="border-b border-[#EAD7BB]">
+                <td className="p-2 md:p-3 text-[#FFF2D8]">{index + 1}</td>
+                <td className="p-2 md:p-3">
+                  <Link
+                    to={`/managetickets?ticketId=${ticket.id}`}
+                    className="text-[#FFF2D8] hover:underline"
+                  >
+                    {ticket.title}
+                  </Link>
+                </td>
+                <td className="p-2 md:p-3 text-[#FFF2D8]">{ticket.updated}</td>
+                <td className="p-2 md:p-3">
+                  <span className="px-2 md:px-3 py-1 rounded bg-[#BCA37F] text-[#FFF2D8]">
+                    {ticket.action}
+                  </span>
+                </td>
+                <td className="p-2 md:p-3">
+                  <span
+                    className="px-2 md:px-3 py-1 rounded"
+                    style={{
+                      backgroundColor: ticket.statusColor,
+                      color: "#113946",
                     }}
-                  />
-                  <div>
-                    <p className="font-semibold">{user.name}</p>
-                    <p className="text-sm text-[#EAD7BB]">
-                      {user.solved_tickets} ticket{user.solved_tickets !== 1 ? "s" : ""} solved
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+                  >
+                    {ticket.status}
+                  </span>
+                </td>
+              </tr>
+            ))
           )}
-        </div>
-      </div>
-
-      {/* Footer with Buttons */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 p-6 bg-[#113946] text-[#FFF2D8] rounded-xl shadow-lg">
-        <span className="text-lg font-semibold mb-4 sm:mb-0">
-          Manage your tickets efficiently
-        </span>
-        <div className="space-x-4">
-          <Link to="/managetickets">
-            <button className="px-4 py-2 bg-[#FFF2D8] hover:bg-[#BCA37F] rounded-xl shadow text-[#113946]">
-              Manage Tickets
-            </button>
-          </Link>
-          <Link to="/assigntickets">
-            <button className="px-4 py-2 bg-[#FFF2D8] hover:bg-[#BCA37F] rounded-xl shadow text-[#113946]">
-              Assign Tickets
-            </button>
-          </Link>
-        </div>
-      </div>
-      
-      {/* Analysis Modal */}
-      <AnalysisModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        ticketsToAnalyze={ticketsToAnalyze}
-        onAnalysisComplete={handleAnalysisComplete}
-      />
+        </tbody>
+      </table>
     </div>
-  );
-};
+  </div>
 
+  {/* Employee Activity Status Section */}
+  <EmployeeActivityStatus />
+</div>
+
+{/* Chart and Top Performers Section */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+  {/* Bar Chart */}
+  <div
+    className="bg-[#113946] p-4 md:p-6 rounded-xl shadow-lg flex justify-center items-center"
+    style={{ height: "300px" }}
+  >
+    {isLoading ? (
+      <div className="text-[#FFF2D8]">Loading chart data...</div>
+    ) : (
+      <Bar data={chartData} options={chartOptions} />
+    )}
+  </div>
+
+  {/* Top Performers */}
+  <div className="bg-[#113946] p-4 md:p-6 rounded-xl shadow-lg">
+    <h2 className="text-lg md:text-xl font-semibold mb-4 text-[#FFF2D8]">
+      Top Performers
+    </h2>
+    {isLoading ? (
+      <p className="text-[#FFF2D8]">Loading top performers...</p>
+    ) : topPerformers.length === 0 ? (
+      <p className="text-[#FFF2D8]">No performer data found.</p>
+    ) : (
+      <ol className="list-decimal pl-5 text-[#FFF2D8]">
+        {topPerformers.map((user) => (
+          <li key={user.userId} className="mb-4 flex items-center gap-3">
+            <img
+              src={user.profile_picture}
+              alt={user.name}
+              className="w-8 md:w-10 h-8 md:h-10 rounded-full"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "default-avatar.png";
+              }}
+            />
+            <div>
+              <p className="font-semibold text-sm md:text-base">{user.name}</p>
+              <p className="text-xs md:text-sm text-[#EAD7BB]">
+                {user.solved_tickets} ticket{user.solved_tickets !== 1 ? "s" : ""} solved
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    )}
+  </div>
+</div>
+
+{/* Footer with Buttons */}
+<div className="flex flex-col sm:flex-row justify-between items-center mt-6 p-4 md:p-6 bg-[#113946] text-[#FFF2D8] rounded-xl shadow-lg">
+  <span className="text-base md:text-lg font-semibold mb-4 sm:mb-0">
+    Manage your tickets efficiently
+  </span>
+  <div className="space-x-0 sm:space-x-4 space-y-4 sm:space-y-0">
+    <Link to="/managetickets">
+      <button className="px-4 py-2 bg-[#FFF2D8] hover:bg-[#BCA37F] rounded-xl shadow text-[#113946] text-sm">
+        Manage Tickets
+      </button>
+    </Link>
+    <Link to="/assigntickets">
+      <button className="px-4 py-2 bg-[#FFF2D8] hover:bg-[#BCA37F] rounded-xl shadow text-[#113946] text-sm">
+        Assign Tickets
+      </button>
+    </Link>
+  </div>
+</div>
+
+{/* Analysis Modal */}
+<AnalysisModal 
+  isOpen={isModalOpen}
+  onClose={() => setIsModalOpen(false)}
+  ticketsToAnalyze={ticketsToAnalyze}
+  onAnalysisComplete={handleAnalysisComplete}
+/>
+</div>
+  );
+}
 export default Dashboard;
