@@ -312,7 +312,7 @@ const Dashboard = () => {
 
   return (
     <div className=" pt-20 p-6 bg-[#FFF2D8] min-h-screen flex flex-col space-y-6">
-      <h1 className="pb-10 text-3xl font-bold text-[#113946]">Admin Dashboard</h1>
+      <h1 className="pb-10 mt-10 text-3xl font-bold text-[#113946]">Admin Dashboard</h1>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
