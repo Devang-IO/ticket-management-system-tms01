@@ -9,7 +9,57 @@
   --accent:    #BCA37F;
 }
 
+/* ==================== */
+/* Custom Scrollbar CSS */
+/* ==================== */
 
+/* Works for Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+  background-color: #FFF2D8;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFF2D8;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BCA37F;
+  border-radius: 8px;
+  border: 3px solid #FFF2D8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #EAD7BB;
+}
+
+::-webkit-scrollbar-corner {
+  background: #FFF2D8;
+}
+
+/* Works for Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #BCA37F #FFF2D8;
+}
+
+/* Optional: Smooth color transitions */
+::-webkit-scrollbar-thumb {
+  transition: background-color 0.3s ease;
+}
+
+/* Optional: Style scrollbar buttons (arrows) */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Optional: Force scrollbar styling on specific elements */
+/* .scroll-container {
+  scrollbar-color: #BCA37F #FFF2D8;
+  overflow: auto;
+} */
 
 /* ======================== */
 /* Windows 11 Cursor System */
