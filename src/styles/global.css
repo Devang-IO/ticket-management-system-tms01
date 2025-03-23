@@ -9,6 +9,75 @@
   --accent:    #BCA37F;
 }
 
+
+
+/* ======================== */
+/* Windows 11 Cursor System */
+/* ======================== */
+
+* {
+  cursor: url('E:\ticket-management-system\public\cursors\arrow.cur'), auto !important;
+}
+
+/* Animated Cursors with Static Fallbacks */
+html.wait, [aria-busy="true"] {
+  cursor: url('E:\ticket-management-system\public\cursors\appstarting.ani'), url('E:\ticket-management-system\public\cursors\wait.ani'), progress !important;
+}
+
+/* Text Selection */
+input, textarea, [contenteditable], pre {
+  cursor: url('E:\ticket-management-system\public\cursors\ibeam.cur'), text !important;
+}
+
+/* Links & Clickables */
+a, button, .clickable {
+  cursor: url('E:\ticket-management-system\public\cursors\hand.cur'), pointer !important;
+}
+
+/* Resize Cursors */
+.resize-nesw { cursor: url('E:\ticket-management-system\public\cursors\sizenesw.cur'), nesw-resize !important; }
+.resize-nwse { cursor: url('E:\ticket-management-system\public\cursors\sizenwse.cur'), nwse-resize !important; }
+.resize-vertical { cursor: url('E:\ticket-management-system\public\cursors\sizens.cur'), ns-resize !important; }
+.resize-horizontal { cursor: url('E:\ticket-management-system\public\cursors\sizewe.cur'), ew-resize !important; }
+
+/* Special States */
+.draggable {
+  cursor: url('E:\ticket-management-system\public\cursors\sizeall.cur'), move !important;
+}
+
+:disabled {
+  cursor: url('E:\ticket-management-system\public\cursors\no.cur'), not-allowed !important;
+}
+
+/* Precision Selection */
+.crosshair {
+  cursor: url('E:\ticket-management-system\public\cursors\crosshair.cur'), crosshair !important;
+}
+
+/* Help Cursor */
+[title]:hover {
+  cursor: url('E:\ticket-management-system\public\cursors\help.cur'), help !important;
+}
+
+/* Person/People Cursor */
+.profile-card {
+  cursor: url('E:\ticket-management-system\public\cursors\person.cur'), context-menu !important;
+}
+
+/* Installation State */
+.installing {
+  cursor: url('E:\ticket-management-system\public\cursors\wait.ani'), url('E:\ticket-management-system\public\cursors\appstarting.ani'), wait !important;
+}
+
+/* Hi-DPI Fallbacks */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  * {
+    cursor: url('E:\ticket-management-system\public\cursors\arrow.cur'), auto !important;
+  }
+  /* Add other @2x variants if available */
+}
+
+
 /* Global Styles */
 body {
   @apply bg-[var(--bg-100)] text-[var(--primary)] transition-all;
