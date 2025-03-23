@@ -233,8 +233,8 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
-        <div className="p-8 max-w-2xl bg-white rounded-xl shadow-lg text-center">
-          <div className="py-10 text-gray-600">Loading profile data...</div>
+        <div className="p-8 max-w-2xl bg-[#FFF2D8] rounded-xl shadow-lg text-center">
+          <div className="py-10 text-[#113946]">Loading profile data...</div>
         </div>
       </div>
     );
@@ -243,9 +243,9 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
   if (!user) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
-        <div className="p-8 max-w-2xl bg-white rounded-xl shadow-lg text-center">
+        <div className="p-8 max-w-2xl bg-[#FFF2D8] rounded-xl shadow-lg text-center">
           <div className="py-10 text-red-600">User profile not found</div>
-          <button onClick={onClose} className="mt-3 bg-gray-600 text-white px-4 py-2 rounded">
+          <button onClick={onClose} className="mt-3 bg-[#BCA37F] text-white px-4 py-2 rounded">
             Close
           </button>
         </div>
@@ -255,17 +255,18 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-lg flex justify-center items-center z-50">
-      <div className="relative p-8 w-full max-w-2xl bg-white rounded-xl shadow-lg text-center max-h-[90vh] overflow-y-auto">
+      <div className="relative p-8 w-full max-w-2xl bg-[#FFF2D8] rounded-xl shadow-lg text-center max-h-[90vh] overflow-y-auto">
         {/* Toast Notification */}
         {profilePicToast && (
-          <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+          <div className="mb-4 p-3 bg-[#EAD7BB] text-[#113946] rounded">
             {profilePicToast}
           </div>
         )}
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-red-700">
+        <button onClick={onClose} className="absolute top-3 right-3 text-[#113946] hover:text-[#BCA37F]">
           <X size={24} />
         </button>
-        <div className="h-24 bg-gradient-to-r from-yellow-500 to-blue-700 rounded-t-lg" />
+        {/* Updated header gradient using theme colors */}
+        <div className="h-24 bg-gradient-to-r from-[#EAD7BB] to-[#BCA37F] rounded-t-lg" />
         <div className="-mt-12 flex flex-col items-center">
           <div className="relative">
             <label htmlFor="profilePicInput" className="cursor-pointer">
@@ -276,11 +277,11 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                     : formData.profile_picture || "/default-avatar.png"
                 }
                 alt="Profile"
-                className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
+                className="w-28 h-28 rounded-full border-4 border-[#FFF2D8] shadow-md object-cover"
               />
               {editing && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-full border-4 border-white">
-                  <span className="text-black text-sm font-medium">Change</span>
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-full border-4 border-[#FFF2D8]">
+                  <span className="text-[#FFF2D8] text-sm font-medium">Change</span>
                 </div>
               )}
             </label>
@@ -299,7 +300,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
           {editing ? (
             <div className="w-full mt-4 space-y-3">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 text-left">
+                <label htmlFor="name" className="block text-sm font-medium text-[#113946] text-left">
                   Name
                 </label>
                 <input
@@ -308,11 +309,11 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                   name="name"
                   value={formData.name || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-[#EAD7BB] rounded-md text-[#113946] shadow-sm py-2 px-3 focus:outline-none focus:ring-[#113946] focus:border-[#113946]"
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 text-left">
+                <label htmlFor="email" className="block text-sm font-medium text-[#113946] text-left">
                   Email
                 </label>
                 <input
@@ -321,11 +322,11 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                   name="email"
                   value={formData.email || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-[#EAD7BB] rounded-md text-[#113946] shadow-sm py-2 px-3 focus:outline-none focus:ring-[#113946] focus:border-[#113946]"
                 />
               </div>
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 text-left">
+                <label htmlFor="phone" className="block text-sm font-medium text-[#113946] text-left">
                   Phone
                 </label>
                 <input
@@ -334,11 +335,11 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                   name="phone"
                   value={formData.phone || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-[#EAD7BB] rounded-md text-[#113946] shadow-sm py-2 px-3 focus:outline-none focus:ring-[#113946] focus:border-[#113946]"
                 />
               </div>
               <div>
-                <label htmlFor="oldPassword" className="block text-sm font-medium text-gray-700 text-left">
+                <label htmlFor="oldPassword" className="block text-sm font-medium text-[#113946] text-left">
                   Old Password
                 </label>
                 <div className="relative">
@@ -348,7 +349,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                     name="oldPassword"
                     value={formData.oldPassword || ""}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-[#EAD7BB] rounded-md text-[#113946] shadow-sm py-2 px-3 focus:outline-none focus:ring-[#113946] focus:border-[#113946]"
                     placeholder="Enter old password"
                   />
                   <button
@@ -360,7 +361,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                 </div>
               </div>
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 text-left">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-[#113946] text-left">
                   New Password
                 </label>
                 <div className="relative">
@@ -370,7 +371,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                     name="newPassword"
                     value={formData.newPassword || ""}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md text-black shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-[#EAD7BB] rounded-md text-[#113946] shadow-sm py-2 px-3 focus:outline-none focus:ring-[#113946] focus:border-[#113946]"
                     placeholder="Enter new password"
                   />
                   <button
@@ -386,8 +387,8 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                   onClick={handleSave}
                   disabled={uploadLoading}
                   className={`flex-1 py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white ${
-                    uploadLoading ? "bg-green-400" : "bg-green-600 hover:bg-green-700"
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
+                    uploadLoading ? "bg-[#BCA37F]" : "bg-[#113946] hover:bg-[#BCA37F]"
+                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#113946]`}
                 >
                   {uploadLoading ? "Saving..." : "Save Changes"}
                 </button>
@@ -399,7 +400,7 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
                     setErrorMessage("");
                   }}
                   disabled={uploadLoading}
-                  className="flex-1 py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  className="flex-1 py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-[#BCA37F] hover:bg-[#113946] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#113946]"
                 >
                   Cancel
                 </button>
@@ -407,15 +408,15 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
             </div>
           ) : (
             <div className="mt-4 space-y-2">
-              <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
-              <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">{user.role}</span>
-              <div className="text-gray-600">
+              <h2 className="text-2xl font-bold text-[#113946]">{user.name}</h2>
+              <span className="bg-[#113946] text-white px-3 py-1 rounded-full text-sm">{user.role}</span>
+              <div className="text-[#113946]">
                 <p>📧 {user.email}</p>
                 {user.phone && <p>📱 {user.phone}</p>}
               </div>
               <button
                 onClick={() => setEditing(true)}
-                className="mt-4 inline-flex items-center px-4 py-2 rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="mt-4 inline-flex items-center px-4 py-2 rounded-xl shadow-sm text-sm font-medium text-white bg-[#113946] hover:bg-[#BCA37F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#113946]"
               >
                 Edit Profile
               </button>
@@ -425,50 +426,50 @@ export default function ProfileModal({ onClose, onProfileUpdate }) {
 
         {/* Ticket statistics */}
         <div className="mt-8 border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-3">Ticket Statistics</h3>
+          <h3 className="text-lg font-semibold text-[#113946] mb-3">Ticket Statistics</h3>
           {user.role.toLowerCase() === "employee" ? (
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-blue-600">{ticketStats.open}</p>
-                <p className="text-sm text-gray-600">Open Tickets</p>
+              <div className="p-3 rounded-lg bg-[#EAD7BB]">
+                <p className="text-2xl font-bold text-[#113946]">{ticketStats.open}</p>
+                <p className="text-sm text-[#113946]">Open Tickets</p>
               </div>
-              <div className="bg-green-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">{ticketStats.assigned}</p>
-                <p className="text-sm text-gray-600">Assigned Tickets</p>
+              <div className="p-3 rounded-lg bg-[#BCA37F]">
+                <p className="text-2xl font-bold text-[#FFF2D8]">{ticketStats.assigned}</p>
+                <p className="text-sm text-[#FFF2D8]">Assigned Tickets</p>
               </div>
-              <div className="bg-yellow-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-600">{ticketStats.closed}</p>
-                <p className="text-sm text-gray-600">Closed Tickets</p>
+              <div className="p-3 rounded-lg bg-[#113946]">
+                <p className="text-2xl font-bold text-[#FFF2D8]">{ticketStats.closed}</p>
+                <p className="text-sm text-[#FFF2D8]">Closed Tickets</p>
               </div>
             </div>
           ) : user.role.toLowerCase() === "admin" ? (
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-blue-600">{ticketStats.totalTickets}</p>
-                <p className="text-sm text-gray-600">Total Tickets</p>
+              <div className="p-3 rounded-lg bg-[#EAD7BB]">
+                <p className="text-2xl font-bold text-[#113946]">{ticketStats.totalTickets}</p>
+                <p className="text-sm text-[#113946]">Total Tickets</p>
               </div>
-              <div className="bg-green-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">{ticketStats.totalUsers}</p>
-                <p className="text-sm text-gray-600">Total Users</p>
+              <div className="p-3 rounded-lg bg-[#BCA37F]">
+                <p className="text-2xl font-bold text-[#FFF2D8]">{ticketStats.totalUsers}</p>
+                <p className="text-sm text-[#FFF2D8]">Total Users</p>
               </div>
-              <div className="bg-yellow-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-600">{ticketStats.totalEmployees}</p>
-                <p className="text-sm text-gray-600">Total Employees</p>
+              <div className="p-3 rounded-lg bg-[#113946]">
+                <p className="text-2xl font-bold text-[#FFF2D8]">{ticketStats.totalEmployees}</p>
+                <p className="text-sm text-[#FFF2D8]">Total Employees</p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-blue-600">{ticketStats.open}</p>
-                <p className="text-sm text-gray-600">Open Tickets</p>
+              <div className="p-3 rounded-lg bg-[#EAD7BB]">
+                <p className="text-2xl font-bold text-[#113946]">{ticketStats.open}</p>
+                <p className="text-sm text-[#113946]">Open Tickets</p>
               </div>
-              <div className="bg-green-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">{ticketStats.closed}</p>
-                <p className="text-sm text-gray-600">Closed Tickets</p>
+              <div className="p-3 rounded-lg bg-[#BCA37F]">
+                <p className="text-2xl font-bold text-[#FFF2D8]">{ticketStats.closed}</p>
+                <p className="text-sm text-[#FFF2D8]">Closed Tickets</p>
               </div>
-              <div className="bg-yellow-50 p-3 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-600">{ticketStats.answered}</p>
-                <p className="text-sm text-gray-600">Answered Tickets</p>
+              <div className="p-3 rounded-lg bg-[#113946]">
+                <p className="text-2xl font-bold text-[#FFF2D8]">{ticketStats.answered}</p>
+                <p className="text-sm text-[#FFF2D8]">Answered Tickets</p>
               </div>
             </div>
           )}

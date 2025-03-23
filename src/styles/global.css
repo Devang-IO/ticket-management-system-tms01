@@ -220,11 +220,10 @@ body {
 .search-input {
   @apply px-2 py-2 border border-[var(--secondary)] rounded-lg w-48 h-8 bg-[var(--primary)] text-white placeholder-[var(--accent)];
 }
-
-.notifications-dropdown,
 .profile-dropdown {
-  @apply absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-50;
+  @apply absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-[9999];
 }
+
 
 .dropdown-header {
   @apply p-4 border-b border-[var(--secondary)] font-semibold text-white;

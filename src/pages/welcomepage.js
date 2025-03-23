@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 
 // Image paths
 const images = {
-  "ticket-list": "/ticketdetail.jpg",
-  "ticket-view": "/ticketview.png",
+  "ticket-list": "/ticketview.png",
+  "ticket-view": "/ticketdetail.png",
   "dashboard": "/dashboard.png",
 };
 
@@ -24,18 +24,19 @@ const WelcomePage = () => {
             QuickAssist
           </h1>
         </div>
-        <div className="space-x-4">
-          <Link to="/login">
-            <button className="px-6 py-2 bg-[#113946] text-[#EAD7BB] font-semibold rounded-full hover:bg-[#BCA37F] transition duration-300">
-              Login
-            </button>
-          </Link>
-          <Link to="/register">
-            <button className="px-6 py-2 bg-[#113946] text-[#EAD7BB] font-semibold rounded-full hover:bg-[#BCA37F] transition duration-300">
-              Signup
-            </button>
-          </Link>
-        </div>
+        <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+  <Link to="/login" className="w-full sm:w-auto">
+    <button className="w-full px-6 py-2 bg-[#113946] text-[#EAD7BB] font-semibold rounded-full hover:bg-[#BCA37F] transition duration-300">
+      Login
+    </button>
+  </Link>
+  <Link to="/register" className="w-full sm:w-auto">
+    <button className="w-full px-6 py-2 bg-[#113946] text-[#EAD7BB] font-semibold rounded-full hover:bg-[#BCA37F] transition duration-300">
+      Signup
+    </button>
+  </Link>
+</div>
+
       </nav>
 
       {/* Welcome Section with Animation */}

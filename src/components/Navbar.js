@@ -152,7 +152,7 @@ const Navbar = ({ sidebarOpen }) => {
         </div>
 
         {/* Navbar right side */}
-        <div className="navbar-right flex items-center gap-2 md:gap-4">
+        <div className="navbar-right flex items-center gap-2 md:gap-4 z-50">
           {/* Search input with icon */}
           <div className="relative flex items-center">
           
@@ -166,8 +166,8 @@ const Navbar = ({ sidebarOpen }) => {
           </div>
 
           {/* Profile dropdown */}
-          <div className="relative">
-            <div className="flex items-center justify-between profile-section">
+          <div className="relative z-50">
+            <div className="flex items-center justify-between profile-section z-50">
               {/* Username and Role (Left) - Hidden on small screens */}
               <div className="user-info text-white flex-col items-end hidden md:flex">
                 <p className="username font-bold whitespace-nowrap">{username}</p>
@@ -201,10 +201,11 @@ const Navbar = ({ sidebarOpen }) => {
               </button>
             </div>
             {profileOpen && (
-  <div className="absolute right-0 mt-2 w-48 bg-[#FFF2D8] rounded-xl shadow-lg transform transition-all duration-300 ease-in-out z-1">
+ <div className="absolute right-0 mt-2 w-48 bg-[#FFF2D8] rounded-xl shadow-lg transform transition-all duration-300 ease-in-out z-[9999]">
+
     <ul className="py-2">
       <li
-        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2"
+        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
         onClick={() => {
           setProfileModalOpen(true);
           setProfileOpen(false);
@@ -215,7 +216,7 @@ const Navbar = ({ sidebarOpen }) => {
       </li>
 
       <li
-        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2"
+        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
         onClick={handleLogout}
       >
         <FiLogOut className="text-[#113946]" />
