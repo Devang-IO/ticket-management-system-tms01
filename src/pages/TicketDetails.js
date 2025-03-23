@@ -146,7 +146,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#EEF3F7] p-6 pl-20">
+    <div className="w-full min-h-screen bg-[#EEF3F7] p-6  mt-16">
       {/* Page Title */}
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-[#23486A]">Ticket Details</h1>
