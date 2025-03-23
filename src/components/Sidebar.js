@@ -3,12 +3,11 @@ import { useLocation } from "react-router-dom";
 import { 
   FiHome, FiFileText, FiPlusCircle, FiCheckCircle, 
   FiSettings, FiArrowLeftCircle, FiArrowRightCircle,FiUsers,
- 
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import TicketSubmissionModal from "./TicketSubmissionModal";
 import SettingsModal from "./SettingsModel";
-import { FaTicketAlt, FaUserCog } from "react-icons/fa";
+import { FaTicketAlt, FaUserCog,FaChartLine } from "react-icons/fa";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
@@ -139,10 +138,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 </Link>
               </li>
               <li>
-                <Link to="/admin/analytics" className={`sidebar-item ${location.pathname === "/admin/analytics" ? "sidebar-item-active" : ""}`}>
-                  <FaUserCog size={20} />
-                  {sidebarOpen && <span className="sidebar-item-text">Analytics</span>}
-                </Link>
+              <Link
+  to="/admin/analytics"
+  className={`sidebar-item ${location.pathname === "/admin/analytics" ? "sidebar-item-active" : ""}`}
+>
+  <FaChartLine size={20} />
+  {sidebarOpen && <span className="sidebar-item-text">Analytics</span>}
+</Link>
+
               </li>
               
             </>

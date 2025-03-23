@@ -366,7 +366,7 @@ const EmployeeActivityStatus = () => {
   }, []);
 
   return (
-    <div className="bg-[#113946] p-4 rounded-xl shadow">
+    <div className="bg-[#113946] p-4 rounded-xl shadow mt-10">
       <h2 className="text-xl font-semibold mb-3 text-[#FFF2D8]">
         Employee Activity Status
       </h2>
@@ -775,7 +775,7 @@ const Dashboard = () => {
 
   return (
     <div className="pt-20 p-6 bg-[#FFF2D8] min-h-screen flex flex-col space-y-6">
-      <h1 className="pb-10 mt-10 text-3xl font-bold text-[#113946]">Admin Dashboard</h1>
+      <h1 className="pb-10 text-3xl font-bold text-[#113946]">Admin Dashboard</h1>
       
       {/* AI Moderation Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 ml-50">
