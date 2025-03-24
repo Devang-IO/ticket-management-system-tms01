@@ -68,11 +68,11 @@ const ClosedTickets = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FFF2D8] to-[#F5E7C1] px-4 py-6 md:px-8 md:py-8 mt-10 z-0">
+    <div className="main-content closed-tickets-container w-full px-4 py-6">
       {/* Page Header */}
-      <div className="bg-[#113946] shadow-lg rounded-xl p-6 max-w-7xl mx-auto transform transition-all duration-300 hover:shadow-xl z-0">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center z-0">
-          <h1 className="text-3xl font-bold text-[#FFF2D8] flex items-center gap-3">
+      <div className="bg-[#113946] shadow-lg rounded-xl p-4 md:p-6 mx-auto">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+          <h1 className="text-2xl md:text-3xl font-bold text-[#FFF2D8] flex items-center gap-3">
             <FaTicketAlt className="text-[#EAD7BB]" />
             Closed Tickets
           </h1>
@@ -82,7 +82,7 @@ const ClosedTickets = () => {
         </div>
 
         {/* Search & Filter Controls */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Search Box */}
           <div className="relative">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -136,31 +136,31 @@ const ClosedTickets = () => {
       </div>
 
       {/* Tickets Table */}
-      <div className="max-w-7xl mx-auto mt-8 bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+      <div className="mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-12">
             <div className="w-16 h-16 border-4 border-[#113946] border-t-[#EAD7BB] rounded-full animate-spin"></div>
             <p className="mt-4 text-[#113946] font-medium">Loading tickets...</p>
           </div>
         ) : sortedFilteredTickets.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+          <div className="overflow-x-auto w-full">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="bg-[#113946] text-[#FFF2D8]">
-                  <th className="p-4 text-left font-semibold">#</th>
-                  <th className="p-4 text-left font-semibold">Ticket Details</th>
-                  <th className="p-4 text-left font-semibold">Date Closed</th>
-                  <th className="p-4 text-center font-semibold">Priority</th>
+                  <th className="p-3 md:p-4 text-left font-semibold">#</th>
+                  <th className="p-3 md:p-4 text-left font-semibold">Ticket Details</th>
+                  <th className="p-3 md:p-4 text-left font-semibold">Date Closed</th>
+                  <th className="p-3 md:p-4 text-center font-semibold">Priority</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {sortedFilteredTickets.map((ticket, index) => (
                   <tr
                     key={ticket.id}
                     className="border-b border-gray-100 hover:bg-[#F9F5EB] transition-colors duration-150"
                   >
-                    <td className="p-4 text-[#113946] font-medium">{index + 1}</td>
-                    <td className="p-4">
+                    <td className="p-3 md:p-4 text-[#113946] font-medium">{index + 1}</td>
+                    <td className="p-3 md:p-4">
                       <div className="font-medium text-[#113946]">{ticket.title}</div>
                       {ticket.description && (
                         <div className="text-sm text-gray-500 mt-1 line-clamp-1">
@@ -168,7 +168,7 @@ const ClosedTickets = () => {
                         </div>
                       )}
                     </td>
-                    <td className="p-4">
+                    <td className="p-3 md:p-4">
                       <div className="flex items-center text-gray-600">
                         <FaCalendarAlt className="mr-2 text-[#BCA37F]" />
                         {new Date(ticket.closedDate || ticket.created_at).toLocaleDateString("en-US", {
@@ -178,7 +178,7 @@ const ClosedTickets = () => {
                         })}
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="p-3 md:p-4">
                       <div className="flex justify-center">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityBadgeStyle(ticket.priority)}`}
@@ -193,9 +193,9 @@ const ClosedTickets = () => {
             </table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-12 text-center">
-            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <FaTicketAlt className="text-gray-400 text-2xl" />
+          <div className="empty-state flex flex-col items-center justify-center p-8 md:p-12 text-center">
+            <div className="w-16 md:w-20 h-16 md:h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <FaTicketAlt className="text-gray-400 text-xl md:text-2xl" />
             </div>
             <h3 className="text-lg font-medium text-[#113946]">No closed tickets found</h3>
             <p className="mt-2 text-gray-500 max-w-md">

@@ -55,12 +55,6 @@ html {
   display: none;
 }
 
-/* Optional: Force scrollbar styling on specific elements */
-/* .scroll-container {
-  scrollbar-color: #BCA37F #FFF2D8;
-  overflow: auto;
-} */
-
 /* ======================== */
 /* Windows 11 Cursor System */
 /* ======================== */
@@ -127,8 +121,6 @@ a, button, .clickable {
   /* Add other @2x variants if available */
 }
 
-
-
 /* Global Styles */
 body {
   @apply bg-[var(--bg-100)] text-[var(--primary)] transition-all;
@@ -167,66 +159,114 @@ body {
   @apply text-xl font-semibold;
 }
 
-/* Navbar */
-.user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
+/* ======= FIXED NAVBAR AND SIDEBAR LAYOUT ======= */
 
-.username {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.user-role {
-  font-size: 0.75rem;
-  color: var(--accent);
-}
-
+/* Navbar - fixed at top */
 .navbar {
-  @apply bg-[var(--primary)] text-white p-4 shadow-md fixed top-0 left-0 right-0 h-14 flex items-center;
+  @apply bg-[var(--primary)] text-white shadow-md fixed top-0 left-0 right-0 h-14 flex items-center justify-between px-4 z-30;
 }
 
 .navbar-left {
   @apply flex items-center gap-4;
+  margin-left: 3.5rem; /* Space for sidebar toggle when collapsed */
+}
+
+/* Adjust margin when sidebar is open */
+.sidebar-open ~ .navbar .navbar-left {
+  margin-left: 13rem; /* Adjust based on sidebar width */
 }
 
 .navbar-right {
   @apply flex items-center gap-4;
 }
 
+/* Sidebar - fixed at left side with proper z-index */
+.sidebar {
+  @apply h-screen bg-[var(--primary)] text-white fixed top-0 left-0 transition-all duration-300 flex flex-col justify-between z-40;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-open {
+  @apply w-52;
+}
+
+.sidebar-closed {
+  @apply w-14;
+}
+
+/* Main content wrapper - adjust margin based on sidebar state */
+.main-content {
+  @apply transition-all duration-300 mt-14;
+  margin-left: 3.5rem; /* Default for collapsed sidebar */
+}
+
+.sidebar-open ~ .main-content {
+  margin-left: 13rem;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .navbar {
+    @apply px-2;
+  }
+  
+  .navbar-left {
+    margin-left: 3rem;
+  }
+  
+  .sidebar-open ~ .navbar .navbar-left {
+    margin-left: 4rem;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .sidebar-open ~ .main-content {
+    margin-left: 4rem;
+  }
+  
+  /* Mobile navbar menu */
+  .mobile-menu {
+    @apply fixed top-14 right-0 bg-[var(--primary)] p-4 w-48 z-30 shadow-lg rounded-bl-lg;
+    display: none;
+  }
+  
+  .mobile-menu.block {
+    display: block;
+  }
+}
+
+/* ======= END FIXED LAYOUT ======= */
+
 /* Container for back button and title centered */
 .page-title-container {
-  @apply flex items-center justify-center gap-2 w-full;
+  @apply flex items-center justify-center gap-2 w-full relative;
 }
 
 /* Page title centered */
 .page-title {
   @apply text-white font-semibold text-xl;
-  position: absolute;
-  left: 300px;
-  margin-left: 300px;
 }
 
 /* Back button on the left */
 .back-btn {
-  @apply text-white text-lg font-semibold;
-  position: absolute;
-  left: 300px;
-  margin-left: 200px;
+  @apply text-white text-lg font-semibold absolute left-4;
 }
 
 .search-input {
   @apply px-2 py-2 border border-[var(--secondary)] rounded-lg w-48 h-8 bg-[var(--primary)] text-white placeholder-[var(--accent)];
 }
+
+/* Dropdown positioning and styling */
 .profile-dropdown {
-  @apply absolute top-10 right-0 bg-white shadow-lg rounded-lg w-64 z-[9999];
+  @apply absolute top-14 right-0 bg-white shadow-lg rounded-lg w-64 z-50;
 }
 
-
 .dropdown-header {
-  @apply p-4 border-b border-[var(--secondary)] font-semibold text-white;
+  @apply p-4 border-b border-[var(--secondary)] font-semibold text-[var(--primary)];
 }
 
 .dropdown-content {
@@ -253,58 +293,139 @@ body {
   @apply w-10 h-10 rounded-full bg-[var(--secondary)];
 }
 
-/* For the hamburger menu icon on small screens */
-.block lg:hidden {
-  display: block;
+/* Sidebar Header */
+.sidebar-header {
+  @apply flex items-center justify-between px-4 py-3;
 }
 
-.lg:hidden {
-  display: none;
+/* Logo */
+.logo {
+  @apply w-9 h-9 object-contain;
 }
 
-/* Mobile menu */
-.mobile-menu {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: rgba(31, 41, 55, 1);
-  padding: 1rem;
-  width: 12rem;
+/* Sidebar Title */
+.sidebar-title {
+  @apply text-lg font-semibold text-white ml-2;
 }
 
-.mobile-menu.block {
-  display: block;
+/* Collapse Button */
+.collapse-btn {
+  @apply p-1 text-[var(--accent)] rounded-full bg-transparent border-none hover:text-[var(--accent)] transition duration-300;
 }
 
-/* General responsiveness */
-.text-center {
-  text-align: center;
+/* Sidebar List */
+.sidebar-list {
+  @apply list-none flex flex-col space-y-3 px-1 mt-5;
 }
 
-.lg:hidden {
-  display: none;
+/* Sidebar Items */
+.sidebar-item {
+  @apply flex items-center p-3 text-[var(--accent)] font-bold no-underline rounded-lg transition duration-300 hover:bg-[var(--accent)] hover:text-[var(--primary)] hover:rounded-2xl hover:shadow-xl;
 }
 
-.absolute {
-  position: absolute;
+/* Active Sidebar Item */
+.sidebar-item-active {
+  @apply bg-[var(--accent)] text-[var(--primary)] shadow-lg rounded-2xl;
 }
 
-.mobile-menu.block {
-  display: block;
+/* Sidebar Item Text */
+.sidebar-item-text {
+  @apply ml-4 text-base font-bold;
 }
 
-.relative {
-  position: relative;
+/* Hide Text When Sidebar is Collapsed */
+.sidebar-closed .sidebar-item-text {
+  @apply hidden;
 }
 
-.text-white {
-  color: white;
+/* Sidebar Footer */
+.sidebar-footer {
+  @apply flex flex-col py-3 px-2 mt-auto border-t border-[var(--primary)] space-y-2 w-full;
 }
 
+/* Settings Button */
+.sidebar-footer .sidebar-item {
+  @apply flex items-center justify-center p-3 w-full rounded-xl transition-all hover:bg-[var(--accent)] hover:text-[var(--primary)];
+}
+
+/* Hide Logo When Sidebar is Collapsed */
+.sidebar-closed .logo {
+  @apply hidden;
+}
+
+/* Dashboard */
+.dashboard-container {
+  @apply p-4 w-full;
+}
+
+.dashboard-main {
+  @apply w-full;
+}
+
+.dashboard-content {
+  @apply w-full p-4 md:p-6;
+}
+
+/* Overview Cards Grid */
+.overview-cards {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6;
+}
+
+/* Charts & Activity Section */
+.charts-activity {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6;
+}
+
+/* ====== FIXED CLOSED TICKETS PAGE ====== */
+/* Adjusting the ClosedTickets component to prevent overlap */
+.closed-tickets-container {
+  @apply w-full bg-gradient-to-b from-[#FFF2D8] to-[#F5E7C1] px-4 py-6 md:px-8 md:py-8 z-0;
+}
+
+/* Ensure the tickets container doesn't overlap with navbar */
+.closed-tickets-container {
+  padding-top: 4rem; /* Add more space at the top */
+}
+
+/* Make the header and filters responsive */
+.closed-tickets-header {
+  @apply flex flex-col md:flex-row md:justify-between md:items-center mb-4 md:mb-6;
+}
+
+.closed-tickets-controls {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 md:mt-6;
+}
+
+/* Ensuring the table is responsive */
+.tickets-table-container {
+  @apply overflow-x-auto mt-4 md:mt-8;
+}
+
+.tickets-table {
+  @apply w-full;
+}
+
+/* Responsive layout for empty state */
+.empty-state {
+  @apply p-6 md:p-12;
+}
+
+/* ====== END CLOSED TICKETS ====== */
+
+/* Generic Modal Styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 backdrop-blur-md;
+}
+
+.modal {
+  @apply bg-white p-4 sm:p-6 rounded-3xl shadow-2xl w-full sm:max-w-xl relative border-t-4 border-[var(--accent)];
+}
+
+/* Other existing styles remain unchanged below */
 /* Login & Register */
 .login-container,
 .register-container {
-  @apply flex flex-col justify-center items-center h-screen bg-[var(--primary)] p-4;
+  @apply flex flex-col justify-center items-center min-h-screen bg-[var(--primary)] p-4;
 }
 
 .login-title,
