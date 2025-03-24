@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { FiBell, FiMenu, FiUser, FiLogOut, FiSearch } from "react-icons/fi";
+import { FiBell, FiMenu, FiUser, FiLogOut, FiSearch, FiMic } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "./ProfileModal";
 import SearchModal from "./SearchModal";
+// Import the component directly (not as a path)
+import AiAssistantModal from "./AiAssistantModal";
+import { SiGoogleassistant } from "react-icons/si";
+
 
 // Default user avatar as inline SVG for reliability
 const DefaultAvatar = () => (
@@ -16,6 +20,7 @@ const DefaultAvatar = () => (
 const Navbar = ({ sidebarOpen }) => {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [aiAssistantModalOpen, setAiAssistantModalOpen] = useState(false); // New state for AI Assistant Modal
   const navigate = useNavigate();
   const location = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -131,6 +136,11 @@ const Navbar = ({ sidebarOpen }) => {
     setAvatarError(true);
   }, []);
 
+  // New handler for opening the AI Assistant modal
+  const handleOpenAiAssistant = useCallback(() => {
+    setAiAssistantModalOpen(true);
+  }, []);
+
   return (
     <>
       <nav className="navbar flex items-center justify-between px-4 py-2 bg-gray-800 shadow-md">
@@ -145,7 +155,6 @@ const Navbar = ({ sidebarOpen }) => {
 
         {/* Page title centered with icon */}
         <div className="flex items-center justify-center gap-2 w-full">
-         
           <div className="page-title text-white font-semibold text-lg truncate max-w-xs">
             {pageName}
           </div>
@@ -153,14 +162,24 @@ const Navbar = ({ sidebarOpen }) => {
 
         {/* Navbar right side */}
         <div className="navbar-right flex items-center gap-2 md:gap-4 z-50">
+          {/* AI Assistant Button - Added new button */}
+          <button
+            onClick={handleOpenAiAssistant}
+            className="relative p-2 rounded-full bg-[#113946] hover:bg-[#154b5e] transition-colors duration-300 text-white"
+            aria-label="AI Voice Assistant"
+            title="AI Voice Assistant"
+          >
+            <SiGoogleassistant size={20} />
+          </button>
+
           {/* Search input with icon */}
           <div className="relative flex items-center">
-          
+            <FiSearch className="absolute left-48 text-gray-400" size={16} />
             <input
               type="text"
               placeholder="Search Tickets"
               onClick={handleSearchInputClick}
-              className="search-input bg-gray-700 text-white pl-9 pr-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer w-32 md:w-auto"
+              className="search-input bg-gray-700 text-white pl-9 pr-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer w-34 md:w-auto"
               readOnly
             />
           </div>
@@ -201,50 +220,59 @@ const Navbar = ({ sidebarOpen }) => {
               </button>
             </div>
             {profileOpen && (
- <div className="absolute right-0 mt-2 w-48 bg-[#FFF2D8] rounded-xl shadow-lg transform transition-all duration-300 ease-in-out z-[9999]">
+              <div className="absolute right-0 mt-2 w-48 bg-[#FFF2D8] rounded-xl shadow-lg transform transition-all duration-300 ease-in-out z-[9999]">
+                <ul className="py-2">
+                  <li
+                    className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
+                    onClick={() => {
+                      setProfileModalOpen(true);
+                      setProfileOpen(false);
+                    }}
+                  >
+                    <FiUser className="text-[#113946]" />
+                    <span className="text-sm text-[#113946]">View Profile</span>
+                  </li>
 
-    <ul className="py-2">
-      <li
-        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
-        onClick={() => {
-          setProfileModalOpen(true);
-          setProfileOpen(false);
-        }}
-      >
-        <FiUser className="text-[#113946]" />
-        <span className="text-sm text-[#113946]">View Profile</span>
-      </li>
+                  <li
+                    className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
+                    onClick={handleLogout}
+                  >
+                    <FiLogOut className="text-[#113946]" />
+                    <span className="text-sm text-[#113946]">Logout</span>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
 
-      <li
-        className="px-4 py-2 hover:bg-[#EAD7BB] cursor-pointer flex items-center gap-2 z-50"
-        onClick={handleLogout}
-      >
-        <FiLogOut className="text-[#113946]" />
-        <span className="text-sm text-[#113946]">Logout</span>
-      </li>
-    </ul>
-  </div>
-)}
-</div>
-</div>
-</nav>
+      {/* Toast Container */}
+      <ToastContainer position="top-center" autoClose={3000} />
 
-{/* Toast Container */}
-<ToastContainer position="top-center" autoClose={3000} />
-
-{/* Profile Modal */}
-{profileModalOpen && (
-  <ProfileModal
-    onClose={() => setProfileModalOpen(false)}
-    onProfileUpdate={handleProfileUpdate}
-  />
-)}
+      {/* Profile Modal */}
+      {profileModalOpen && (
+        <ProfileModal
+          onClose={() => setProfileModalOpen(false)}
+          onProfileUpdate={handleProfileUpdate}
+        />
+      )}
       
       {/* Search Modal */}
-      <SearchModal 
-        isOpen={searchModalOpen} 
-        onClose={() => setSearchModalOpen(false)} 
-      />
+      {searchModalOpen && (
+        <SearchModal 
+          isOpen={searchModalOpen} 
+          onClose={() => setSearchModalOpen(false)} 
+        />
+      )}
+
+      {/* AI Assistant Modal */}
+      {aiAssistantModalOpen && (
+        <AiAssistantModal 
+          isOpen={aiAssistantModalOpen} 
+          onClose={() => setAiAssistantModalOpen(false)} 
+        />
+      )}
     </>
   );
 };
