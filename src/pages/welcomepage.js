@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { FaUsers, FaComments, FaTicketAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -11,142 +11,116 @@ const images = {
 };
 
 const WelcomePage = () => {
-  // Default active tab
   const [activeTab, setActiveTab] = useState("ticket-list");
-  
-  // Typewriter effect states
   const [titleText, setTitleText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
   const fullTitleText = "Welcome to QuickAssist";
   const fullDescriptionText = "QuickAssist is a powerful helpdesk solution designed to simplify customer support. With a ticketing system, community forums, and an intuitive interface, we help businesses resolve issues faster and enhance customer satisfaction.";
   
-  // Scroll-based animation state
+  // Scroll animation states
   const [isScrolling, setIsScrolling] = useState(false);
-  const [scrollDirection, setScrollDirection] = useState("none"); // "up", "down", or "none"
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const scrollTimeoutRef = useRef(null);
-  const backgroundRef = useRef(null);
+  const [scrollDirection, setScrollDirection] = useState("none");
+  const lastScrollY = useRef(0);
+  const scrollTimeout = useRef(null);
 
-  // Typewriter effect for title
+  // Generate dots with useMemo to prevent recreation on re-renders
+  const dots = useMemo(() => {
+    const numDots = 100;
+    return Array(numDots).fill(null).map(() => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1
+    }));
+  }, []);
+
+  // Typewriter effect
   useEffect(() => {
+    let titleTimeout, descTimeout;
+    
     if (titleText.length < fullTitleText.length) {
-      const timeoutId = setTimeout(() => {
+      titleTimeout = setTimeout(() => {
         setTitleText(fullTitleText.slice(0, titleText.length + 1));
       }, 100);
-      return () => clearTimeout(timeoutId);
     } else if (descriptionText.length < fullDescriptionText.length) {
-      const timeoutId = setTimeout(() => {
+      descTimeout = setTimeout(() => {
         setDescriptionText(fullDescriptionText.slice(0, descriptionText.length + 1));
       }, 30);
-      return () => clearTimeout(timeoutId);
     }
+
+    return () => {
+      clearTimeout(titleTimeout);
+      clearTimeout(descTimeout);
+    };
   }, [titleText, descriptionText]);
 
-  // Handle scroll events
+  // Scroll handler with improved detection
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      // Detect if we're scrolling and in which direction
-      if (Math.abs(currentScrollY - lastScrollY) > 5) {
+      const direction = currentScrollY > lastScrollY.current ? "down" : "up";
+      const scrollDelta = Math.abs(currentScrollY - lastScrollY.current);
+
+      if (scrollDelta > 10) {
+        setScrollDirection(direction);
         setIsScrolling(true);
         
-        if (currentScrollY > lastScrollY) {
-          setScrollDirection("down");
-        } else {
-          setScrollDirection("up");
-        }
-        
-        // Reset the timeout to detect when scrolling stops
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-        
-        scrollTimeoutRef.current = setTimeout(() => {
+        if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+        scrollTimeout.current = setTimeout(() => {
           setIsScrolling(false);
           setScrollDirection("none");
-        }, 300); // Wait 300ms after scrolling stops to revert the animation
+        }, 100);
       }
-      
-      setLastScrollY(currentScrollY);
+
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [lastScrollY]);
-
-  // Setup the dot background
-  const dots = [];
-  const numDots = 1000;
-  for (let i = 0; i < numDots; i++) {
-    const x = Math.random() * 100;
-    const y = Math.random() * 100;
-    const size = Math.random() * 3 + 1;
-    dots.push({ x, y, size });
-  }
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div 
-      className="min-h-screen flex flex-col items-center bg-[#113946] text-white relative overflow-hidden"
-      ref={backgroundRef}
-    >
-      {/* Animated background dots */}
-      {dots.map((dot, index) => (
-  <motion.div
-  initial={{ y: 0 }}
-  animate={
-    isScrolling
-      ? {
-          y: scrollDirection === "down" ? 100 : -100, // Move all dots down/up
-          transition: {
-            duration: 0.5,
-            ease: "easeOut",
-          },
-        }
-      : {
-          y: 0, // Reset when idle
-          transition: { duration: 0.5, ease: "easeOut" },
-        }
-  }
-  className="absolute w-full h-full"
->
-  {dots.map((dot, index) => (
-    <motion.div
-      key={index}
-      initial={{
-        left: `${dot.x}%`,
-        top: `${dot.y}%`,
-        opacity: 0.2 + Math.random() * 0.3,
-      }}
-      animate={{
-        opacity: [0.2, 0.5, 0.2], // Twinkling effect
-        transition: {
-          opacity: {
-            duration: 1.5 + Math.random() * 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          },
-        },
-      }}
-      className="absolute rounded-full bg-white"
-      style={{
-        width: `${dot.size}px`,
-        height: `${dot.size}px`,
-      }}
-    />
-  ))}
-</motion.div>
+    <div className="min-h-screen flex flex-col items-center bg-[#113946] text-white relative overflow-hidden">
+      {/* Star Dots Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        {dots.map((dot, index) => (
+          <motion.div
+            key={index}
+            initial={{
+              left: `${dot.x}%`,
+              top: `${dot.y}%`,
+              opacity: 0 + Math.random() * 0.4,
+            }}
+            animate={isScrolling ? {
+              y: scrollDirection === "down" ? "100vh" : "-100vh",
+              opacity: [1, 0],
+              scale: [1, 1.5],
+              transition: {
+                duration: 0.01,
+                ease: "linear",
+              }
+            } : {
+              y: 0,
+              opacity: [0.2, 0.5, 0.2],
+              scale: 1,
+              transition: {
+                opacity: {
+                  duration: 5 + Math.random() * 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+                y: { duration: 0.01 }
+              }
+            }}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: `${dot.size}px`,
+              height: `${dot.size}px`,
+            }}
+          />
+        ))}
+      </div>
 
-))}
-
-
-      {/* Content wrapper to ensure it's above the background dots */}
+      {/* Rest of your content remains the same */}
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Navbar */}
         <nav className="w-full flex justify-between items-center px-10 py-4 bg-[#EAD7BB] shadow-md">
@@ -170,7 +144,7 @@ const WelcomePage = () => {
           </div>
         </nav>
 
-        {/* Welcome Section with Typewriter Animation */}
+        {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -185,7 +159,7 @@ const WelcomePage = () => {
           </p>
         </motion.div>
 
-        {/* Feature Section with Animation */}
+        {/* Feature Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 px-10 max-w-6xl">
           {[
             { icon: <FaUsers />, title: "How to use QuickAssist", desc: "Learn how to navigate and use QuickAssist effectively." },
@@ -208,7 +182,7 @@ const WelcomePage = () => {
           ))}
         </div>
 
-        {/* Get Started Button Below Feature Section */}
+        {/* Get Started Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -222,7 +196,7 @@ const WelcomePage = () => {
           </Link>
         </motion.div>
 
-        {/* Discover QuickAssist Section */}
+        {/* Discover Section */}
         <div className="mt-16 w-full max-w-3xl">
           <h2 className="text-3xl font-bold text-[#FFF2D8] text-center mb-6">
             Discover QuickAssist
@@ -244,7 +218,7 @@ const WelcomePage = () => {
           </div>
         </div>
 
-        {/* Dynamic Image Container */}
+        {/* Image Container */}
         <div className="mt-8 bg-[#EAD7BB] p-4 rounded-3xl shadow-lg max-w-4xl w-full text-center">
           <img
             src={images[activeTab]}
