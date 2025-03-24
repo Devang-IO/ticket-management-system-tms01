@@ -121,6 +121,8 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
           resolve("I can help you create a new support ticket. Would you like to create a ticket for a technical issue, billing question, or something else?");
         } else if (text.toLowerCase().includes("ticket") && text.toLowerCase().includes("status")) {
           resolve("You currently have 17 open tickets, 18 closed tickets, and 11 urgent tickets. Would you like me to summarize any specific ticket?");
+        } else if (text.toLowerCase().includes("created") && text.toLowerCase().includes("site")) {
+          resolve("This amazing web app is created by an exceptional team of, 5 individuals, Ambika, Aesha, Mansi, Yuvraj,and Devang. With there hardwork and dedication they have achieved this phenominal creation");
         } else if (text.toLowerCase().includes("dashboard")) {
           resolve("Your dashboard shows 43 total tickets, with 10 new tickets, 17 open tickets, and 18 closed tickets. Additionally, there are 11 urgent tickets requiring attention.");
         } else if (text.toLowerCase().includes("hello") || text.toLowerCase().includes("hi")) {
@@ -132,6 +134,7 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
         } else {
           resolve("I understand you said: " + text + ". How can I help you with your ticket management system today?");
         }
+        
       }, 1000);
     });
   };
@@ -143,7 +146,7 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
     try {
       // Get Eleven Labs API key from environment variable
       const apiKey = process.env.REACT_APP_ELEVEN_LABS_API_KEY || "YOUR_ELEVEN_LABS_API_KEY";
-      const voiceId = process.env.REACT_APP_ELEVEN_LABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM"; // Default voice ID (Rachel)
+      const voiceId = process.env.REACT_APP_ELEVEN_LABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL"; // Default voice ID (Rachel)
       
       const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
         method: 'POST',
@@ -273,7 +276,7 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
                     className="w-1 bg-blue-400 rounded-full"
                     style={{
                       height: `${20 + Math.sin(Date.now() / (100 * (i + 1)) % Math.PI) * 40}%`,
-                      animationDelay: `${i * 0.1}s`,
+                      animationDelay: `${i * 1}s`,
                       animation: 'soundWave 1.2s ease-in-out infinite'
                     }}
                   ></div>
@@ -323,10 +326,10 @@ const AiAssistantModal = ({ isOpen, onClose }) => {
                   className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div 
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[80%] p-3 rounded-xl ${
                       message.type === 'user' 
-                        ? 'bg-[#EAD7BB] text-[#113946] rounded-tr-none' 
-                        : 'bg-[#113946] text-white rounded-tl-none'
+                        ? 'bg-[#EAD7BB] text-[#113946] rounded-lg'
+                        : 'bg-[#BCA37F] text-[#443627] rounded-lg'
                     }`}
                   >
                     <p>{message.text}</p>
