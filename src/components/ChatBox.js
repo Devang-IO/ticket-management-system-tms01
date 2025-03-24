@@ -284,7 +284,7 @@ const ChatBox = ({ ticketId, currentUser, assignedUserId, ticketCreatorId, onCha
                 <img src={msg.image_url} alt="Uploaded" className="max-w-full h-auto rounded" />
                 <button
                   onClick={() => setModalImageUrl(msg.image_url)}
-                  className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-99 transition-opacity"
                 >
                   <FaSearchPlus className="text-white text-3xl bg-black bg-opacity-50 p-2 rounded-full border border-white" />
                 </button>
