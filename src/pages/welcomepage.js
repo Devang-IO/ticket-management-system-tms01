@@ -85,7 +85,7 @@ const WelcomePage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.6 }}
-        className="mt-8"
+        className="mt-16"
       >
         <Link to="/register">
           <button className="px-8 py-3 bg-[#EAD7BB] text-[#113946] font-semibold rounded-full hover:bg-[#FFF2D8] transition duration-300 shadow-lg">
@@ -117,11 +117,11 @@ const WelcomePage = () => {
       </div>
 
       {/* Dynamic Image Container */}
-      <div className="mt-8 bg-[#EAD7BB] p-6 rounded-3xl shadow-lg max-w-4xl w-full text-center">
+      <div className="mt-8 bg-[#EAD7BB] p-4 rounded-3xl shadow-lg max-w-4xl w-full text-center">
         <img
           src={images[activeTab]}
           alt={activeTab}
-          className="w-full rounded-3xl shadow-md"
+          className="w-full rounded-xl shadow-md"
         />
       </div>
 
