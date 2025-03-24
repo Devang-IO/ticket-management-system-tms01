@@ -10,20 +10,44 @@ const TicketDetails = ({ currentUser: propUser }) => {
 
   const [ticket, setTicket] = useState(null);
   const [currentUser, setCurrentUser] = useState(propUser);
+  const [userRole, setUserRole] = useState(null); // <--- store the user role here
   const [assignedEmployee, setAssignedEmployee] = useState(null);
   const [waitingForEmployee, setWaitingForEmployee] = useState(false);
   const [chatInitiated, setChatInitiated] = useState(false);
 
-  // Fetch current user if not provided as prop
+  // Fetch current user if not provided as prop and get user role
   useEffect(() => {
-    if (!currentUser) {
-      const fetchUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) setCurrentUser(user);
-      };
-      fetchUser();
-    }
-  }, [currentUser]);
+    const fetchUserAndRole = async () => {
+      let userToUse = propUser;
+
+      // If no user passed as prop, fetch from supabase.auth
+      if (!userToUse) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        userToUse = user || null;
+      }
+
+      // If we have a user, fetch the user role from "users" table
+      if (userToUse) {
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", userToUse.id)
+          .single();
+
+        if (userError) {
+          console.error("Error fetching user role:", userError);
+        } else if (userData) {
+          setUserRole(userData.role);
+        }
+
+        setCurrentUser(userToUse);
+      }
+    };
+
+    fetchUserAndRole();
+  }, [propUser]);
 
   // Fetch ticket details and assigned employee
   useEffect(() => {
@@ -52,7 +76,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
           .eq("id", ticketData.assigned_user_id)
           .single();
 
-        if (!employeeError) {
+        if (!employeeError && employeeData) {
           setAssignedEmployee(employeeData.name);
         }
       }
@@ -63,13 +87,13 @@ const TicketDetails = ({ currentUser: propUser }) => {
     // Set up real-time subscription for ticket updates
     const subscription = supabase
       .channel(`public:tickets:id=eq.${id}`)
-      .on('UPDATE', (payload) => {
+      .on("UPDATE", (payload) => {
         // Update the ticket state when changes occur
         setTicket(payload.new);
-        
+
         // Update chat initiated state directly
         setChatInitiated(payload.new.chat_initiated);
-        
+
         // Check if employee has connected
         if (payload.new.employee_connected && !payload.old.employee_connected) {
           setWaitingForEmployee(false);
@@ -87,8 +111,8 @@ const TicketDetails = ({ currentUser: propUser }) => {
   const requestConnection = async () => {
     const { error } = await supabase
       .from("tickets")
-      .update({ 
-        user_waiting: true 
+      .update({
+        user_waiting: true,
       })
       .eq("id", id);
 
@@ -96,7 +120,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
       console.error("Error updating ticket:", error);
       return;
     }
-    
+
     setWaitingForEmployee(true);
   };
 
@@ -104,8 +128,8 @@ const TicketDetails = ({ currentUser: propUser }) => {
   const cancelRequest = async () => {
     const { error } = await supabase
       .from("tickets")
-      .update({ 
-        user_waiting: false 
+      .update({
+        user_waiting: false,
       })
       .eq("id", id);
 
@@ -113,7 +137,7 @@ const TicketDetails = ({ currentUser: propUser }) => {
       console.error("Error updating ticket:", error);
       return;
     }
-    
+
     setWaitingForEmployee(false);
   };
 
@@ -121,17 +145,17 @@ const TicketDetails = ({ currentUser: propUser }) => {
   const handleChatClosed = async () => {
     // Update local state immediately for UI
     setChatInitiated(false);
-    
+
     // Update the DB
     const { error } = await supabase
       .from("tickets")
-      .update({ 
+      .update({
         chat_initiated: false,
         user_waiting: false,
-        employee_connected: false
+        employee_connected: false,
       })
       .eq("id", id);
-      
+
     if (error) {
       console.error("Error updating ticket chat status:", error);
     }
@@ -144,6 +168,9 @@ const TicketDetails = ({ currentUser: propUser }) => {
       </div>
     );
   }
+
+  // Check if current user is an employee
+  const isEmployee = userRole === "employee";
 
   return (
     <div className="w-full min-h-screen bg-[#EEF3F7] p-6  mt-16">
@@ -243,52 +270,74 @@ const TicketDetails = ({ currentUser: propUser }) => {
               </div>
             )
           ) : (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-[#113946] mb-4">Connect with Support</h2>
-              {ticket.assigned_user_id ? (
-                assignedEmployee ? (
-                  <p className="text-lg text-[#113946] mb-2">
-                    Your ticket is being handled by <strong>{assignedEmployee}</strong>
-                  </p>
+            // Chat is NOT initiated
+            isEmployee ? (
+              // Employee side (just viewing, not connected for chat)
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-[#113946] mb-4">
+                  Connect to user for live chat
+                </h2>
+                <p className="text-lg text-[#113946]">
+                  To start a live chat, please connect from your support panel or user requests page.
+                </p>
+              </div>
+            ) : (
+              // User side
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-[#113946] mb-4">
+                  Connect with Support
+                </h2>
+                {ticket.assigned_user_id ? (
+                  assignedEmployee ? (
+                    <p className="text-lg text-[#113946] mb-2">
+                      Your ticket is being handled by <strong>{assignedEmployee}</strong>
+                    </p>
+                  ) : (
+                    <p className="text-lg text-[#113946] mb-2">
+                      Loading assigned employee...
+                    </p>
+                  )
                 ) : (
                   <p className="text-lg text-[#113946] mb-2">
-                    Loading assigned employee...
+                    Your ticket has not yet been assigned to a support representative.
                   </p>
-                )
-              ) : (
-                <p className="text-lg text-[#113946] mb-2">
-                  Your ticket has not yet been assigned to a support representative.
-                </p>
-              )}
-              
-              {waitingForEmployee ? (
-                <div className="mt-4">
-                  <div className="animate-pulse bg-[#FFF2D8] text-[#113946] p-4 rounded-lg mb-4 border border-[#BCA37F]">
-                    <p className="font-semibold">Waiting for support agent to connect...</p>
-                    <div className="flex justify-center mt-2">
-                      <div className="flex space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce"></div>
-                        <div className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                )}
+
+                {waitingForEmployee ? (
+                  <div className="mt-4">
+                    <div className="animate-pulse bg-[#FFF2D8] text-[#113946] p-4 rounded-lg mb-4 border border-[#BCA37F]">
+                      <p className="font-semibold">Waiting for support agent to connect...</p>
+                      <div className="flex justify-center mt-2">
+                        <div className="flex space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce"></div>
+                          <div
+                            className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce"
+                            style={{ animationDelay: "0.2s" }}
+                          ></div>
+                          <div
+                            className="w-3 h-3 rounded-full bg-[#BCA37F] animate-bounce"
+                            style={{ animationDelay: "0.4s" }}
+                          ></div>
+                        </div>
                       </div>
                     </div>
+                    <button
+                      onClick={cancelRequest}
+                      className="px-6 py-3 bg-[#BCA37F] hover:bg-[#113946] text-white font-semibold rounded-lg shadow-md transition-colors duration-300"
+                    >
+                      Cancel Request
+                    </button>
                   </div>
-                  <button 
-                    onClick={cancelRequest}
-                    className="px-6 py-3 bg-[#BCA37F] hover:bg-[#113946] text-white font-semibold rounded-lg shadow-md transition-colors duration-300"
+                ) : (
+                  <button
+                    onClick={requestConnection}
+                    className="mt-4 px-6 py-3 bg-[#113946] hover:bg-[#BCA37F] text-white font-semibold rounded-xl shadow-md transition-colors duration-300"
                   >
-                    Cancel Request
+                    Request Connection
                   </button>
-                </div>
-              ) : (
-                <button 
-                  onClick={requestConnection}
-                  className="mt-4 px-6 py-3 bg-[#113946] hover:bg-[#BCA37F] text-white font-semibold rounded-xl shadow-md transition-colors duration-300"
-                >
-                  Request Connection
-                </button>
-              )}
-            </div>
+                )}
+              </div>
+            )
           )}
         </div>
       </div>
