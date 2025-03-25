@@ -360,7 +360,7 @@ const EmployeeActivityStatus = () => {
     fetchEmployees();
     
     // Set up a refresh interval for employee status
-    const refreshInterval = setInterval(fetchEmployees, 1000); // Refresh every minute
+    const refreshInterval = setInterval(fetchEmployees, 60000); // Refresh every minute
     
     return () => clearInterval(refreshInterval);
   }, []);
