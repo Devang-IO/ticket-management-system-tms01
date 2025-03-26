@@ -298,30 +298,10 @@ const WelcomePage = () => {
         ref={heroRef}
         className="relative z-10 py-20 md:py-28 bg-gradient-to-b from-[#0a1f2d] to-[#113946]"
       >
-        {/* Abstract shapes background
-        <div className="absolute inset-0">
-          <svg className="absolute w-full h-full opacity-10" viewBox="0 0 1000 1000">
-            <defs>
-              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#EAD7BB" />
-                <stop offset="100%" stopColor="#BCA37F" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M0,800 C200,700 350,900 500,800 C650,700 700,550 900,600 L1000,1000 L0,1000 Z"
-              fill="url(#grad1)"
-            />
-            <path d="M0,200 C150,150 350,50 500,100 C650,150 800,250 1000,200 L1000,0 L0,0 Z" fill="url(#grad1)" />
-          </svg>
-        </div> */}
-
-        <motion.div className="container mx-auto px-4 relative z-20" style={{ opacity, scale }}>
+        <motion.div className="container mx-auto px-4 relative z-20">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             <motion.div
               className="md:w-1/2"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
             >
               <div className="inline-block px-4 py-1 mb-6 bg-[#EAD7BB]/20 rounded-full text-[#EAD7BB] text-sm font-medium">
                 Trusted by 10,000+ support teams worldwide
