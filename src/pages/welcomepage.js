@@ -185,7 +185,7 @@ const WelcomePage = () => {
       <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#113946]/90 shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="QuickAssist Logo" className="h-10 w-10 object-contain relative rounded-full" />
+            <img src="/logo_white.png" alt="QuickAssist Logo" className="h-10 w-10 object-contain relative rounded-full" />
             <h1 className="text-2xl font-extrabold tracking-wide text-white">
               Quick<span className="text-[#EAD7BB]">Assist</span>
             </h1>
