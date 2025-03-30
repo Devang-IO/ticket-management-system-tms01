@@ -20,11 +20,11 @@ const TicketRequestModal = ({ show, onClose, ticket, onRequestSubmitted }) => {
         return;
       }
 
-      // Update ticket status to indicate closure requested
+      // Update ticket status to indicate closure requested.
       const { error } = await supabase
         .from("tickets")
         .update({
-          status: "closure_requested",
+          status: "requested",
           closed_by: user.id,
         })
         .eq("id", ticket.id);
@@ -47,13 +47,11 @@ const TicketRequestModal = ({ show, onClose, ticket, onRequestSubmitted }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[#FFF2D8] rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-[#113946]">Request Ticket Closure</h2>
-        
         <div className="mb-4">
           <p className="text-[#113946]">
             You are requesting to close ticket: <strong>{ticket.title}</strong>
           </p>
         </div>
-        
         <div className="flex justify-end space-x-3">
           <button
             type="button"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEye, FaSearch, FaFilter, FaTicketAlt } from "react-icons/fa";
 import { supabase } from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
@@ -10,28 +10,6 @@ const priorityStyles = {
   Critical: "bg-[#113946]",
 };
 
-/**
- * Returns the pill classes for the Status column.
- * Pastel background + darker border + text color
- */
-const getStatusPillClass = (status) => {
-  const s = (status || "").toLowerCase().trim();
-  switch (s) {
-    case "open":
-      return "inline-block px-3 py-1 border border-yellow-600 bg-yellow-50 text-yellow-700 rounded-full";
-    case "answered":
-      return "inline-block px-3 py-1 border border-blue-600 bg-blue-50 text-blue-700 rounded-full";
-    case "closed":
-      return "inline-block px-3 py-1 border border-green-600 bg-green-50 text-green-700 rounded-full";
-    case "requested":
-      return "inline-block px-3 py-1 border border-red-600 bg-red-50 text-red-700 rounded-full";
-    default:
-      // Fallback
-      return "inline-block px-3 py-1 border border-teal-600 bg-teal-50 text-teal-700 rounded-full";
-  }
-};
-
-// Main container + styling
 const pageContainer = "pt-24 px-6 min-h-screen flex flex-col bg-gray-50 text-gray-800";
 const pageTitle = "text-3xl font-bold text-[#23486A] mb-4";
 const searchBarClass = "flex items-center w-full max-w-lg bg-white border border-gray-300 text-gray-600 rounded-full px-4 py-2 mb-6 shadow-md";
@@ -51,9 +29,6 @@ const EmployeeTicketList = () => {
   const ticketsPerPage = 5;
   const [showModal, setShowModal] = useState(false);
   const [ticketToClose, setTicketToClose] = useState(null);
-
-  // Keep track of which tickets have already triggered closure email
-  const notifiedTicketIdsRef = useRef(new Set());
 
   // Fetch user name from 'users' table
   const fetchUserNameById = async (userId) => {
@@ -197,40 +172,6 @@ const EmployeeTicketList = () => {
       setTicketToClose(null);
     }
   };
-
-  // Watch for closed tickets => send closure email
-  useEffect(() => {
-    tickets.forEach(async (ticket) => {
-      const s = (ticket.status || "").toLowerCase();
-      if (s === "closed" && !notifiedTicketIdsRef.current.has(ticket.id)) {
-        const closurePayload = {
-          ticket: {
-            name: ticket.name,
-            email: ticket.email,
-            title: ticket.title,
-            closed: true,
-          },
-        };
-        try {
-          const response = await fetch("https://twilio-backend-service-production.up.railway.app/api/send-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(closurePayload),
-          });
-          if (!response.ok) {
-            const result = await response.json();
-            console.error("Email sending failed:", result.error);
-          } else {
-            const result = await response.json();
-            console.log("Closure email sent successfully for ticket", ticket.id, result);
-            notifiedTicketIdsRef.current.add(ticket.id);
-          }
-        } catch (emailError) {
-          console.error("Error calling email endpoint:", emailError);
-        }
-      }
-    });
-  }, [tickets]);
 
   return (
     <div className="pt-20 px-6 min-h-screen flex flex-col bg-[#FFF2D8] text-[#113946]">

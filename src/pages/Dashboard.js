@@ -21,34 +21,102 @@ const COLORS = {
 
 // Ticket closure confirmation modal component
 const TicketCloseConfirmModal = ({ ticket, onClose, onConfirm }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   if (!ticket) return null;
+
+  const handleCloseTicket = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // First update the ticket status in the database
+      const { error } = await supabase
+        .from("tickets")
+        .update({ status: "closed" })
+        .eq("id", ticket.id);
+        
+      if (error) {
+        toast.error("Error closing ticket: " + error.message);
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Get the most up-to-date ticket data
+      const { data: ticketData, error: ticketError } = await supabase
+        .from("tickets")
+        .select("*")
+        .eq("id", ticket.id)
+        .single();
+        
+      if (ticketError) {
+        console.error("Error fetching ticket details:", ticketError);
+      }
+      
+      // Create a simplified ticket object with the explicit closed flag
+      const emailTicket = {
+        id: ticket.id,
+        email: ticketData?.email || ticket.email,
+        name: ticketData?.name || ticket.name || "Customer",
+        title: ticketData?.title || ticket.title || "Support Ticket",
+        closed: true  // This is critical for the email API to recognize it as a closure
+      };
+      
+      // Send the closure email
+      try {
+        const response = await fetch("https://twilio-backend-service-production.up.railway.app/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticket: emailTicket }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Email API error details:", errorData);
+        } else {
+          console.log("Closure email sent successfully");
+        }
+      } catch (emailError) {
+        console.error("Failed to send closure email:", emailError);
+      }
+      
+      // Complete the closure process
+      onConfirm();
+      toast.success("Ticket closed successfully");
+    } catch (error) {
+      toast.error("An error occurred: " + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-xl transform transition-all">
-        <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.primary }}>
+        <h2 className="text-2xl font-bold mb-4" style={{ color: "#113946" }}>
           Ticket Closure Request
         </h2>
-        <p className="mb-4" style={{ color: COLORS.primary }}>
+        <p className="mb-4" style={{ color: "#113946" }}>
           Support has requested to close your ticket: <strong>{ticket.title}</strong>
         </p>
-        <p className="mb-6" style={{ color: COLORS.primary }}>
+        <p className="mb-6" style={{ color: "#113946" }}>
           Are you satisfied with the solution? Confirming will close this ticket.
         </p>
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
+            disabled={isSubmitting}
             className="px-4 py-2 rounded-md transition-colors duration-300"
-            style={{ backgroundColor: COLORS.accent, color: COLORS.primary }}
+            style={{ backgroundColor: "#EAD7BB", color: "#113946" }}
           >
             Not Yet
           </button>
           <button
-            onClick={onConfirm}
+            onClick={handleCloseTicket}
+            disabled={isSubmitting}
             className="px-4 py-2 rounded-md transition-colors duration-300"
-            style={{ backgroundColor: COLORS.primary, color: COLORS.light }}
+            style={{ backgroundColor: "#113946", color: "#FFF2D8" }}
           >
-            Yes, Close Ticket
+            {isSubmitting ? "Processing..." : "Yes, Close Ticket"}
           </button>
         </div>
       </div>

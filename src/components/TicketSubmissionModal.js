@@ -38,21 +38,17 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     formData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
 
     try {
-      console.log("Uploading to Cloudinary...");
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
         { method: "POST", body: formData }
       );
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Cloudinary error details:", errorData);
         throw new Error(`Failed to upload image: ${response.statusText}`);
       }
       const data = await response.json();
-      console.log("Cloudinary upload successful:", data);
       return data.secure_url;
     } catch (error) {
-      console.error("Error uploading image:", error);
       toast.error("Image upload failed. Submitting ticket without image.");
       return null;
     }
@@ -66,10 +62,7 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
     try {
       let imageUrl = null;
       if (imageFile) {
-        console.log("Uploading image:", imageFile.name);
         imageUrl = await uploadImageToCloudinary(imageFile);
-      } else {
-        console.log("No image file provided.");
       }
 
       // Get current user ID
@@ -98,10 +91,8 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         .select();
 
       if (insertError) {
-        console.error("Supabase insertion error:", insertError);
         throw insertError;
       }
-      console.log("Ticket created:", ticketData);
 
       toast.success("Ticket submitted successfully!", {
         position: "top-center",
@@ -127,8 +118,6 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         const result = await response.json();
         if (!response.ok) {
           console.error("Email sending failed:", result.error);
-        } else {
-          console.log("Email sent successfully:", result.message);
         }
       } catch (emailError) {
         console.error("Error calling email endpoint:", emailError);
@@ -140,7 +129,6 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
         navigate("/dashboard");
       }, 1000);
     } catch (error) {
-      console.error("Error submitting ticket:", error);
       toast.error("Failed to submit ticket. Please try again.", {
         position: "top-center",
         autoClose: 3000,
@@ -159,7 +147,6 @@ const TicketSubmissionModal = ({ isOpen, onClose }) => {
       setImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
-      console.log("Image selected:", file.name);
     } else {
       setImageFile(null);
       setImagePreview(null);
