@@ -1,4 +1,3 @@
-
 # QuickAssist - Ticket Management System
 
 QuickAssist is a modern ticket management frontend designed for fast, clean, and collaborative issue tracking. Built with React and styled using Tailwind CSS, it provides an intuitive interface for users and admins.
